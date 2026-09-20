@@ -15,10 +15,10 @@ from app.core.database import get_db
 import app.db.models as models
 import app.db.schemas as schemas
 from app.preprocessing.pipeline import inspect_csv, preprocess_dataset
-from app.ml.pipeline import train_and_evaluate_model, XGBOOST_AVAILABLE
+from app.ml.pipeline import XGBOOST_AVAILABLE
 from app.detection.engine import run_threat_detection
 from app.reports.generator import generate_report_summary, export_pdf_report
-from app.ml.anomaly.anomaly_service import train_and_save_anomaly_model, run_anomaly_inference
+from app.ml.anomaly.anomaly_service import run_anomaly_inference
 from app.ml.threat_engine.threat_engine import evaluate_threat
 
 logger = logging.getLogger(__name__)
@@ -115,6 +115,7 @@ def upload_dataset(file: UploadFile = File(...), db: Session = Depends(get_db)):
         column_types=json.dumps(stats["column_types"]),
         target_column=stats["target_column"],
         class_distribution=json.dumps(stats["class_distribution"]),
+        missing_counts=json.dumps(stats["missing_counts"]),
         status="uploaded"
     )
     
@@ -126,6 +127,7 @@ def upload_dataset(file: UploadFile = File(...), db: Session = Depends(get_db)):
     db_dataset.columns = json.loads(db_dataset.columns)
     db_dataset.column_types = json.loads(db_dataset.column_types)
     db_dataset.class_distribution = json.loads(db_dataset.class_distribution)
+    db_dataset.missing_counts = json.loads(db_dataset.missing_counts) if db_dataset.missing_counts else None
     
     return db_dataset
 
@@ -139,6 +141,7 @@ def get_dataset(id: int, db: Session = Depends(get_db)):
     db_dataset.columns = json.loads(db_dataset.columns)
     db_dataset.column_types = json.loads(db_dataset.column_types)
     db_dataset.class_distribution = json.loads(db_dataset.class_distribution)
+    db_dataset.missing_counts = json.loads(db_dataset.missing_counts) if db_dataset.missing_counts else None
     
     return db_dataset
 
@@ -150,6 +153,7 @@ def list_datasets(db: Session = Depends(get_db)):
         d.columns = json.loads(d.columns)
         d.column_types = json.loads(d.column_types)
         d.class_distribution = json.loads(d.class_distribution)
+        d.missing_counts = json.loads(d.missing_counts) if d.missing_counts else None
     return datasets
 
 
@@ -221,83 +225,30 @@ def run_preprocess_endpoint(id: int, config: schemas.PreprocessConfig, db: Sessi
         raise HTTPException(status_code=400, detail=f"Data preprocessing failed: {str(e)}")
 
 
-# ----------------- 3. MACHINE LEARNING PIPELINE -----------------
-@router.post("/model/train", response_model=schemas.MLModelResponse)
-def train_model(payload: schemas.MLModelTrainRequest, db: Session = Depends(get_db)):
-    db_dataset = db.query(models.Dataset).filter(models.Dataset.id == payload.dataset_id).first()
-    if not db_dataset or not os.path.exists(db_dataset.filepath):
-        raise HTTPException(status_code=404, detail="Selected dataset not found on disk.")
-        
-    # Check target column
-    target_col = db_dataset.target_column
-    if not target_col:
-        raise HTTPException(
-            status_code=400,
-            detail="No target label column selected. Please preprocess the dataset first."
-        )
-        
+
+
+@router.post("/predict", response_model=Dict[str, Any])
+def predict_endpoint(record: Dict[str, Any]):
     try:
-        # Run preprocessing to split
-        X_train, X_test, y_train, y_test, prep_summary = preprocess_dataset(
-            db_dataset.filepath,
-            target_column=target_col,
-            train_split=payload.train_split
-        )
-        
-        # Save model name
-        model_name = f"model_ds_{db_dataset.id}_{payload.algorithm.lower().replace(' ', '_')}"
-        model_uuid = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{model_name}.joblib"
-        model_filepath = os.path.join(settings.MODEL_DIR, model_uuid)
-        
-        # Run train
-        _, metrics = train_and_evaluate_model(
-            X_train=X_train,
-            X_test=X_test,
-            y_train=y_train,
-            y_test=y_test,
-            algorithm=payload.algorithm,
-            feature_names=prep_summary["feature_names"],
-            classes_list=prep_summary["classes"],
-            save_path=model_filepath
-        )
-        
-        # Save to DB
-        db_model = models.MLModel(
-            name=model_name,
-            algorithm=metrics["algorithm"],
-            model_type="classifier",
-            dataset_id=db_dataset.id,
-            features=json.dumps(prep_summary["feature_names"]),
-            classes=json.dumps(prep_summary["classes"]),
-            accuracy=metrics["accuracy"],
-            precision_score=metrics["precision"],
-            recall_score=metrics["recall"],
-            f1_score=metrics["f1"],
-            metrics_json=json.dumps(metrics["classification_report"]),
-            confusion_matrix=json.dumps(metrics["confusion_matrix"]),
-            feature_importance=json.dumps(metrics["feature_importance"]),
-            filepath=model_filepath
-        )
-        
-        db.add(db_model)
-        db.commit()
-        db.refresh(db_model)
-        
-        # Format list outputs for response Pydantic parsing
-        db_model.features = json.loads(db_model.features)
-        db_model.classes = json.loads(db_model.classes)
-        db_model.metrics_json = json.loads(db_model.metrics_json)
-        db_model.confusion_matrix = json.loads(db_model.confusion_matrix)
-        db_model.feature_importance = json.loads(db_model.feature_importance) if db_model.feature_importance else {}
-        
-        return db_model
-        
+        from app.ml.predict_pipeline import predict_tuned
+        return predict_tuned(record)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Training failed: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Model training failed: {str(e)}"
-        )
+        logger.error(f"Prediction failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/predict/explain", response_model=Dict[str, Any])
+def explain_endpoint(record: Dict[str, Any]):
+    try:
+        from app.ml.predict_pipeline import explain_prediction
+        return explain_prediction(record, top_k=5)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"SHAP explanation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get("/model/{id}", response_model=schemas.MLModelResponse)

@@ -7,10 +7,11 @@ import {
   SystemStatus, 
   DashboardAnalytics,
   PreprocessConfig,
-  MLModelTrainRequest
+  MLModelTrainRequest,
+  PredictionExplanation
 } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8005/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
@@ -175,5 +176,24 @@ export const apiService = {
   async explainThreat(id: number): Promise<Record<string, any>> {
     const res = await fetch(`${API_BASE_URL}/threats/${id}/explain`);
     return handleResponse<Record<string, any>>(res);
+  },
+
+  // Real-time SHAP Prediction Explanation
+  async explainPrediction(record: Record<string, any>): Promise<PredictionExplanation> {
+    const res = await fetch(`${API_BASE_URL}/predict/explain`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record),
+    });
+    return handleResponse<PredictionExplanation>(res);
+  },
+
+  async predict(record: Record<string, any>): Promise<{ label: string; confidence: number; probabilities: Record<string, number> }> {
+    const res = await fetch(`${API_BASE_URL}/predict`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(record),
+    });
+    return handleResponse<{ label: string; confidence: number; probabilities: Record<string, number> }>(res);
   }
 };

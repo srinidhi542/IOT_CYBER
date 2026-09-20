@@ -14,6 +14,7 @@ class Dataset(Base):
     column_types = Column(String, nullable=True)  # JSON dict
     target_column = Column(String, nullable=True)
     class_distribution = Column(String, nullable=True)  # JSON dict
+    missing_counts = Column(String, nullable=True)  # JSON dict
     status = Column(String, default="uploaded")  # uploaded, preprocessed
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

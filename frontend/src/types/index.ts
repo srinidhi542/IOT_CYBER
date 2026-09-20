@@ -8,6 +8,7 @@ export interface Dataset {
   column_types: Record<string, string> | null;
   target_column: string | null;
   class_distribution: Record<string, number> | null;
+  missing_counts: Record<string, number> | null;
   status: string;
   created_at: string;
 }
@@ -147,4 +148,19 @@ export interface DashboardAnalytics {
     TotalAnomalies: number;
   };
   detection_trend: Array<{ range: string; threats: number }>;
+}
+
+export interface ShapContribution {
+  feature: string;
+  value: number;
+  shap_value: number;
+  direction: 'increases' | 'decreases';
+}
+
+export interface PredictionExplanation {
+  label: string;
+  confidence: number;
+  probabilities: Record<string, number>;
+  top_contributing_features: ShapContribution[];
+  shap_values: Record<string, number>;
 }

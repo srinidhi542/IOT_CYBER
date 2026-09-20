@@ -1,23 +1,32 @@
-import React from 'react';
+import React, { useState, lazy, Suspense } from 'react';
 import { 
   Sliders, 
   Cpu, 
   Bluetooth, 
   Globe, 
-  Database,
   ArrowRight,
   ToggleLeft,
-  Server
+  LogOut,
+  User,
+  Shield,
+  AlertTriangle
 } from 'lucide-react';
 import { SystemStatus } from '../types';
 
+const GearSceneLazy = lazy(() => import('../components/3d/GearScene').then(m => ({ default: m.GearScene })));
+
 interface SettingsProps {
   systemStatus: SystemStatus | null;
+  onLogout: () => void;
 }
 
-export const Settings: React.FC<SettingsProps> = ({ systemStatus }) => {
+export const Settings: React.FC<SettingsProps> = ({ systemStatus, onLogout }) => {
+  const [confirmLogout, setConfirmLogout] = useState(false);
   return (
-    <div className="space-y-8 max-w-4xl">
+    <div className="flex gap-6">
+      {/* ── Existing settings content ── */}
+      <div className="flex-1 space-y-8 max-w-4xl">
+
       {/* PIPELINE ARCHITECTURE CONCEPT CHART */}
       <div className="dark-panel p-6 space-y-4 bg-slate-900/10">
         <h3 className="text-xs font-semibold text-slate-300 font-mono uppercase tracking-wider">Future-Ready Platform Architecture Flow</h3>
@@ -176,6 +185,129 @@ export const Settings: React.FC<SettingsProps> = ({ systemStatus }) => {
           </div>
         </div>
       </div>
+
+      {/* ── SESSION & ACCOUNT ───────────────────────────── */}
+      <div className="space-y-4">
+        <h3 className="text-xs font-semibold text-slate-400 font-mono uppercase tracking-wider flex items-center gap-1.5">
+          <User size={13} className="text-cyan-500" />
+          Session & Account
+        </h3>
+
+        <div className="dark-panel p-6 space-y-5">
+          {/* Operator info row */}
+          <div className="flex items-center gap-4 p-4 bg-slate-900/60 border border-slate-800 rounded-lg">
+            <div className="w-11 h-11 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-bold text-sm shrink-0">
+              SOC
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white">operator_admin</p>
+              <p className="text-[11px] text-slate-500 font-mono">ROLE: Analyst  •  IOTShield Platform</p>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 border border-emerald-600/20 rounded-full text-[10px] font-mono text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              ACTIVE SESSION
+            </div>
+          </div>
+
+          {/* Security info */}
+          <div className="grid grid-cols-3 gap-3 text-xs font-mono">
+            <div className="p-3 bg-slate-900 border border-slate-800 rounded space-y-1">
+              <p className="text-slate-500 text-[10px]">AUTH METHOD</p>
+              <div className="flex items-center gap-1.5 text-slate-300">
+                <Shield size={11} className="text-cyan-400" />
+                Gateway Token
+              </div>
+            </div>
+            <div className="p-3 bg-slate-900 border border-slate-800 rounded space-y-1">
+              <p className="text-slate-500 text-[10px]">SESSION TYPE</p>
+              <p className="text-slate-300">Local Operator</p>
+            </div>
+            <div className="p-3 bg-slate-900 border border-slate-800 rounded space-y-1">
+              <p className="text-slate-500 text-[10px]">ENCRYPTION</p>
+              <p className="text-slate-300">TLS v1.3</p>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-slate-800" />
+
+          {/* Logout section */}
+          {!confirmLogout ? (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-300 font-medium">Sign out of IOTShield</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">Ends the current operator session and returns to the login screen.</p>
+              </div>
+              <button
+                onClick={() => setConfirmLogout(true)}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-rose-700/40 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 text-xs font-semibold transition-all"
+              >
+                <LogOut size={14} />
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-4 bg-rose-500/10 border border-rose-700/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle size={16} className="text-rose-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-rose-300 font-semibold">Confirm Sign Out</p>
+                  <p className="text-[11px] text-rose-400/70 mt-0.5">Your session will be terminated. Any unsaved state will be lost.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 ml-6 shrink-0">
+                <button
+                  onClick={() => setConfirmLogout(false)}
+                  className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-semibold transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={onLogout}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold transition-all"
+                >
+                  <LogOut size={13} />
+                  Confirm Sign Out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+    </div>{/* end flex-1 settings content */}
+
+    {/* ── 3D Gear panel (right side) ── */}
+    <div className="hidden xl:flex flex-col shrink-0 glass-panel p-4 space-y-3 relative overflow-hidden" style={{ width: 320, minHeight: 560 }}>
+      <div className="flex items-center justify-between border-b border-cyan-900/30 pb-3">
+        <div>
+          <h3 className="text-xs font-bold text-white tracking-wide flex items-center gap-1.5">
+            <Cpu size={14} className="text-cyan-400" />
+            Platform Engine Core
+          </h3>
+          <p className="text-[9px] text-cyan-600 font-mono mt-0.5">ACTIVE SYSTEM DRIVER</p>
+        </div>
+        <span className="text-[8px] font-mono px-2 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-400 animate-pulse">
+          OPERATIONAL
+        </span>
+      </div>
+
+      <div className="flex-1 w-full rounded-lg overflow-hidden relative">
+        <Suspense fallback={
+          <div className="h-full flex items-center justify-center text-xs text-slate-600 font-mono">
+            Initializing 3D Engine...
+          </div>
+        }>
+          <GearSceneLazy />
+        </Suspense>
+      </div>
+
+      <div className="p-2.5 rounded bg-slate-950/60 border border-cyan-950 flex items-center justify-between text-[9px] font-mono text-slate-400">
+        <span>ENGINE CLOCK</span>
+        <span className="text-cyan-400 font-bold">SYNCHRONIZED</span>
+      </div>
     </div>
-  );
+
+  </div>
+);
 };

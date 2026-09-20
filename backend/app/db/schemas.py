@@ -15,6 +15,7 @@ class DatasetResponse(DatasetBase):
     column_types: Optional[Dict[str, str]] = None
     target_column: Optional[str] = None
     class_distribution: Optional[Dict[str, int]] = None
+    missing_counts: Optional[Dict[str, int]] = None
     status: str
     created_at: datetime
 
