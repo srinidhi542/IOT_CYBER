@@ -5,6 +5,7 @@ import {
   Activity,
   Settings as SettingsIcon,
   Shield,
+  ShieldAlert,
   Sparkles,
 } from 'lucide-react';
 import { SystemStatus, Dataset, MLModel } from '../types';
@@ -13,25 +14,28 @@ import { SystemStatus, Dataset, MLModel } from '../types';
     PAGE ORDER
 ═══════════════════════════════════════════════════ */
 export const PAGE_ORDER = [
-  'dashboard',     // 01
-  'dataset',       // 02
-  'performance',   // 03
-  'explainability',// 04
-  'settings',      // 05
+  'dashboard',      // 01
+  'incidents',      // 02
+  'dataset',        // 03
+  'performance',    // 04
+  'explainability', // 05
+  'settings',       // 06
 ];
 
 /* ─── PAGE META ─── */
 const PAGE_META: Record<string, { title: string; desc: string; idx: string }> = {
-  dashboard:      { title: 'IoTShield Dashboard',              desc: 'Overview of dataset, ML model, and live predictions.',                      idx: '01' },
-  dataset:        { title: 'Dataset Analysis & Preprocessing', desc: 'Upload, inspect, validate and clean network traffic capture files.',          idx: '02' },
-  performance:    { title: 'Model Performance & Metrics',       desc: 'Finalized 8-class XGBoost model metrics and confusion matrix.',               idx: '03' },
-  explainability: { title: 'AI Explainability',                desc: 'SHAP-based explanations and attack analysis for evaluated network telemetry.', idx: '04' },
-  settings:       { title: 'Platform Settings & Session',      desc: 'System configurations, hardware adapters, and session management.',           idx: '05' },
+  dashboard:      { title: 'IoTShield Dashboard',              desc: 'Network packet capture, overall traffic prediction, and live AI explainability.', idx: '01' },
+  incidents:      { title: 'SOC Incident Center',              desc: 'Multi-agent incident triage, MITRE threat intel, and response playbook approval.', idx: '02' },
+  dataset:        { title: 'Dataset Analysis & Preprocessing', desc: 'Upload, inspect, validate and clean network traffic capture files.',          idx: '03' },
+  performance:    { title: 'Model Performance & Metrics',       desc: 'Finalized 8-class XGBoost model metrics, evaluations, and confusion matrix.', idx: '04' },
+  explainability: { title: 'AI Explainability Deep Dive',      desc: 'SHAP-based explanations and attack analysis for evaluated network telemetry.', idx: '05' },
+  settings:       { title: 'Platform Settings & Session',      desc: 'System configurations, hardware adapters, and session management.',           idx: '06' },
 };
 
 /* ─── NAV ITEMS ─── */
 const NAV_ITEMS = [
   { id: 'dashboard',     label: 'Dashboard',          icon: LayoutDashboard },
+  { id: 'incidents',     label: 'SOC Incidents',      icon: ShieldAlert },
   { id: 'dataset',       label: 'Dataset Analysis',   icon: Database },
   { id: 'performance',   label: 'Model Performance',  icon: Activity },
   { id: 'explainability',label: 'AI Explainability',  icon: Sparkles },

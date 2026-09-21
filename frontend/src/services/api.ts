@@ -8,7 +8,11 @@ import {
   DashboardAnalytics,
   PreprocessConfig,
   MLModelTrainRequest,
-  PredictionExplanation
+  PredictionExplanation,
+  NetworkInterface,
+  CaptureStatus,
+  IncidentState,
+  CaptureProcessResult
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -195,5 +199,101 @@ export const apiService = {
       body: JSON.stringify(record),
     });
     return handleResponse<{ label: string; confidence: number; probabilities: Record<string, number> }>(res);
+  },
+
+  // ═══════════════════════════════════════════════════
+  // NETWORK PACKET CAPTURE & PCAP MANAGEMENT
+  // ═══════════════════════════════════════════════════
+  async getCaptureInterfaces(): Promise<NetworkInterface[]> {
+    const res = await fetch(`${API_BASE_URL}/capture/interfaces`);
+    return handleResponse<NetworkInterface[]>(res);
+  },
+
+  async getCaptureStatus(): Promise<CaptureStatus> {
+    const res = await fetch(`${API_BASE_URL}/capture/status`);
+    return handleResponse<CaptureStatus>(res);
+  },
+
+  async startCapture(iface: string, durationLimit = 0, packetLimit = 0): Promise<Record<string, any>> {
+    const res = await fetch(`${API_BASE_URL}/capture/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        interface: iface,
+        duration_limit: durationLimit,
+        packet_limit: packetLimit
+      }),
+    });
+    return handleResponse<Record<string, any>>(res);
+  },
+
+  async stopCapture(): Promise<Record<string, any>> {
+    const res = await fetch(`${API_BASE_URL}/capture/stop`, {
+      method: 'POST',
+    });
+    return handleResponse<Record<string, any>>(res);
+  },
+
+  async uploadPcap(file: File): Promise<{ filename: string; filepath: string; file_size: number }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await fetch(`${API_BASE_URL}/capture/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    return handleResponse<{ filename: string; filepath: string; file_size: number }>(res);
+  },
+
+  async processPcap(pcapPath?: string, maxFlows = 5): Promise<CaptureProcessResult> {
+    const res = await fetch(`${API_BASE_URL}/capture/process`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pcap_path: pcapPath,
+        max_flows_to_analyze: maxFlows
+      }),
+    });
+    return handleResponse<CaptureProcessResult>(res);
+  },
+
+  // ═══════════════════════════════════════════════════
+  // MULTI-AGENT SOC PIPELINE
+  // ═══════════════════════════════════════════════════
+  async analyzeFlow(record: Record<string, any>, networkContext?: Record<string, any>): Promise<IncidentState> {
+    const res = await fetch(`${API_BASE_URL}/agents/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ record, network_context: networkContext }),
+    });
+    return handleResponse<IncidentState>(res);
+  },
+
+  async getSocIncidents(): Promise<IncidentState[]> {
+    const res = await fetch(`${API_BASE_URL}/agents/incidents`);
+    return handleResponse<IncidentState[]>(res);
+  },
+
+  async getSocIncident(incidentId: string): Promise<IncidentState> {
+    const res = await fetch(`${API_BASE_URL}/agents/incident/${incidentId}`);
+    return handleResponse<IncidentState>(res);
+  },
+
+  async reviewIncidentResponse(incidentId: string, approved: boolean, analystName = "SOC Analyst", notes?: string): Promise<IncidentState> {
+    const res = await fetch(`${API_BASE_URL}/agents/incident/${incidentId}/approval`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        approved,
+        analyst_name: analystName,
+        notes
+      }),
+    });
+    return handleResponse<IncidentState>(res);
+  },
+
+  async getIncidentReportMarkdown(incidentId: string): Promise<string> {
+    const res = await fetch(`${API_BASE_URL}/agents/incident/${incidentId}/report`);
+    if (!res.ok) throw new Error("Failed to fetch markdown report");
+    return res.text();
   }
 };

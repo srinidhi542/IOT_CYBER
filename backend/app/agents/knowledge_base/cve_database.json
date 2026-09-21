@@ -1,0 +1,90 @@
+[
+  {
+    "cve_id": "CVE-2023-1389",
+    "affected_systems": "TP-Link Archer AX21 (Firmware prior to 1.1.4 Build 20230219)",
+    "cvss_score": 8.8,
+    "severity": "HIGH",
+    "attack_vector": "NETWORK",
+    "keywords": ["mirai", "web attack", "tp-link", "command injection", "c2", "botnet"],
+    "description": "TP-Link Archer AX21 web management interface contains an unauthenticated command injection vulnerability in the country code/locale parameter handling. The vulnerability was publicly demonstrated at Pwn2Own and subsequently actively weaponized in the wild by Mirai botnet operators to recruit IoT consumer routers into volumetric DDoS botnets.",
+    "mitigation": "Apply TP-Link firmware patch 1.1.4 Build 20230219 or later, restrict web management access to local LAN only, and block port 80/443 WAN exposure.",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2023-1389"
+  },
+  {
+    "cve_id": "CVE-2021-36260",
+    "affected_systems": "Hikvision IP Cameras and NVR firmware (multiple model lines)",
+    "cvss_score": 9.8,
+    "severity": "CRITICAL",
+    "attack_vector": "NETWORK",
+    "keywords": ["mirai", "ip camera", "web attack", "command injection", "rce", "botnet", "mozi"],
+    "description": "A command injection vulnerability in the web server of certain Hikvision IP camera models allows an attacker to send specially crafted messages with malicious shell payloads. Active in CISA KEV catalog; extensively targeted by Mirai, Mozi, and Gafgyt botnets to harvest cameras for high-bandwidth DDoS reflection attacks.",
+    "mitigation": "Immediately upgrade Hikvision camera firmware to the latest manufacturer release, place cameras on an isolated surveillance VLAN, and prohibit direct Internet routing.",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-36260"
+  },
+  {
+    "cve_id": "CVE-2017-17215",
+    "affected_systems": "Huawei HG532 Home Gateway Routers",
+    "cvss_score": 8.8,
+    "severity": "HIGH",
+    "attack_vector": "NETWORK",
+    "keywords": ["mirai", "satori", "router", "tr-064", "remote code execution", "ddos"],
+    "description": "An authenticated remote code execution vulnerability in the TR-064 protocol implementation on port 37215 of Huawei HG532 routers allows remote attackers to execute arbitrary system commands via crafted UPnP/TR-064 SOAP packets. Weaponized by the Satori Mirai variant to compromise hundreds of thousands of residential gateways.",
+    "mitigation": "Deploy carrier-level upstream filtering on TCP port 37215, disable remote TR-064 administration, and upgrade gateway firmware.",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2017-17215"
+  },
+  {
+    "cve_id": "CVE-2016-10401",
+    "affected_systems": "ZyXEL and generic BusyBox-based IoT routers / embedded Linux devices",
+    "cvss_score": 9.8,
+    "severity": "CRITICAL",
+    "attack_vector": "NETWORK",
+    "keywords": ["mirai", "brute force", "telnet", "default password", "busybox", "credentials"],
+    "description": "Hardcoded and default credential vulnerability in embedded BusyBox Linux firmware used across multiple consumer router and IP device vendors. Mirai botnet scan engines automate rapid dictionary attacks matching known default usernames/passwords over Telnet port 23.",
+    "mitigation": "Disable WAN Telnet access, enforce mandatory non-default credential resets during device provisioning, and block inbound port 23/2323 on network perimeters.",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2016-10401"
+  },
+  {
+    "cve_id": "CVE-2020-11896",
+    "affected_systems": "Treck TCP/IP Embedded Stack (Ripple20 vulnerabilities)",
+    "cvss_score": 10.0,
+    "severity": "CRITICAL",
+    "attack_vector": "NETWORK",
+    "keywords": ["dos", "ddos", "stack", "ip fragment", "ripple20", "memory corruption"],
+    "description": "Multiple memory corruption vulnerabilities in the Treck TCP/IP stack (Ripple20) when processing IPv4 fragments over UDP or ICMP. Allows an unauthenticated network attacker to trigger remote code execution or complete system crash (Denial of Service) across industrial, medical, and smart infrastructure IoT devices.",
+    "mitigation": "Apply Treck patch release 6.0.1.67 or vendor-specific patches; enforce network inspection to drop anomalous, malformed, or overlapping IPv4 fragments.",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-11896"
+  },
+  {
+    "cve_id": "CVE-2018-10561",
+    "affected_systems": "Dasan GPON Home Optical Network Terminals / Routers",
+    "cvss_score": 9.8,
+    "severity": "CRITICAL",
+    "attack_vector": "NETWORK",
+    "keywords": ["mirai", "web attack", "gpon", "authentication bypass", "botnet"],
+    "description": "Authentication bypass vulnerability in Dasan GPON routers allowing attackers to bypass web authentication by appending '?images/' to any HTTP URL, followed by command injection via CVE-2018-10562. Weaponized by Mirai and Muhstik IoT botnets to enslave fiber gateways.",
+    "mitigation": "Disable remote web access on WAN interfaces and apply firmware patches provided by ISP or manufacturer.",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2018-10561"
+  },
+  {
+    "cve_id": "CVE-2022-30525",
+    "affected_systems": "Zyxel USG/ZyWALL/ATP firewalls with ZLD firmware",
+    "cvss_score": 9.8,
+    "severity": "CRITICAL",
+    "attack_vector": "NETWORK",
+    "keywords": ["command injection", "web attack", "firewall", "rce", "c2"],
+    "description": "Unauthenticated remote command injection in the web management CGI of Zyxel firewall and IoT edge gateway devices via the libcli daemon. Allows remote attackers to execute arbitrary OS commands as nobody user.",
+    "mitigation": "Upgrade firmware to ZLD 5.30 or subsequent patch releases; restrict web administrative interface access to trusted VPN subnets.",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-30525"
+  },
+  {
+    "cve_id": "CVE-2020-8597",
+    "affected_systems": "pppd (Point-to-Point Protocol Daemon) 2.4.2 through 2.4.8",
+    "cvss_score": 9.8,
+    "severity": "CRITICAL",
+    "attack_vector": "NETWORK",
+    "keywords": ["dos", "rce", "buffer overflow", "pppd", "router"],
+    "description": "Buffer overflow in the eap_request and eap_response functions of pppd daemon when parsing EAP packets. Widely deployed across Linux-based consumer routers and IoT gateways.",
+    "mitigation": "Upgrade pppd to version 2.4.9 or higher and sanitize incoming PPP/EAP session initializations.",
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-8597"
+  }
+]

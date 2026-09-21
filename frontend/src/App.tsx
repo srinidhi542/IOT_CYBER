@@ -6,7 +6,8 @@ import { ModelPerformance } from './pages/ModelPerformance';
 import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
 import { AIExplainability } from './pages/Explainability';
-import { Dataset, MLModel, SystemStatus, DashboardAnalytics, PredictionExplanation } from './types';
+import { Incidents } from './pages/Incidents';
+import { Dataset, MLModel, SystemStatus, DashboardAnalytics, PredictionExplanation, IncidentState, CaptureProcessResult } from './types';
 import { apiService } from './services/api';
 
 function App() {
@@ -22,7 +23,62 @@ function App() {
   const [models, setModels] = useState<MLModel[]>([]);
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState<boolean>(false);
-  const [latestPrediction, setLatestPrediction] = useState<PredictionExplanation | null>(null);
+  
+  // Persistent detection & packet capture results across page navigation & reload
+  const [captureResult, setCaptureResult] = useState<CaptureProcessResult | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('iotshield_last_capture');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [latestPrediction, setLatestPrediction] = useState<PredictionExplanation | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('iotshield_latest_pred');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [activeIncident, setActiveIncident] = useState<IncidentState | null>(null);
+  const [incidentsList, setIncidentsList] = useState<IncidentState[]>([]);
+
+  // Sync state to sessionStorage
+  useEffect(() => {
+    try {
+      if (captureResult) {
+        sessionStorage.setItem('iotshield_last_capture', JSON.stringify(captureResult));
+      } else {
+        sessionStorage.removeItem('iotshield_last_capture');
+      }
+    } catch (e) {
+      console.warn("Could not persist capture result to sessionStorage", e);
+    }
+  }, [captureResult]);
+
+  useEffect(() => {
+    try {
+      if (latestPrediction) {
+        sessionStorage.setItem('iotshield_latest_pred', JSON.stringify(latestPrediction));
+      } else {
+        sessionStorage.removeItem('iotshield_latest_pred');
+      }
+    } catch (e) {
+      console.warn("Could not persist prediction to sessionStorage", e);
+    }
+  }, [latestPrediction]);
+
+  const handleResetDetection = () => {
+    setLatestPrediction(null);
+    setCaptureResult(null);
+    try {
+      sessionStorage.removeItem('iotshield_last_capture');
+      sessionStorage.removeItem('iotshield_latest_pred');
+    } catch (e) {}
+  };
 
   // Load system and configuration metadata
   const fetchStatusAndData = async () => {
@@ -75,6 +131,7 @@ function App() {
   useEffect(() => {
     fetchStatusAndData();
     loadDashboardAnalytics();
+    loadIncidents();
     
     // Set a health check poll every 30 seconds
     const interval = setInterval(async () => {
@@ -88,6 +145,20 @@ function App() {
 
     return () => clearInterval(interval);
   }, []);
+
+  const loadIncidents = async () => {
+    try {
+      const list = await apiService.getSocIncidents();
+      if (list && list.length > 0) {
+        setIncidentsList(list);
+        if (!activeIncident) {
+          setActiveIncident(list[0]);
+        }
+      }
+    } catch (err) {
+      // silent
+    }
+  };
 
   // Sync selection defaults
   useEffect(() => {
@@ -134,7 +205,25 @@ function App() {
           selectedModel={selectedModel}
           latestPrediction={latestPrediction}
           setLatestPrediction={setLatestPrediction}
+          captureResult={captureResult}
+          setCaptureResult={setCaptureResult}
+          onResetDetection={handleResetDetection}
           onNavigateToExplainability={() => setActivePage('explainability')}
+          onNavigateToIncidents={() => setActivePage('incidents')}
+          activeIncident={activeIncident}
+          setActiveIncident={setActiveIncident}
+          setIncidentsList={setIncidentsList}
+        />
+      )}
+
+      {activePage === 'incidents' && (
+        <Incidents
+          activeIncident={activeIncident}
+          incidentsList={incidentsList}
+          setActiveIncident={setActiveIncident}
+          setIncidentsList={setIncidentsList}
+          onNavigateToDashboard={() => setActivePage('dashboard')}
+          refreshIncidents={loadIncidents}
         />
       )}
       

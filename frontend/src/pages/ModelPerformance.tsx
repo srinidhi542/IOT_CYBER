@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Cpu } from 'lucide-react';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell } from 'recharts';
+import { Activity, Cpu, BarChart3, TrendingUp, Layers } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, Legend, CartesianGrid } from 'recharts';
 import { MLModel } from '../types';
 import { apiService } from '../services/api';
 
@@ -19,12 +19,17 @@ export const ModelPerformance: React.FC<ModelPerformanceProps> = ({
     try {
       const list = await apiService.getModels();
       setModels(list);
+      if (list.length > 0 && !selectedModel) {
+        setSelectedModel(list[0]);
+      }
     } catch (err: any) {
       console.error(err);
     }
   }
 
-  useEffect(() => { loadModels(); }, [selectedModel]);
+  useEffect(() => {
+    loadModels();
+  }, [selectedModel]);
 
   const formatFeatureImportance = (importance: Record<string, number> | null) => {
     if (!importance) return [];
@@ -35,6 +40,18 @@ export const ModelPerformance: React.FC<ModelPerformanceProps> = ({
   };
 
   const importanceData = formatFeatureImportance(selectedModel?.feature_importance || null);
+
+  const perClassData = (selectedModel?.classes || []).map(cls => {
+    const classReport = selectedModel?.metrics_json?.classification_report || selectedModel?.metrics_json;
+    const metrics = classReport?.[cls];
+    return {
+      name: cls,
+      Precision: metrics ? Number((metrics.precision * 100).toFixed(1)) : 0,
+      Recall: metrics ? Number((metrics.recall * 100).toFixed(1)) : 0,
+      'F1-Score': metrics ? Number((metrics['f1-score'] * 100).toFixed(1)) : 0,
+      support: metrics ? metrics.support : 0
+    };
+  });
 
   const getMatrixCellColor = (value: number, rowIdx: number, colIdx: number, maxVal: number) => {
     if (maxVal === 0) return 'bg-slate-900';
@@ -232,6 +249,62 @@ export const ModelPerformance: React.FC<ModelPerformanceProps> = ({
               </div>
             </div>
 
+            {/* PER-CLASS VISUAL PERFORMANCE COMPARISON CHART */}
+            {perClassData.length > 0 && (
+              <div className="dark-panel p-6 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-800/80">
+                  <div className="flex items-center gap-2">
+                    <BarChart3 size={16} className="text-cyan-400" />
+                    <div>
+                      <h3 className="text-xs font-semibold text-slate-300 font-mono uppercase tracking-wider">
+                        Per-Class Attack Detection Benchmarks (Precision / Recall / F1)
+                      </h3>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Comparative performance evaluation across all 8 evaluated IoT attack categories.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-800/40 text-cyan-400 uppercase shrink-0">
+                    Interactive Multi-Metric Chart
+                  </span>
+                </div>
+
+                <div className="h-72 w-full pt-2">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={perClassData} margin={{ top: 10, right: 20, left: -10, bottom: 25 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" opacity={0.6} />
+                      <XAxis 
+                        dataKey="name" 
+                        stroke="#64748b" 
+                        fontSize={11} 
+                        tickLine={false} 
+                        interval={0}
+                        angle={-15}
+                        textAnchor="end"
+                      />
+                      <YAxis 
+                        stroke="#64748b" 
+                        fontSize={10} 
+                        tickLine={false} 
+                        domain={[0, 100]} 
+                        unit="%" 
+                      />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', fontSize: '11px', fontFamily: 'monospace' }} 
+                        formatter={(val: any, name: string) => [`${val}%`, name]}
+                      />
+                      <Legend 
+                        wrapperStyle={{ paddingTop: '10px', fontSize: '11px', fontFamily: 'monospace' }} 
+                      />
+                      <Bar dataKey="Precision" fill="#06b6d4" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="Recall" fill="#10b981" radius={[3, 3, 0, 0]} />
+                      <Bar dataKey="F1-Score" fill="#818cf8" radius={[3, 3, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="dark-panel p-6 flex flex-col justify-between">
                 <div>
@@ -275,7 +348,8 @@ export const ModelPerformance: React.FC<ModelPerformanceProps> = ({
                     </thead>
                     <tbody className="divide-y divide-slate-850">
                       {selectedModel.classes && selectedModel.classes.map((cls) => {
-                        const classMetrics = selectedModel.metrics_json?.[cls];
+                        const classReport = selectedModel.metrics_json?.classification_report || selectedModel.metrics_json;
+                        const classMetrics = classReport?.[cls];
                         if (!classMetrics) return null;
                         return (
                           <tr key={cls} className="text-slate-300 hover:bg-slate-900/30">

@@ -20,10 +20,14 @@ from app.detection.engine import run_threat_detection
 from app.reports.generator import generate_report_summary, export_pdf_report
 from app.ml.anomaly.anomaly_service import run_anomaly_inference
 from app.ml.threat_engine.threat_engine import evaluate_threat
+from app.api.capture_endpoints import router as capture_router
+from app.api.agent_endpoints import router as agents_router
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+router.include_router(capture_router)
+router.include_router(agents_router)
 
 # ----------------- 1. HEALTH & SYSTEM STATUS -----------------
 @router.get("/health", response_model=Dict[str, str])

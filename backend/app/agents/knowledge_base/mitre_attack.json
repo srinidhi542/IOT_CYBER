@@ -1,0 +1,90 @@
+[
+  {
+    "id": "T1498",
+    "name": "Network Denial of Service",
+    "tactic": "Impact",
+    "subtechniques": ["T1498.001 - Direct Network Flood", "T1498.002 - Reflection Amplification"],
+    "keywords": ["ddos", "dos", "flood", "syn flood", "udp flood", "volumetric", "rate"],
+    "description": "Adversaries may perform Network Denial of Service (DoS) attacks to degrade or block the availability of targeted resources to users by exhausting network bandwidth through direct flooding or reflection amplification. In IoT environments, compromised devices are frequently enslaved to generate high-bandwidth UDP or TCP SYN floods targeting critical network nodes.",
+    "detection": "Monitor network bandwidth and packet arrival rates for abnormal surges, high Flow_Packets_s, and disproportionate SYN or UDP traffic without corresponding application completions.",
+    "mitigation": "Deploy upstream rate-limiting filters, BGP Anycast routing, automated border ACLs, and SYN cookie protection on border gateways.",
+    "url": "https://attack.mitre.org/techniques/T1498/"
+  },
+  {
+    "id": "T1499",
+    "name": "Endpoint Denial of Service",
+    "tactic": "Impact",
+    "subtechniques": ["T1499.001 - OS Exhaustion Flood", "T1499.002 - Service Exhaustion Flood"],
+    "keywords": ["dos", "exhaustion", "crash", "resource limit", "memory exhaustion"],
+    "description": "Adversaries may target endpoints with packets engineered to exhaust system memory, CPU cycles, or state tables (e.g. TCP connection state exhaustion). Resource-constrained IoT embedded microcontrollers and smart sensors are particularly vulnerable to crashing when subjected to malformed protocol headers or rapid connection opens.",
+    "detection": "Track anomalous spikes in open sockets, memory exhaustion alerts, unresponsive device telemetry, and excessive incomplete TCP handshakes.",
+    "mitigation": "Tune TCP keepalive timeouts, enforce connection count limits per source IP, and implement watchdog reboot mechanisms on IoT edge nodes.",
+    "url": "https://attack.mitre.org/techniques/T1499/"
+  },
+  {
+    "id": "T1584.005",
+    "name": "Compromise Infrastructure: Botnet",
+    "tactic": "Resource Development",
+    "subtechniques": ["T1584.005 - Botnet Infrastructure"],
+    "keywords": ["mirai", "botnet", "c2", "zombie", "malware", "infection"],
+    "description": "Adversaries may compromise and control an aggregation of Internet-connected devices, such as vulnerable IoT routers, IP cameras, and smart appliances, to construct botnets (e.g. Mirai, Mozi, Gafgyt). These botnets are commanded via central C2 servers or peer-to-peer protocols to execute coordinated volumetric attacks.",
+    "detection": "Detect outbound synchronization to known bulletproof hosting providers, unexpected IRC or raw TCP communication on non-standard ports from IoT assets, and sudden mass outbound connection attempts.",
+    "mitigation": "Isolate IoT devices onto segregated management VLANs with strict outbound firewall policies denying arbitrary egress traffic.",
+    "url": "https://attack.mitre.org/techniques/T1584/005/"
+  },
+  {
+    "id": "T1110",
+    "name": "Brute Force",
+    "tactic": "Credential Access",
+    "subtechniques": ["T1110.001 - Password Guessing", "T1110.003 - Password Spraying"],
+    "keywords": ["brute force", "telnet", "ssh", "credentials", "login", "password"],
+    "description": "Adversaries may use brute force techniques to attempt credential guessing against IoT management interfaces. IoT malware families like Mirai routinely sweep IPv4 ranges and launch automated dictionary attacks using hardcoded vendor defaults (e.g. admin/admin, root/xc3511) over Telnet (port 23) and SSH (port 22).",
+    "detection": "Detect repeated authentication failure logs, rapid TCP connections to port 23/22 within seconds from single or distributed IPs, and elevated packet rates with small payload sizes.",
+    "mitigation": "Disable default accounts, enforce strong unique passwords, disable unencrypted Telnet in favor of SSH with public-key authentication, and implement fail2ban rate-limiting.",
+    "url": "https://attack.mitre.org/techniques/T1110/"
+  },
+  {
+    "id": "T1046",
+    "name": "Network Service Discovery",
+    "tactic": "Discovery",
+    "subtechniques": ["T1046 - Port and Service Scanning"],
+    "keywords": ["recon", "reconnaissance", "scan", "port scan", "discovery", "sweep"],
+    "description": "Adversaries may attempt to get a listing of services and open ports running on target network hosts. In IoT networks, attackers utilize TCP SYN scans, UDP probes, and ARP sweeps to discover vulnerable edge devices, IP cameras, MQTT message brokers, and industrial controllers.",
+    "detection": "Identify rapid sequential or random port connection attempts from single external or internal addresses with low IAT (Inter-Arrival Time) and minimal payload data.",
+    "mitigation": "Configure stateful host and perimeter firewalls to drop unauthorized discovery probes and deploy honeypots to detect internal lateral movement scanning.",
+    "url": "https://attack.mitre.org/techniques/T1046/"
+  },
+  {
+    "id": "T1595",
+    "name": "Active Scanning",
+    "tactic": "Reconnaissance",
+    "subtechniques": ["T1595.001 - Scanning IP Blocks", "T1595.002 - Vulnerability Scanning"],
+    "keywords": ["recon", "vulnerability scan", "banner grabbing", "active scanning"],
+    "description": "Adversaries execute active scans of internet IP subnets or local enterprise segments to fingerprint IoT device architectures, embedded firmware versions, and web server banners (e.g., GoAhead, Boa, mini_httpd) prior to launching exploit payloads.",
+    "detection": "Inspect HTTP User-Agent strings for known security scanner signatures (e.g., ZGrab, Masscan, Nmap) and analyze ICMP echo request bursts across subnet ranges.",
+    "mitigation": "Implement ingress rate limiting on perimeter gateways and obscure software identification banners where feasible.",
+    "url": "https://attack.mitre.org/techniques/T1595/"
+  },
+  {
+    "id": "T1565",
+    "name": "Data Manipulation",
+    "tactic": "Impact",
+    "subtechniques": ["T1565.001 - Stored Data Manipulation", "T1565.002 - Transmitted Data Manipulation"],
+    "keywords": ["spoofing", "arp spoofing", "dns spoofing", "mitm", "tampering"],
+    "description": "Adversaries may manipulate transmitted telemetry data, control signals, or network addresses. In IoT networks without cryptographic authentication, adversaries execute ARP cache poisoning or IP address spoofing to redirect telemetry to malicious proxies or masquerade as legitimate sensor gateways.",
+    "detection": "Monitor for conflicting ARP announcements (gratuitous ARP bursts), mismatched MAC-to-IP associations, and sudden changes in packet Time-To-Live (TTL) or Header_Length indicators.",
+    "mitigation": "Enable Dynamic ARP Inspection (DAI), 802.1X port-based network access control, and enforce TLS cryptographic mutual authentication on all IoT data channels.",
+    "url": "https://attack.mitre.org/techniques/T1565/"
+  },
+  {
+    "id": "T1190",
+    "name": "Exploit Public-Facing Application",
+    "tactic": "Initial Access",
+    "subtechniques": ["T1190 - Public-Facing Application Exploitation"],
+    "keywords": ["web attack", "injection", "command injection", "cve", "firmware", "rce"],
+    "description": "Adversaries may exploit vulnerabilities in Internet-facing IoT applications, such as router web administration panels, camera RTSP streamers, or UPnP daemon entry points, to execute arbitrary operating system commands.",
+    "detection": "Inspect web server logs for path traversal strings (../..), shell meta-characters (; | `), and unexpected POST requests to administrative CGI binaries.",
+    "mitigation": "Restrict administrative access to trusted management networks, disable remote WAN administration, and apply vendor firmware security updates immediately.",
+    "url": "https://attack.mitre.org/techniques/T1190/"
+  }
+]

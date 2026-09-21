@@ -1,0 +1,59 @@
+[
+  {
+    "id": "AA22-110A",
+    "title": "Russian State-Sponsored and Criminal Cyber Actors Target Network Infrastructure and IoT Gateways",
+    "release_date": "2022-04-20",
+    "issuing_agencies": ["CISA", "FBI", "NSA", "NCSC"],
+    "keywords": ["botnet", "mirai", "brute force", "recon", "router", "gateway"],
+    "summary": "CISA and partner security agencies issue guidance warning that cyber actors routinely compromise small-office/home-office (SOHO) routers and IoT network appliances via default credentials and known unpatched vulnerabilities to deploy persistent botnet agents, conduct reconnaissance, and proxy malicious network traffic.",
+    "recommended_actions": [
+      "Disable remote management over WAN (ports 80, 443, 22, 23)",
+      "Change all manufacturer default passwords to strong unique passphrases",
+      "Regularly reboot devices to clear volatile memory-resident malware",
+      "Isolate IoT devices from enterprise networks using dedicated VLANs"
+    ],
+    "url": "https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-110a"
+  },
+  {
+    "id": "AA20-302A",
+    "title": "Ransomware and Botnet Activity Targeting Critical Infrastructure and Healthcare IoT",
+    "release_date": "2020-10-28",
+    "issuing_agencies": ["CISA", "FBI", "HHS"],
+    "keywords": ["ddos", "botnet", "malware", "healthcare", "dos"],
+    "summary": "CISA, FBI, and HHS warn that threat actors are leveraging compromised IoT devices and botnets to execute high-volume DDoS attacks and disruption campaigns against healthcare facilities, clinical monitoring IoT devices, and public sector networks.",
+    "recommended_actions": [
+      "Implement multi-factor authentication (MFA) across all administrative access channels",
+      "Deploy robust network segmentation separating clinical telemetry from internet-accessible networks",
+      "Ensure real-time network traffic anomaly detection is operational"
+    ],
+    "url": "https://www.cisa.gov/news-events/cybersecurity-advisories/aa20-302a"
+  },
+  {
+    "id": "ICSA-20-168-01",
+    "title": "Treck TCP/IP Stack Vulnerabilities (Ripple20)",
+    "release_date": "2020-06-16",
+    "issuing_agencies": ["CISA ICS-CERT"],
+    "keywords": ["dos", "ddos", "stack", "ripple20", "fragmentation", "iot"],
+    "summary": "CISA warning regarding 19 distinct vulnerabilities in the Treck embedded TCP/IP stack (Ripple20). Multiple vulnerabilities can lead to unauthenticated remote code execution or complete denial-of-service crashes across hundreds of millions of industrial and consumer IoT microcontrollers.",
+    "recommended_actions": [
+      "Minimize network exposure for all control system and IoT assets",
+      "Locate control system networks and remote devices behind firewalls and isolate them from the business network",
+      "Drop or block malformed TCP and UDP packet headers at border routers"
+    ],
+    "url": "https://www.cisa.gov/news-events/ics-advisories/icsa-20-168-01"
+  },
+  {
+    "id": "AA23-074A",
+    "title": "#StopRansomware: Initial Access Brokers Weaponizing IoT Network Appliances",
+    "release_date": "2023-03-15",
+    "issuing_agencies": ["CISA", "FBI"],
+    "keywords": ["web attack", "recon", "command injection", "cve", "edge"],
+    "summary": "Threat actors are weaponizing newly disclosed NVD CVEs against internet-exposed edge network appliances, VPN routers, and IoT smart devices within hours of proof-of-concept release to establish footholds and lateral movement runways.",
+    "recommended_actions": [
+      "Audit internet-facing assets and remove unnecessary exposed services",
+      "Apply security patches immediately upon vendor disclosure",
+      "Monitor outbound perimeter connections for unauthorized command-and-control beacons"
+    ],
+    "url": "https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-074a"
+  }
+]

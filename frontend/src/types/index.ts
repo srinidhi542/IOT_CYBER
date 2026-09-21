@@ -164,3 +164,168 @@ export interface PredictionExplanation {
   top_contributing_features: ShapContribution[];
   shap_values: Record<string, number>;
 }
+
+// ═══════════════════════════════════════════════════
+// MULTI-AGENT SOC & PACKET CAPTURE TYPES
+// ═══════════════════════════════════════════════════
+
+export interface NetworkInterface {
+  id: string;
+  name: string;
+  description: string;
+  ip_address: string | null;
+  mac_address: string | null;
+  is_up: boolean;
+  is_loopback: boolean;
+  tshark_supported: boolean;
+}
+
+export interface CaptureStatus {
+  session_id: string | null;
+  interface: string | null;
+  output_pcap: string | null;
+  is_capturing: boolean;
+  duration: number;
+  packet_count: number;
+  file_size: number;
+  error?: string | null;
+  tshark_available: boolean;
+  tshark_path?: string | null;
+}
+
+export interface NetworkContext {
+  timestamp?: string;
+  source_ip?: string;
+  destination_ip?: string;
+  source_port?: number;
+  destination_port?: number;
+  protocol?: string;
+}
+
+export interface MitreAttackItem {
+  id: string;
+  name: string;
+  tactic: string;
+  description: string;
+  url: string;
+}
+
+export interface CveItem {
+  cve_id: string;
+  affected_systems: string;
+  cvss_score: number;
+  severity: string;
+  description: string;
+  url: string;
+}
+
+export interface CisaAdvisoryItem {
+  id: string;
+  title: string;
+  release_date: string;
+  summary: string;
+  url: string;
+}
+
+export interface ThreatIntelData {
+  mitre_attack: MitreAttackItem[];
+  cve_list: CveItem[];
+  cisa_advisories: CisaAdvisoryItem[];
+  iot_threat_context: string;
+  retrieval_confidence: number;
+  sources: string[];
+}
+
+export interface RiskAssessmentData {
+  risk_score: number;
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  priority: string;
+  impact: string;
+  likelihood: string;
+  reasoning: string[];
+}
+
+export interface FirewallCommand {
+  firewall_type: string;
+  command: string;
+  description: string;
+}
+
+export interface ResponsePlanData {
+  containment: string[];
+  recovery: string[];
+  prevention: string[];
+  firewall_commands: FirewallCommand[];
+  approval_required: boolean;
+  approval_status: 'PENDING_ANALYST_APPROVAL' | 'APPROVED' | 'REJECTED';
+  reviewed_by?: string | null;
+  review_timestamp?: string | null;
+  review_notes?: string | null;
+}
+
+export interface TimelineEvent {
+  timestamp: string;
+  agent: string;
+  action: string;
+  details: string;
+  status: string;
+}
+
+export interface IncidentReportData {
+  incident_id: string;
+  generated_at: string;
+  title: string;
+  executive_summary: string;
+  attack_type: string;
+  severity: string;
+  priority: string;
+  risk_score: number;
+  timeline: TimelineEvent[];
+  markdown_content: string;
+}
+
+export interface IncidentState {
+  incident_id: string;
+  created_at: string;
+  status: string;
+  detection: {
+    attack_type: string;
+    confidence: number;
+    probabilities: Record<string, number>;
+    network_context: NetworkContext;
+    top_contributing_features: ShapContribution[];
+    shap_values: Record<string, number>;
+    raw_record: Record<string, any>;
+  };
+  threat_intel?: ThreatIntelData | null;
+  risk_assessment?: RiskAssessmentData | null;
+  response?: ResponsePlanData | null;
+  report?: IncidentReportData | null;
+  timeline: TimelineEvent[];
+}
+
+export interface CaptureProcessResult {
+  pcap_path: string;
+  flows_extracted: number;
+  capture_stats?: {
+    Timestamp?: string;
+    Source_IP?: string;
+    Destination_IP?: string;
+    Source_Port?: number;
+    Destination_Port?: number;
+    Protocol_Name?: string;
+    total_flows?: number;
+    unique_source_ips?: string[];
+    unique_destination_ips?: string[];
+    observed_protocols?: string[];
+  };
+  overall_prediction?: {
+    label: string;
+    confidence: number;
+    probabilities: Record<string, number>;
+  };
+  overall_explainability?: PredictionExplanation;
+  overall_incident?: IncidentState;
+  incidents: IncidentState[];
+}
+

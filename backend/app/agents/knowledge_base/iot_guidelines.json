@@ -1,0 +1,23 @@
+[
+  {
+    "standard": "NIST SP 800-213",
+    "title": "IoT Device Cybersecurity Guidance for the Federal Government",
+    "keywords": ["baseline", "iot", "segmentation", "identification", "protection"],
+    "guidance": "Establishes mandatory baseline requirements for IoT asset integration: Device identification (MAC/IP cryptographic binding), network interface configuration restriction, secure logical boundary isolation (VLAN zoning), and continuous anomalous telemetry auditing.",
+    "url": "https://csrc.nist.gov/publications/detail/sp/800-213/final"
+  },
+  {
+    "standard": "OWASP IoT Top 10 (2018/2023)",
+    "title": "OWASP Internet of Things Security Project",
+    "keywords": ["owasp", "passwords", "insecure network", "credentials", "brute force"],
+    "guidance": "Identifies the highest-risk attack surfaces in IoT ecosystems: I1: Weak, Guessable, or Hardcoded Passwords; I2: Insecure Network Services (unneeded open ports, exposed Telnet/UPnP daemons); I3: Insecure Ecosystem Interfaces (unauthenticated APIs, command injection vulnerabilities); I7: Insecure Data Transfer (lack of TLS/encryption).",
+    "url": "https://owasp.org/www-project-internet-of-things/"
+  },
+  {
+    "standard": "ENISA IoT Guidelines",
+    "title": "Baseline Security Recommendations for IoT in Critical Information Infrastructures",
+    "keywords": ["enisa", "critical infrastructure", "mitigation", "resilience"],
+    "guidance": "Recommends zero-trust network microsegmentation for IoT nodes, ingress filtering against spoofed source packets, automated detection of denial-of-service amplification, and immediate revocation of compromised device certificates.",
+    "url": "https://www.enisa.europa.eu/publications/baseline-security-recommendations-for-iot"
+  }
+]
