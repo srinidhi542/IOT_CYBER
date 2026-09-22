@@ -129,3 +129,22 @@ class SystemStatusResponse(BaseModel):
     ml_engine: ComponentStatus
     dataset_engine: ComponentStatus
     detection_engine: ComponentStatus
+    tshark: Optional[ComponentStatus] = None
+    cicflowmeter: Optional[ComponentStatus] = None
+    xgboost: Optional[ComponentStatus] = None
+    shap: Optional[ComponentStatus] = None
+    rag: Optional[ComponentStatus] = None
+    agents: Optional[Dict[str, ComponentStatus]] = None
+
+class PlatformSettingsSchema(BaseModel):
+    network_capture: Dict[str, Any]
+    flow_extraction: Dict[str, Any]
+    detection_engine: Dict[str, Any]
+    multi_agent_pipeline: Dict[str, Any]
+    threat_intelligence: Dict[str, Any]
+    data_storage: Dict[str, Any]
+
+class PlatformSettingsResponse(BaseModel):
+    settings: PlatformSettingsSchema
+    health: Dict[str, ComponentStatus]
+    agents_health: Dict[str, ComponentStatus]

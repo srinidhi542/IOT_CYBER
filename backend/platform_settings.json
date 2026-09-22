@@ -1,0 +1,34 @@
+{
+  "network_capture": {
+    "default_interface": "1",
+    "capture_duration": 30,
+    "auto_stop": true,
+    "pcap_storage_path": "backend/uploads"
+  },
+  "flow_extraction": {
+    "flow_timeout": 120,
+    "output_directory": "backend/uploads",
+    "auto_process_pcap": true
+  },
+  "detection_engine": {
+    "active_model_id": 1,
+    "confidence_threshold": 0.92,
+    "shap_top_k": 5
+  },
+  "multi_agent_pipeline": {
+    "execution_mode": "coordinated",
+    "analyst_approval_required": true
+  },
+  "threat_intelligence": {
+    "enable_mitre": true,
+    "enable_nvd_cve": true,
+    "enable_cisa": true,
+    "rag_top_k": 2
+  },
+  "data_storage": {
+    "pcap_path": "backend/uploads",
+    "flow_csv_path": "backend/uploads",
+    "report_path": "backend/reports",
+    "retention_days": 30
+  }
+}

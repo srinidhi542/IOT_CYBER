@@ -52,10 +52,26 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
     try {
       const list = await apiService.getCaptureInterfaces();
       setInterfaces(list);
-      if (list.length > 0 && !selectedIface) {
-        // Pick first active or Wi-Fi/Ethernet adapter
-        const best = list.find(i => i.is_up && !i.is_loopback) || list[0];
-        setSelectedIface(best.name);
+
+      // Check if user configured a persistent default in Settings
+      let defaultFromSettings = '';
+      try {
+        const platformSettings = await apiService.getPlatformSettings();
+        if (platformSettings?.settings?.network_capture?.default_interface) {
+          defaultFromSettings = platformSettings.settings.network_capture.default_interface;
+        }
+      } catch (err) {
+        // Fallback silently if settings endpoint not ready
+      }
+
+      if (list.length > 0) {
+        const match = list.find(i => i.name === defaultFromSettings);
+        if (match) {
+          setSelectedIface(match.name);
+        } else {
+          const best = list.find(i => i.is_up && !i.is_loopback) || list[0];
+          setSelectedIface(best.name);
+        }
       }
     } catch (e: any) {
       console.warn("Failed to enumerate network interfaces:", e);

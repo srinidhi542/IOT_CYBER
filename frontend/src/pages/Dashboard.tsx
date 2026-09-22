@@ -287,120 +287,31 @@ export const Dashboard: React.FC<DashboardProps> = ({
       )}
 
       {/* ═══════════════════════════════════════════════════
-          3. EMBEDDED AI EXPLAINABILITY (SHAP ATTRIBUTION)
+          3. LINK TO DEDICATED AI EXPLAINABILITY VIEW
       ═══════════════════════════════════════════════════ */}
       {latestPrediction && (
-        <div className="dark-panel p-6 space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-800/80">
+        <div className="dark-panel p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border border-slate-800/80 bg-slate-950/60">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-cyan-950/60 border border-cyan-800/50 text-cyan-400">
+              <Sparkles size={20} />
+            </div>
             <div>
-              <div className="flex items-center gap-2">
-                <Sparkles size={16} className="text-cyan-400" />
-                <h3 className="text-xs font-mono uppercase tracking-wider text-white font-bold">
-                  AI Explainability (SHAP Tree Attribution on Captured Traffic)
-                </h3>
-                <span className="px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-800/50 text-[9px] font-mono text-cyan-400">
-                  SHAP TreeExplainer
-                </span>
-              </div>
-              <p className="text-xs text-slate-400 mt-1">
-                Real-time feature impact attributions driving the model's classification for this captured traffic.
+              <h3 className="text-xs font-mono uppercase tracking-wider text-white font-bold">
+                AI Explainability & SHAP Feature Attribution Ready
+              </h3>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Evaluation breakdown and SHAP feature influence scores available for <b className="text-cyan-300">{latestPrediction.label}</b> prediction.
               </p>
             </div>
-
-            <button
-              onClick={onNavigateToExplainability}
-              className="text-xs font-mono text-cyan-400 hover:text-cyan-300 flex items-center gap-1.5 transition-colors"
-            >
-              <span>Full Threat Intelligence Knowledge Base</span>
-              <ArrowRight size={13} />
-            </button>
           </div>
 
-          {/* Top Contributing Features Visualizer */}
-          <div className="space-y-3">
-            <h4 className="text-[10px] font-mono uppercase tracking-widest text-slate-500">
-              Top Traffic Features Driving Classification ({latestPrediction.label})
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {latestPrediction.top_contributing_features.map((feat, idx) => {
-                const isPositive = feat.direction === 'increases';
-                const barWidth = Math.min(100, Math.max(8, (Math.abs(feat.shap_value) / maxShap) * 100));
-                const explanation = FEATURE_EXPLANATIONS[feat.feature] || 'Observed network flow metric evaluated by the tuned XGBoost model.';
-
-                return (
-                  <div 
-                    key={idx} 
-                    className="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800/80 hover:border-slate-700 transition-all space-y-2"
-                  >
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <div className="flex items-center gap-2">
-                        <span className="text-slate-200 font-bold">{feat.feature}</span>
-                        <span className="text-slate-500 text-[10px]">val: <b className="text-slate-300">{feat.value}</b></span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        {isPositive ? (
-                          <span className="flex items-center gap-1 text-[10px] text-rose-400 font-bold bg-rose-950/60 px-2 py-0.5 rounded border border-rose-800/40">
-                            <TrendingUp size={11} />
-                            <span>+{feat.shap_value.toFixed(3)} (Pushes Threat)</span>
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1 text-[10px] text-cyan-400 font-bold bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800/40">
-                            <TrendingDown size={11} />
-                            <span>{feat.shap_value.toFixed(3)} (Pulls Benign)</span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Horizontal Bar */}
-                    <div className="w-full bg-slate-950 rounded-full h-2 overflow-hidden flex">
-                      <div
-                        className={`h-full rounded-full transition-all duration-700 ${
-                          isPositive 
-                            ? 'bg-gradient-to-r from-amber-500 to-rose-500' 
-                            : 'bg-gradient-to-r from-blue-500 to-cyan-400'
-                        }`}
-                        style={{ width: `${barWidth}%` }}
-                      />
-                    </div>
-
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-light">
-                      {explanation}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Probabilities Distribution */}
-          {latestPrediction.probabilities && (
-            <div className="pt-2 border-t border-slate-800/60">
-              <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 block mb-2">
-                Class Probability Distribution Across 8 Attack Families
-              </span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 font-mono text-[10px]">
-                {Object.entries(latestPrediction.probabilities).map(([cls, prob]) => {
-                  const pct = (prob * 100).toFixed(1);
-                  const isTop = cls === latestPrediction.label;
-                  return (
-                    <div 
-                      key={cls} 
-                      className={`p-2 rounded text-center border transition-all ${
-                        isTop 
-                          ? 'bg-cyan-950/80 border-cyan-500 text-cyan-200 font-bold' 
-                          : 'bg-slate-900/50 border-slate-800/80 text-slate-400'
-                      }`}
-                    >
-                      <span className="block truncate font-semibold" title={cls}>{cls}</span>
-                      <span className={isTop ? 'text-cyan-300 font-bold' : 'text-slate-500'}>{pct}%</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          <button
+            onClick={onNavigateToExplainability}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-xs font-bold uppercase transition-all shadow-md shadow-cyan-950/40 shrink-0"
+          >
+            <span>View Dedicated AI Explainability</span>
+            <ArrowRight size={14} />
+          </button>
         </div>
       )}
 
@@ -484,53 +395,6 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════
-          5. MANUAL RECORD TESTING (OPTIONAL JSON TESTING)
-      ═══════════════════════════════════════════════════ */}
-      <div className="dark-panel p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Play className="text-emerald-500" size={20} />
-          <h3 className="font-mono text-xs uppercase text-slate-300 font-bold">
-            Manual Network Record Testing & Attribution
-          </h3>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs font-mono text-slate-500 mb-2 block">
-              Network Record (JSON 39 features):
-            </label>
-            <textarea
-              value={testRecord}
-              onChange={e => setTestRecord(e.target.value)}
-              className="w-full h-28 bg-slate-900 border border-slate-800 rounded p-3 text-xs font-mono text-slate-300 focus:border-cyan-500 focus:outline-none"
-              placeholder='{"feature1": 1.0, ...}'
-            />
-          </div>
-          <button
-            onClick={handlePredict}
-            disabled={predicting || !modelReady}
-            className="w-full bg-cyan-600 hover:bg-cyan-500 text-white rounded py-2 text-xs font-mono font-bold uppercase transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-cyan-950/40"
-          >
-            {predicting ? (
-              <>
-                <div className="w-3.5 h-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                <span>Computing SHAP Attribution & Multi-Agent SOC Assessment...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles size={14} />
-                <span>EVALUATE RECORD & UPDATE EXPLAINABILITY</span>
-              </>
-            )}
-          </button>
-          {errorMsg && (
-            <div className="text-rose-400 text-xs font-mono bg-rose-900/20 p-2.5 rounded border border-rose-800/40 flex items-center gap-2">
-              <AlertCircle size={14} className="shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 };

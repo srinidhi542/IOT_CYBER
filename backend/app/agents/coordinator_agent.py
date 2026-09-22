@@ -58,9 +58,14 @@ class CoordinatorAgent:
         # -------------------------------------------------------------
         # 1. DETECTION AGENT (Existing XGBoost & SHAP Explainability)
         # -------------------------------------------------------------
+        from app.core.config import load_platform_settings
         from app.ml.predict_pipeline import explain_prediction
 
-        shap_result = explain_prediction(record, top_k=5)
+        platform_cfg = load_platform_settings()
+        shap_k = platform_cfg.get("detection_engine", {}).get("shap_top_k", 5)
+        exec_mode = platform_cfg.get("agent_pipeline", {}).get("execution_mode", "coordinated")
+
+        shap_result = explain_prediction(record, top_k=shap_k)
 
         net_ctx = NetworkContext(
             timestamp=network_context.get("Timestamp") if network_context else record.get("Timestamp", created_at_iso),
@@ -104,7 +109,7 @@ class CoordinatorAgent:
         mark_event(
             "Coordinator Agent",
             "Incident State Initialized",
-            f"Allocated incident tracker {incident_id}. Initiating Threat Intelligence RAG retrieval."
+            f"Allocated incident tracker {incident_id} (Execution Mode: {exec_mode.upper()}). Initiating Threat Intelligence RAG retrieval."
         )
 
         # -------------------------------------------------------------

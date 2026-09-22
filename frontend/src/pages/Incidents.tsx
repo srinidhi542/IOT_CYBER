@@ -331,42 +331,11 @@ export const Incidents: React.FC<IncidentsProps> = ({
                   </div>
                 </div>
 
-                {/* 3. SHAP Evidence */}
-                <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
-                  <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest block">
-                    3. Top Explainable ML Feature Indicators (SHAP Attribution)
-                  </span>
-                  <table className="w-full text-left text-xs">
-                    <thead>
-                      <tr className="border-b border-slate-800 text-slate-500 text-[10px]">
-                        <th className="py-1.5">FEATURE</th>
-                        <th className="py-1.5 text-right">MEASURED VALUE</th>
-                        <th className="py-1.5 text-right">SHAP IMPACT</th>
-                        <th className="py-1.5 text-right">DIRECTION</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-850">
-                      {(activeIncident.detection?.top_contributing_features || []).map((f, i) => (
-                        <tr key={i} className="text-slate-300 hover:bg-slate-950/40">
-                          <td className="py-2 font-bold text-white">{f.feature}</td>
-                          <td className="py-2 text-right">{f.value}</td>
-                          <td className="py-2 text-right font-bold text-cyan-400">{(f.shap_value ?? 0).toFixed(4)}</td>
-                          <td className="py-2 text-right">
-                            <span className={`px-2 py-0.5 rounded text-[9px] uppercase font-bold ${f.direction === 'increases' ? 'bg-rose-950 text-rose-300 border border-rose-800/40' : 'bg-cyan-950 text-cyan-300 border border-cyan-800/40'}`}>
-                              {f.direction === 'increases' ? '+ Increases Threat' : '- Pulls Benign'}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                {/* 4. Threat Intel Citations */}
+                {/* 3. Threat Intel Citations */}
                 {activeIncident.threat_intel && (
                   <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
                     <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest block">
-                      4. Verified Threat Intelligence & Knowledge Base Citations
+                      3. Verified Threat Intelligence & Knowledge Base Citations
                     </span>
                     {activeIncident.threat_intel.iot_threat_context && (
                       <p className="text-slate-300 text-xs leading-relaxed bg-slate-950 p-3 rounded-lg border border-slate-850 font-sans">
@@ -412,12 +381,12 @@ export const Incidents: React.FC<IncidentsProps> = ({
                   </div>
                 )}
 
-                {/* 5. Response Playbook & Firewall Rules */}
+                {/* 4. Response Playbook & Firewall Rules */}
                 {activeIncident.response && (
                   <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">
-                        5. Containment Procedures & Firewall Enforcement
+                        4. Containment Procedures & Firewall Enforcement
                       </span>
                       <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${activeIncident.response.approval_status === 'APPROVED' ? 'bg-emerald-950 text-emerald-300 border-emerald-700/60' : 'bg-amber-950 text-amber-300 border-amber-700/60'}`}>
                         {activeIncident.response.approval_status}

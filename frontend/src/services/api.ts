@@ -12,7 +12,9 @@ import {
   NetworkInterface,
   CaptureStatus,
   IncidentState,
-  CaptureProcessResult
+  CaptureProcessResult,
+  PlatformSettings,
+  PlatformSettingsResponse
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -295,5 +297,22 @@ export const apiService = {
     const res = await fetch(`${API_BASE_URL}/agents/incident/${incidentId}/report`);
     if (!res.ok) throw new Error("Failed to fetch markdown report");
     return res.text();
+  },
+
+  // ═══════════════════════════════════════════════════
+  // PLATFORM CONFIGURATION & SETTINGS
+  // ═══════════════════════════════════════════════════
+  async getPlatformSettings(): Promise<PlatformSettingsResponse> {
+    const res = await fetch(`${API_BASE_URL}/settings`);
+    return handleResponse<PlatformSettingsResponse>(res);
+  },
+
+  async updatePlatformSettings(settings: Partial<PlatformSettings>): Promise<PlatformSettingsResponse> {
+    const res = await fetch(`${API_BASE_URL}/settings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings),
+    });
+    return handleResponse<PlatformSettingsResponse>(res);
   }
 };

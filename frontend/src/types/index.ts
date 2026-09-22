@@ -329,3 +329,44 @@ export interface CaptureProcessResult {
   incidents: IncidentState[];
 }
 
+export interface PlatformSettings {
+  network_capture: {
+    default_interface: string;
+    capture_duration: number;
+    auto_stop: boolean;
+    pcap_storage_path: string;
+  };
+  flow_extraction: {
+    flow_timeout: number;
+    output_directory: string;
+    auto_process_pcap: boolean;
+  };
+  detection_engine: {
+    active_model_id: number;
+    confidence_threshold: number;
+    shap_top_k: number;
+  };
+  multi_agent_pipeline: {
+    execution_mode: 'coordinated' | 'sequential';
+    analyst_approval_required: boolean;
+  };
+  threat_intelligence: {
+    enable_mitre: boolean;
+    enable_nvd_cve: boolean;
+    enable_cisa: boolean;
+    rag_top_k: number;
+  };
+  data_storage: {
+    pcap_path: string;
+    flow_csv_path: string;
+    report_path: string;
+    retention_days: number;
+  };
+}
+
+export interface PlatformSettingsResponse {
+  settings: PlatformSettings;
+  health: Record<string, { name: string; status: string; details?: string }>;
+  agents_health: Record<string, { name: string; status: string; details?: string }>;
+}
+

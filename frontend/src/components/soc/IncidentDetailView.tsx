@@ -189,41 +189,8 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
 
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Card 1: SHAP Explainability Attribution */}
-          <div className="dark-panel p-6 border border-slate-800 bg-slate-950/70">
-            <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-800">
-              <Cpu className="text-cyan-400" size={18} />
-              <h4 className="font-mono text-xs uppercase tracking-wider text-slate-200 font-bold">
-                SHAP Feature Attribution Evidence
-              </h4>
-            </div>
-            <p className="text-xs text-slate-400 mb-4">
-              Direct game-theoretic SHAP tree attribution scores explaining which network flow characteristics drove the detection decision:
-            </p>
-
-            <div className="space-y-3">
-              {(incident.detection?.top_contributing_features || []).map((item, idx) => {
-                const isPositive = item.shap_value >= 0;
-                return (
-                  <div key={idx} className="p-3 rounded-lg bg-slate-900/80 border border-slate-800 font-mono text-xs">
-                    <div className="flex justify-between items-center mb-1.5">
-                      <span className="text-slate-200 font-semibold">{item.feature}</span>
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${isPositive ? 'bg-rose-950/60 text-rose-400 border border-rose-800/40' : 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/40'}`}>
-                        {item.shap_value > 0 ? `+${item.shap_value.toFixed(4)}` : item.shap_value.toFixed(4)} SHAP
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-[11px] text-slate-400">
-                      <span>Measured Value: <span className="text-cyan-300 font-bold">{item.value}</span></span>
-                      <span>Impact: <span className="text-slate-300 capitalize">{item.direction} risk</span></span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Card 2: Verified Threat Intelligence (RAG) */}
+        <div className="space-y-6">
+          {/* Verified Threat Intelligence (RAG) */}
           <div className="dark-panel p-6 border border-slate-800 bg-slate-950/70">
             <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-800">
               <ShieldCheck className="text-indigo-400" size={18} />

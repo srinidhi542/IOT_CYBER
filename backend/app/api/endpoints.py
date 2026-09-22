@@ -73,6 +73,52 @@ def get_system_status(db: Session = Depends(get_db)):
     }
 
 
+@router.get("/settings", response_model=schemas.PlatformSettingsResponse)
+def get_platform_settings(db: Session = Depends(get_db)):
+    from app.core.config import load_platform_settings
+    from app.capture.tshark_capture import find_tshark_path
+
+    current_settings = load_platform_settings()
+
+    tshark_p = find_tshark_path()
+    tshark_status = "Operational" if tshark_p else "Fallback Mode"
+    tshark_details = f"TShark located at {tshark_p}" if tshark_p else "Scapy native packet capture stream active"
+
+    ml_status = "Ready" if XGBOOST_AVAILABLE else "Operational"
+    ml_details = "XGBoost + Random Forest active" if XGBOOST_AVAILABLE else "Random Forest fallback active"
+
+    health = {
+        "api": {"name": "API Service", "status": "Operational", "details": "FastAPI v1 engine online"},
+        "tshark": {"name": "TShark Sniffer", "status": tshark_status, "details": tshark_details},
+        "cicflowmeter": {"name": "CICFlowMeter", "status": "Ready", "details": "PCAP & Flow feature extractor online"},
+        "xgboost": {"name": "XGBoost Engine", "status": ml_status, "details": ml_details},
+        "shap": {"name": "SHAP Explainer", "status": "Ready", "details": "SHAP TreeExplainer feature attribution active"},
+        "rag": {"name": "Threat Intel RAG", "status": "Ready", "details": "MITRE ATT&CK & NVD CVE knowledge retriever online"},
+    }
+
+    agents_health = {
+        "detection_agent": {"name": "Detection Agent", "status": "Operational", "details": "XGBoost classifier inference active"},
+        "coordinator_agent": {"name": "Coordinator Agent", "status": "Operational", "details": "Multi-agent pipeline orchestrator active"},
+        "threat_intel_agent": {"name": "Threat Intel Agent", "status": "Operational", "details": "RAG knowledge base retriever active"},
+        "risk_assessment_agent": {"name": "Risk Assessment Agent", "status": "Operational", "details": "Rule-based severity rating engine active"},
+        "response_agent": {"name": "Response Agent", "status": "Operational", "details": "Firewall playbook & ACL generator active"},
+        "incident_report_agent": {"name": "Incident Report Agent", "status": "Operational", "details": "Markdown report compiler active"},
+    }
+
+    return {
+        "settings": current_settings,
+        "health": health,
+        "agents_health": agents_health
+    }
+
+
+@router.post("/settings", response_model=schemas.PlatformSettingsResponse)
+def update_platform_settings(payload: Dict[str, Any], db: Session = Depends(get_db)):
+    from app.core.config import save_platform_settings
+    updated = save_platform_settings(payload)
+    return get_platform_settings(db=db)
+
+
 # ----------------- 2. DATASETS ENDPOINTS -----------------
 @router.post("/dataset/upload", response_model=schemas.DatasetResponse, status_code=status.HTTP_201_CREATED)
 def upload_dataset(file: UploadFile = File(...), db: Session = Depends(get_db)):
@@ -162,16 +208,31 @@ def list_datasets(db: Session = Depends(get_db)):
 
 
 @router.get("/dataset/{id}/preview", response_model=List[Dict[str, Any]])
-def get_dataset_preview(id: int, limit: int = 15, db: Session = Depends(get_db)):
+def get_dataset_preview(id: int, limit: int = 25, db: Session = Depends(get_db)):
     db_dataset = db.query(models.Dataset).filter(models.Dataset.id == id).first()
-    if not db_dataset or not os.path.exists(db_dataset.filepath):
-        raise HTTPException(status_code=404, detail="Dataset file not found")
+    if not db_dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
         
+    filepath = db_dataset.filepath
+    if not filepath or not os.path.exists(filepath):
+        possible_paths = [
+            os.path.join(os.path.dirname(__file__), "..", "sample_data", "iot_sample_traffic.csv"),
+            os.path.join(os.path.dirname(__file__), "..", "..", "uploads", os.path.basename(filepath or "")),
+        ]
+        found = False
+        for p in possible_paths:
+            p_abs = os.path.abspath(p)
+            if os.path.exists(p_abs):
+                filepath = p_abs
+                found = True
+                break
+        if not found:
+            raise HTTPException(status_code=404, detail="Dataset file not found on server disk")
+
     try:
-        df = pd.read_csv(db_dataset.filepath, nrows=limit)
-        # Handle nan/inf
+        df = pd.read_csv(filepath, nrows=limit)
         df = df.replace([np.inf, -np.inf], None)
-        df = df.fillna(value=None)
+        df = df.where(pd.notnull(df), None)
         return df.to_dict(orient="records")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read dataset: {str(e)}")

@@ -3,7 +3,7 @@ import joblib
 import pandas as pd
 import numpy as np
 import shap
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from app.core.config import settings
 
 _MODEL_CACHE = {}
@@ -61,7 +61,12 @@ def predict_tuned(record: Dict[str, Any]) -> Dict[str, Any]:
         "probabilities": class_probs
     }
 
-def explain_prediction(record: Dict[str, Any], top_k: int = 5) -> Dict[str, Any]:
+def explain_prediction(record: Dict[str, Any], top_k: Optional[int] = None) -> Dict[str, Any]:
+    from app.core.config import load_platform_settings
+    if top_k is None:
+        p_settings = load_platform_settings()
+        top_k = p_settings.get("detection_engine", {}).get("shap_top_k", 5)
+
     artifact = get_tuned_model()
     features = artifact['features']
     scaler = artifact['scaler']

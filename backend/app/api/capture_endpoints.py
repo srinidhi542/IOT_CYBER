@@ -48,10 +48,22 @@ def get_capture_status():
 def start_capture(payload: StartCaptureRequest):
     """Starts packet capture on the selected network adapter."""
     try:
+        from app.core.config import load_platform_settings
+        platform_cfg = load_platform_settings()
+        net_cfg = platform_cfg.get("network_capture", {})
+
+        selected_interface = payload.interface
+        if not selected_interface or selected_interface == "Default":
+            selected_interface = net_cfg.get("default_interface", "Default")
+
+        duration_limit = payload.duration_limit
+        if not duration_limit or duration_limit <= 0:
+            duration_limit = net_cfg.get("capture_duration", 0)
+
         session = capture_manager.start_capture(
-            interface=payload.interface,
+            interface=selected_interface,
             output_dir=settings.UPLOAD_DIR,
-            duration_limit=payload.duration_limit,
+            duration_limit=duration_limit,
             packet_limit=payload.packet_limit
         )
         return session.to_dict()

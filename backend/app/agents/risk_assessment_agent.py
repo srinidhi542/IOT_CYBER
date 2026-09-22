@@ -38,6 +38,10 @@ class RiskAssessmentAgent:
         detection: DetectionOutput,
         threat_intel: ThreatIntelOutput
     ) -> RiskAssessmentOutput:
+        from app.core.config import load_platform_settings
+        p_settings = load_platform_settings().get("detection_engine", {})
+        conf_threshold = p_settings.get("confidence_threshold", 0.70)
+
         attack = detection.attack_type.strip().lower()
         conf = max(0.0, min(1.0, detection.confidence))
         is_benign = attack in ["benign", "normal"]
@@ -63,9 +67,11 @@ class RiskAssessmentAgent:
                 base_score = v
                 break
 
-        # 2. Confidence scaling
-        # High confidence reinforces score; low confidence discounts
+        # 2. Confidence scaling using configured confidence threshold
         conf_factor = 0.7 + (conf * 0.3)
+        if conf < conf_threshold:
+            conf_factor *= (conf / conf_threshold)
+
         calculated_risk = base_score * conf_factor
 
         # 3. SHAP Evidence modifier

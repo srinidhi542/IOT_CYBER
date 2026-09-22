@@ -291,7 +291,7 @@ export const ModelPerformance: React.FC<ModelPerformanceProps> = ({
                       />
                       <Tooltip 
                         contentStyle={{ backgroundColor: '#090d16', border: '1px solid #1e293b', borderRadius: '8px', fontSize: '11px', fontFamily: 'monospace' }} 
-                        formatter={(val: any, name: string) => [`${val}%`, name]}
+                        formatter={(val: any, name: any) => [`${val}%`, String(name || '')]}
                       />
                       <Legend 
                         wrapperStyle={{ paddingTop: '10px', fontSize: '11px', fontFamily: 'monospace' }} 

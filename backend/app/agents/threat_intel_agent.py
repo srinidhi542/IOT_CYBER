@@ -58,6 +58,13 @@ class ThreatIntelAgent:
         return score
 
     def retrieve_intelligence(self, detection: DetectionOutput) -> ThreatIntelOutput:
+        from app.core.config import load_platform_settings
+        p_settings = load_platform_settings().get("threat_intelligence", {})
+        enable_mitre = p_settings.get("enable_mitre", True)
+        enable_cve = p_settings.get("enable_nvd_cve", True)
+        enable_cisa = p_settings.get("enable_cisa", True)
+        rag_top_k = p_settings.get("rag_top_k", 3)
+
         attack = detection.attack_type.strip()
         attack_lower = attack.lower()
         is_benign = attack_lower in ["benign", "normal"]
@@ -123,65 +130,71 @@ class ThreatIntelAgent:
                 query_terms.append("scan")
 
         # 1. Retrieve MITRE ATT&CK techniques
-        scored_mitre = []
-        for item in self.mitre_kb:
-            text_repr = f"{item['name']} {item['description']} {item['tactic']} {' '.join(item.get('keywords', []))}"
-            score = self._calculate_match_score(item.get("keywords", []), text_repr, query_terms)
-            if score > 0:
-                scored_mitre.append((score, item))
+        top_mitre_items = []
+        if enable_mitre:
+            scored_mitre = []
+            for item in self.mitre_kb:
+                text_repr = f"{item['name']} {item['description']} {item['tactic']} {' '.join(item.get('keywords', []))}"
+                score = self._calculate_match_score(item.get("keywords", []), text_repr, query_terms)
+                if score > 0:
+                    scored_mitre.append((score, item))
 
-        scored_mitre.sort(key=lambda x: x[0], reverse=True)
-        top_mitre_items = [
-            MitreAttackItem(
-                id=m["id"],
-                name=m["name"],
-                tactic=m["tactic"],
-                description=m["description"],
-                url=m["url"]
-            )
-            for _, m in scored_mitre[:2]
-        ]
+            scored_mitre.sort(key=lambda x: x[0], reverse=True)
+            top_mitre_items = [
+                MitreAttackItem(
+                    id=m["id"],
+                    name=m["name"],
+                    tactic=m["tactic"],
+                    description=m["description"],
+                    url=m["url"]
+                )
+                for _, m in scored_mitre[:rag_top_k]
+            ]
 
         # 2. Retrieve NVD CVE entries
-        scored_cve = []
-        for item in self.cve_kb:
-            text_repr = f"{item['cve_id']} {item['affected_systems']} {item['description']} {' '.join(item.get('keywords', []))}"
-            score = self._calculate_match_score(item.get("keywords", []), text_repr, query_terms)
-            if score > 0:
-                scored_cve.append((score, item))
+        top_cve_items = []
+        if enable_cve:
+            scored_cve = []
+            for item in self.cve_kb:
+                text_repr = f"{item['cve_id']} {item['affected_systems']} {item['description']} {' '.join(item.get('keywords', []))}"
+                score = self._calculate_match_score(item.get("keywords", []), text_repr, query_terms)
+                if score > 0:
+                    scored_cve.append((score, item))
 
-        scored_cve.sort(key=lambda x: x[0], reverse=True)
-        top_cve_items = [
-            CveItem(
-                cve_id=c["cve_id"],
-                affected_systems=c["affected_systems"],
-                cvss_score=c["cvss_score"],
-                severity=c["severity"],
-                description=c["description"],
-                url=c["url"]
-            )
-            for _, c in scored_cve[:2]
-        ]
+            scored_cve.sort(key=lambda x: x[0], reverse=True)
+            top_cve_items = [
+                CveItem(
+                    cve_id=c["cve_id"],
+                    affected_systems=c["affected_systems"],
+                    cvss_score=c["cvss_score"],
+                    severity=c["severity"],
+                    description=c["description"],
+                    url=c["url"]
+                )
+                for _, c in scored_cve[:rag_top_k]
+            ]
 
         # 3. Retrieve CISA Advisories
-        scored_cisa = []
-        for item in self.cisa_kb:
-            text_repr = f"{item['id']} {item['title']} {item['summary']} {' '.join(item.get('keywords', []))}"
-            score = self._calculate_match_score(item.get("keywords", []), text_repr, query_terms)
-            if score > 0:
-                scored_cisa.append((score, item))
+        top_cisa_items = []
+        if enable_cisa:
+            scored_cisa = []
+            for item in self.cisa_kb:
+                text_repr = f"{item['id']} {item['title']} {item['summary']} {' '.join(item.get('keywords', []))}"
+                score = self._calculate_match_score(item.get("keywords", []), text_repr, query_terms)
+                if score > 0:
+                    scored_cisa.append((score, item))
 
-        scored_cisa.sort(key=lambda x: x[0], reverse=True)
-        top_cisa_items = [
-            CisaAdvisoryItem(
-                id=ci["id"],
-                title=ci["title"],
-                release_date=ci["release_date"],
-                summary=ci["summary"],
-                url=ci["url"]
-            )
-            for _, ci in scored_cisa[:2]
-        ]
+            scored_cisa.sort(key=lambda x: x[0], reverse=True)
+            top_cisa_items = [
+                CisaAdvisoryItem(
+                    id=ci["id"],
+                    title=ci["title"],
+                    release_date=ci["release_date"],
+                    summary=ci["summary"],
+                    url=ci["url"]
+                )
+                for _, ci in scored_cisa[:rag_top_k]
+            ]
 
         # 4. Formulate verified threat context
         context_parts = []
