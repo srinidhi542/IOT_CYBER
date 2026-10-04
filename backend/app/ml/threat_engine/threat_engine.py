@@ -55,15 +55,15 @@ def evaluate_threat(
     risk_score = float(np.clip(risk_score, 0.0, 100.0))
     
     # 3. Detect Unknown / Zero-day Anomalies (Section 8)
-    # If Isolation Forest detects a strong anomaly, but the classifier predicts Benign with moderate/high confidence:
+    # If Isolation Forest detects a genuine severe anomaly (> 82), but the classifier predicts Benign:
     override_reason = None
     final_attack = predicted_attack
     
-    if anomaly_score > 75.0 and is_benign_pred:
+    if anomaly_score > 82.0 and is_benign_pred and confidence < 0.90:
         final_attack = "Unknown / Suspicious"
-        # Force risk to at least High (e.g. minimum 55) or update severity
+        # Elevate risk for zero-day investigation
         risk_score = max(risk_score, 55.0)
-        override_reason = "The traffic does not strongly match a known attack category but exhibits highly unusual characteristics."
+        override_reason = "The traffic does not match a known attack category but exhibits highly unusual network characteristics."
         
     # 4. Determine Combined Threat Severity (Section 4)
     # Low: Risk < 25

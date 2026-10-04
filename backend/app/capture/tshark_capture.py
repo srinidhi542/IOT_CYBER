@@ -242,7 +242,7 @@ class CaptureManager:
                     if matched and matched.get("id"):
                         iface_arg = str(matched["id"])
 
-                    cmd = [tshark_path, "-i", iface_arg, "-w", output_pcap]
+                    cmd = [tshark_path, "-i", iface_arg, "-F", "pcap", "-w", output_pcap]
                     if duration_limit and duration_limit > 0:
                         cmd.extend(["-a", f"duration:{duration_limit}"])
                     if packet_limit and packet_limit > 0:
@@ -391,19 +391,20 @@ class CaptureManager:
                 logger.info("Captured 0 packets via TShark. Generating fallback IoT packet stream into PCAP.")
                 try:
                     from scapy.utils import PcapWriter
-                    from scapy.layers.inet import IP, TCP, UDP, ICMP
+                    from scapy.layers.inet import IP, TCP, UDP
                     import random
 
                     writer = PcapWriter(session.output_pcap, append=True, sync=True)
-                    iot_hosts = ["192.168.1.15", "192.168.1.20", "192.168.1.50"]
-                    external_targets = ["104.24.12.5", "45.227.254.12", "8.8.8.8"]
+                    local_ip = "192.168.1.100"
+                    dns_server = "8.8.8.8"
+                    gateway = "192.168.1.1"
 
-                    for _ in range(random.randint(15, 30)):
-                        src_ip = random.choice(iot_hosts)
-                        dst_ip = random.choice(external_targets)
-                        payload = b"\x00" * random.randint(30, 250)
-                        pkt = IP(src=src_ip, dst=dst_ip, ttl=64) / TCP(sport=random.randint(30000, 60000), dport=80, flags="PA") / payload
-                        writer.write(pkt)
+                    # Generate realistic benign standard DNS and HTTPS traffic
+                    for _ in range(20):
+                        # Benign DNS query / response pair
+                        writer.write(IP(src=local_ip, dst=dns_server, ttl=64) / UDP(sport=random.randint(49152, 65535), dport=53) / b"\xaa\xaa\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\x07example\x03com\x00\x00\x01\x00\x01")
+                        # Benign HTTPS connection keep-alive
+                        writer.write(IP(src=local_ip, dst=gateway, ttl=64) / TCP(sport=random.randint(49152, 65535), dport=443, flags="A"))
                     writer.close()
 
                     session.file_size = os.path.getsize(session.output_pcap)

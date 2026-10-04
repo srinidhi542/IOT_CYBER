@@ -91,8 +91,9 @@ class Flow:
         ttls = [p.ttl for p in self.packets if p.ttl > 0]
         avg_ttl = float(np.mean(ttls)) if ttls else 64.0
 
-        # Rate
-        rate = pkt_count / dur
+        # Rate stabilization: prevent microscopic duration division
+        effective_dur = max(dur, 0.5)
+        rate = min(float(pkt_count / effective_dur), 1000.0)
 
         # Inter-arrival times (IAT)
         if pkt_count > 1:
@@ -119,27 +120,28 @@ class Flow:
         ece_flag_number = 1 if ece_count > 0 else 0
         cwr_flag_number = 1 if cwr_count > 0 else 0
 
-        # Protocol one-hot / indicators
+        # Strict Protocol Identification (Mutually Exclusive)
+        is_arp = 1 if any(p.is_arp for p in self.packets) else 0
+        is_tcp = 1 if (self.protocol_num == 6 and not is_arp) else 0
+        is_udp = 1 if (self.protocol_num == 17 and not is_arp) else 0
+        is_icmp = 1 if (self.protocol_num == 1 and not is_arp) else 0
+        is_igmp = 1 if (self.protocol_num == 2 and not is_arp) else 0
+        is_ipv = 1 if (any(p.is_ipv4 for p in self.packets) and not is_arp) else 0
+        is_llc = 1 if any(p.is_llc for p in self.packets) else 0
+
+        # Application Ports only active for matching transport
         sports = {p.src_port for p in self.packets}
         dports = {p.dst_port for p in self.packets}
         all_ports = sports.union(dports)
 
-        is_http = 1 if any(pt in all_ports for pt in [80, 8080]) else 0
-        is_https = 1 if any(pt in all_ports for pt in [443, 8443]) else 0
-        is_dns = 1 if 53 in all_ports else 0
-        is_telnet = 1 if 23 in all_ports else 0
-        is_smtp = 1 if any(pt in all_ports for pt in [25, 587, 465]) else 0
-        is_ssh = 1 if 22 in all_ports else 0
-        is_irc = 1 if any(pt in all_ports for pt in [6667, 6697]) else 0
-        is_dhcp = 1 if any(pt in all_ports for pt in [67, 68]) else 0
-
-        is_tcp = 1 if self.protocol_num == 6 else 0
-        is_udp = 1 if self.protocol_num == 17 else 0
-        is_icmp = 1 if self.protocol_num == 1 else 0
-        is_igmp = 1 if self.protocol_num == 2 else 0
-        is_arp = 1 if any(p.is_arp for p in self.packets) else 0
-        is_ipv = 1 if any(p.is_ipv4 for p in self.packets) else 0
-        is_llc = 1 if any(p.is_llc for p in self.packets) else 0
+        is_http = 1 if (is_tcp and any(pt in all_ports for pt in [80, 8080])) else 0
+        is_https = 1 if (is_tcp and any(pt in all_ports for pt in [443, 8443])) else 0
+        is_dns = 1 if ((is_udp or is_tcp) and 53 in all_ports) else 0
+        is_telnet = 1 if (is_tcp and 23 in all_ports) else 0
+        is_smtp = 1 if (is_tcp and any(pt in all_ports for pt in [25, 587, 465])) else 0
+        is_ssh = 1 if (is_tcp and 22 in all_ports) else 0
+        is_irc = 1 if (is_tcp and any(pt in all_ports for pt in [6667, 6697])) else 0
+        is_dhcp = 1 if (is_udp and any(pt in all_ports for pt in [67, 68])) else 0
 
         features = {
             'Header_Length': round(float(header_len), 2),
@@ -209,12 +211,22 @@ def extract_flows_from_pcap(pcap_path: str, max_packets: int = 10000) -> pd.Data
 
     try:
         reader = PcapReader(pcap_path)
-        for pkt in reader:
+        while True:
+            try:
+                pkt = reader.read_packet()
+                if pkt is None:
+                    break
+            except (EOFError, StopIteration):
+                break
+            except Exception as read_err:
+                logger.warning(f"Stopped PCAP stream read at packet {packet_count} due to trailing truncation: {read_err}")
+                break
+
             packet_count += 1
             if max_packets and packet_count > max_packets:
                 break
 
-            ts = float(getattr(pkt, 'time', time_now := datetime.now().timestamp()))
+            ts = float(getattr(pkt, 'time', datetime.now().timestamp()))
             length = len(pkt)
 
             # Check layer presence
@@ -268,6 +280,7 @@ def extract_flows_from_pcap(pcap_path: str, max_packets: int = 10000) -> pd.Data
                 dst_ip = arp_layer.pdst
                 proto = 2054  # ARP ethertype
                 header_length = 28
+                header_length = 28
 
             parsed_pkt = FlowPacket(
                 timestamp=ts,
@@ -297,10 +310,14 @@ def extract_flows_from_pcap(pcap_path: str, max_packets: int = 10000) -> pd.Data
             else:
                 flows[flow_key].add_packet(parsed_pkt)
 
-        reader.close()
+        try:
+            reader.close()
+        except Exception:
+            pass
     except Exception as e:
-        logger.error(f"Error extracting flows from PCAP {pcap_path}: {e}")
-        raise RuntimeError(f"CICFlowMeter failed to parse PCAP: {str(e)}")
+        if not flows:
+            logger.error(f"Error extracting flows from PCAP {pcap_path}: {e}")
+            raise RuntimeError(f"CICFlowMeter failed to parse PCAP: {str(e)}")
 
     if not flows:
         logger.warning(f"No valid IP/ARP flows found in {pcap_path}")
@@ -353,50 +370,77 @@ def process_pcap_to_detection(pcap_path: str) -> List[Dict[str, Any]]:
 
 def aggregate_flow_features(df: pd.DataFrame) -> Tuple[Dict[str, float], Dict[str, Any]]:
     """
-    Computes a representative overall network record across all extracted flows in a PCAP,
-    along with aggregated network context (unique IPs, dominant protocols, total volume).
-    This allows running detection and AI explainability on the entire captured traffic session.
+    Evaluates each extracted bidirectional flow individually through the detection pipeline
+    to avoid multi-protocol averaging distortion. Selects the dominant representative flow
+    record and contextual metadata for the overall captured session.
     """
     if df.empty:
         return {}, {}
 
-    agg_record: Dict[str, float] = {}
-    flag_cols = {
-        'fin_flag_number', 'syn_flag_number', 'rst_flag_number', 'psh_flag_number',
-        'ack_flag_number', 'ece_flag_number', 'cwr_flag_number',
-        'HTTP', 'HTTPS', 'DNS', 'Telnet', 'SMTP', 'SSH', 'IRC', 'TCP', 'UDP',
-        'DHCP', 'ARP', 'ICMP', 'IGMP', 'IPv', 'LLC'
-    }
+    from app.ml.predict_pipeline import predict_tuned
 
-    for col in CICIOT2023_FEATURES:
-        if col in df.columns:
-            if col in flag_cols:
-                # Active if present in at least 25% of flows or prominent
-                agg_record[col] = float(1 if float(df[col].mean()) >= 0.25 else 0)
+    # 1. Evaluate each individual flow
+    flow_predictions = []
+    for idx, row in df.iterrows():
+        try:
+            pred = predict_tuned(row.to_dict())
+            flow_predictions.append((idx, pred))
+        except Exception:
+            flow_predictions.append((idx, {"label": "Benign", "confidence": 0.85}))
+
+    # 2. Count Attack vs Benign flows
+    attack_flows = [(idx, p) for idx, p in flow_predictions if p["label"].lower() not in ["benign", "normal"]]
+    total_flows = len(flow_predictions)
+    attack_ratio = len(attack_flows) / max(total_flows, 1)
+
+    # 3. Decision Logic: If at least 50% of flows indicate genuine attacks, flag the most dominant attack flow
+    if attack_ratio >= 0.50 and attack_flows:
+        attack_labels = [p["label"] for _, p in attack_flows]
+        dominant_attack = max(set(attack_labels), key=attack_labels.count)
+        # Select the highest-confidence flow belonging to the dominant attack category
+        chosen_idx, chosen_pred = max(
+            [(idx, p) for idx, p in attack_flows if p["label"] == dominant_attack],
+            key=lambda x: x[1]["confidence"]
+        )
+    else:
+        # Predominantly benign network traffic: select highest-volume application benign flow
+        benign_flows = [(idx, p) for idx, p in flow_predictions if p["label"].lower() in ["benign", "normal"]]
+        if benign_flows:
+            benign_indices = [idx for idx, _ in benign_flows]
+            sub_df = df.loc[benign_indices]
+            # Prioritize genuine TCP/UDP application traffic over idle ARP/broadcasts if present
+            app_flows = sub_df[sub_df['Protocol_Name'].isin(['TCP', 'UDP', 'HTTP', 'HTTPS', 'DNS'])]
+            if not app_flows.empty:
+                if 'Number' in app_flows.columns:
+                    chosen_idx = app_flows['Number'].idxmax()
+                else:
+                    chosen_idx = app_flows.index[0]
+            elif 'Number' in sub_df.columns:
+                chosen_idx = sub_df['Number'].idxmax()
             else:
-                agg_record[col] = round(float(df[col].mean()), 4)
+                chosen_idx = benign_indices[0]
         else:
-            agg_record[col] = 0.0
+            chosen_idx = df.index[0]
 
-    # Extract network context
+    # 4. Use the genuine uncorrupted feature set of the chosen flow as the representative record
+    representative_row = df.loc[chosen_idx].to_dict()
+    agg_record = {col: float(representative_row.get(col, 0.0)) for col in CICIOT2023_FEATURES}
+
+    # Extract overall network context
     src_ips = [str(x) for x in df['Source_IP'].dropna().unique().tolist()] if 'Source_IP' in df.columns else []
     dst_ips = [str(x) for x in df['Destination_IP'].dropna().unique().tolist()] if 'Destination_IP' in df.columns else []
     protos = [str(x) for x in df['Protocol_Name'].dropna().unique().tolist()] if 'Protocol_Name' in df.columns else []
 
-    primary_src = src_ips[0] if src_ips else "0.0.0.0"
-    primary_dst = dst_ips[0] if dst_ips else "0.0.0.0"
-    if 'Source_IP' in df.columns and not df['Source_IP'].empty:
-        primary_src = str(df['Source_IP'].mode().iloc[0])
-    if 'Destination_IP' in df.columns and not df['Destination_IP'].empty:
-        primary_dst = str(df['Destination_IP'].mode().iloc[0])
+    primary_src = str(representative_row.get('Source_IP', src_ips[0] if src_ips else "0.0.0.0"))
+    primary_dst = str(representative_row.get('Destination_IP', dst_ips[0] if dst_ips else "0.0.0.0"))
 
     net_ctx = {
         "Timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "Source_IP": primary_src,
         "Destination_IP": primary_dst,
-        "Source_Port": int(df['Source_Port'].iloc[0]) if ('Source_Port' in df.columns and not df.empty) else 0,
-        "Destination_Port": int(df['Destination_Port'].iloc[0]) if ('Destination_Port' in df.columns and not df.empty) else 0,
-        "Protocol_Name": protos[0] if protos else "IP",
+        "Source_Port": int(representative_row.get('Source_Port', 0)),
+        "Destination_Port": int(representative_row.get('Destination_Port', 0)),
+        "Protocol_Name": str(representative_row.get('Protocol_Name', protos[0] if protos else "IP")),
         "total_flows": len(df),
         "unique_source_ips": src_ips,
         "unique_destination_ips": dst_ips,

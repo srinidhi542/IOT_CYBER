@@ -218,12 +218,18 @@ def run_threat_detection(
     for col in X.columns:
         X[col] = X[col].fillna(X[col].median() if not pd.isna(X[col].median()) else 0.0)
         
+    scaler = artifact.get("scaler", None)
+    if scaler is not None:
+        X_infer = pd.DataFrame(scaler.transform(X), columns=features)
+    else:
+        X_infer = X
+
     # Inference
-    preds = model.predict(X)
+    preds = model.predict(X_infer)
     
     confidences = []
     if hasattr(model, "predict_proba"):
-        probs = model.predict_proba(X)
+        probs = model.predict_proba(X_infer)
         confidences = [float(c) for c in np.max(probs, axis=1)]
     else:
         confidences = [1.0] * len(X)
