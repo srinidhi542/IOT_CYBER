@@ -13,7 +13,8 @@ import {
   ShieldAlert, 
   Terminal,
   Clock,
-  HardDrive
+  HardDrive,
+  RotateCw
 } from 'lucide-react';
 
 interface PacketCapturePanelProps {
@@ -36,8 +37,10 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
   const [captureStatus, setCaptureStatus] = useState<CaptureStatus | null>(null);
   const [capturing, setCapturing] = useState<boolean>(false);
   const [durationTimer, setDurationTimer] = useState<number>(0);
+  const [captureDurationLimit, setCaptureDurationLimit] = useState<number>(10);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedPcapPath, setUploadedPcapPath] = useState<string | null>(null);
+  const [loadingInterfaces, setLoadingInterfaces] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const timerRef = useRef<any>(null);
@@ -49,6 +52,7 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
   }, []);
 
   const loadInterfaces = async () => {
+    setLoadingInterfaces(true);
     try {
       const list = await apiService.getCaptureInterfaces();
       setInterfaces(list);
@@ -69,12 +73,20 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
         if (match) {
           setSelectedIface(match.name);
         } else {
-          const best = list.find(i => i.is_up && !i.is_loopback) || list[0];
+          // Prioritize active Wi-Fi or physical Ethernet over virtual adapters like "Local Area Connection* 2"
+          const wifiOrEthernet = list.find(i => i.is_up && !i.is_loopback && (i.name.toLowerCase().includes('wi-fi') || i.name.toLowerCase().includes('wifi') || i.name.toLowerCase() === 'ethernet'));
+          const best = wifiOrEthernet || list.find(i => i.is_up && !i.is_loopback && !i.name.includes('*')) || list.find(i => i.is_up && !i.is_loopback) || list[0];
           setSelectedIface(best.name);
         }
       }
     } catch (e: any) {
       console.warn("Failed to enumerate network interfaces:", e);
+      // Auto-retry after 3s if backend was still starting up
+      setTimeout(() => {
+        loadInterfaces();
+      }, 3000);
+    } finally {
+      setLoadingInterfaces(false);
     }
   };
 
@@ -91,11 +103,18 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
     }
   };
 
-  // Timer while capturing
+  // Timer while capturing with auto-stop support
   useEffect(() => {
     if (capturing) {
       timerRef.current = setInterval(() => {
-        setDurationTimer(prev => prev + 1);
+        setDurationTimer(prev => {
+          const next = prev + 1;
+          if (captureDurationLimit > 0 && next >= captureDurationLimit) {
+            handleStopAndAnalyze();
+            return captureDurationLimit;
+          }
+          return next;
+        });
       }, 1000);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -103,19 +122,24 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [capturing]);
+  }, [capturing, captureDurationLimit]);
 
   const handleStartCapture = async () => {
     try {
       setErrorMsg(null);
       setSuccessMsg(null);
       setDurationTimer(0);
-      const res = await apiService.startCapture(selectedIface || "Default", 0, 0);
+      const res = await apiService.startCapture(selectedIface || "Default", captureDurationLimit, 0);
       setCapturing(true);
       setCaptureStatus(res as any);
-      setSuccessMsg(`Capture initiated on adapter: ${selectedIface || "Default"}`);
+      setSuccessMsg(`Capture initiated on adapter: ${selectedIface || "Default"}${captureDurationLimit > 0 ? ` (Auto-stop in ${captureDurationLimit}s)` : ''}`);
     } catch (err: any) {
-      setErrorMsg(err.message || "Failed to start capture");
+      const msg = err.message || "";
+      if (msg.includes("ECONNREFUSED") || msg.includes("Failed to fetch") || msg.includes("proxy error")) {
+        setErrorMsg("Backend server is starting up or unavailable. Please wait a few seconds and try again.");
+      } else {
+        setErrorMsg(msg || "Failed to start capture");
+      }
     }
   };
 
@@ -142,6 +166,8 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
         if (procResult.incidents && procResult.incidents.length > 0) {
           onIncidentsGenerated(procResult.incidents);
           setSuccessMsg(`Extracted ${procResult.flows_extracted} flows (${procResult.packets_analyzed || stopRes.packet_count || 0} packets). Classified as ${procResult.overall_prediction?.label || 'Analyzed'}.`);
+        } else if (procResult.flows_extracted === 0) {
+          setSuccessMsg(`Captured ${stopRes.packet_count || 0} packets (0 active flows on this interface). No threat activity detected (Benign / Idle).`);
         } else {
           setSuccessMsg(`Captured ${stopRes.packet_count || procResult.packets_analyzed || 0} packets (${procResult.flows_extracted} flows). Classified as ${procResult.overall_prediction?.label || 'Benign'}.`);
         }
@@ -247,21 +273,36 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
         {/* Col 1: Adapter Selector & Details */}
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-mono text-slate-400 mb-1.5 flex items-center gap-2">
-              <Wifi size={13} className="text-cyan-400" />
-              <span>Target Network Interface:</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-mono text-slate-400 flex items-center gap-2">
+                <Wifi size={13} className="text-cyan-400" />
+                <span>Target Network Interface:</span>
+              </label>
+              <button
+                type="button"
+                onClick={loadInterfaces}
+                disabled={capturing || isProcessing || loadingInterfaces}
+                title="Refresh network interfaces"
+                className="text-slate-400 hover:text-cyan-400 disabled:opacity-40 transition-colors p-0.5 rounded"
+              >
+                <RotateCw size={12} className={loadingInterfaces ? "animate-spin text-cyan-400" : ""} />
+              </button>
+            </div>
             <select
               value={selectedIface}
               onChange={e => setSelectedIface(e.target.value)}
-              disabled={capturing || isProcessing}
+              disabled={capturing || isProcessing || loadingInterfaces}
               className="w-full bg-slate-900/90 border border-slate-700/80 rounded-lg p-2.5 text-xs font-mono text-slate-200 focus:border-cyan-500 focus:outline-none transition-colors"
             >
-              {interfaces.map(iface => (
-                <option key={iface.name} value={iface.name}>
-                  {iface.name} {iface.ip_address ? `(${iface.ip_address})` : ''}
-                </option>
-              ))}
+              {interfaces.length === 0 ? (
+                <option value="">{loadingInterfaces ? "Discovering interfaces..." : "No interfaces found (click refresh)"}</option>
+              ) : (
+                interfaces.map(iface => (
+                  <option key={iface.name} value={iface.name}>
+                    {iface.name} {iface.ip_address ? `(${iface.ip_address})` : ''}
+                  </option>
+                ))
+              )}
             </select>
           </div>
 
@@ -287,10 +328,24 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
         {/* Col 2: Live Capture Control & Telemetry */}
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-mono text-slate-400 mb-1.5 flex items-center gap-2">
-              <Terminal size={13} className="text-cyan-400" />
-              <span>Live Sniffer Controls:</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-mono text-slate-400 flex items-center gap-2">
+                <Terminal size={13} className="text-cyan-400" />
+                <span>Live Sniffer Controls:</span>
+              </label>
+              <select
+                value={captureDurationLimit}
+                onChange={e => setCaptureDurationLimit(Number(e.target.value))}
+                disabled={capturing || isProcessing}
+                className="bg-slate-900 border border-slate-700/80 text-cyan-300 text-[10px] font-mono rounded px-2 py-0.5 focus:outline-none focus:border-cyan-500 cursor-pointer"
+                title="Select capture duration limit"
+              >
+                <option value={10}>Auto: 10s</option>
+                <option value={20}>Auto: 20s</option>
+                <option value={30}>Auto: 30s</option>
+                <option value={0}>Manual Stop</option>
+              </select>
+            </div>
             <div className="flex gap-2">
               {!capturing ? (
                 <button
@@ -312,6 +367,19 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
                 </button>
               )}
             </div>
+
+            {/* Real-time status / guidance tip */}
+            {capturing && (
+              <p className="text-[11px] font-mono text-amber-300/90 mt-1.5 flex items-center gap-1.5 animate-pulse">
+                <span>● Sniffing packets live. {captureDurationLimit > 0 ? `Auto-finishing in ${Math.max(0, captureDurationLimit - durationTimer)}s or click STOP now.` : 'Click STOP & RUN SOC PIPELINE to analyze.'}</span>
+              </p>
+            )}
+            {isProcessing && (
+              <p className="text-[11px] font-mono text-cyan-400 mt-1.5 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                <span>Extracting flows & running 6-Agent AI SOC Pipeline...</span>
+              </p>
+            )}
           </div>
 
           {/* Live Telemetry Meters */}

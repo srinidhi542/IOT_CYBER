@@ -60,9 +60,12 @@ export const ModelPerformance: React.FC<ModelPerformanceProps> = ({
     return value > 0 ? `bg-rose-500/${intensity} text-rose-200` : 'bg-slate-900/40 text-slate-600';
   };
 
-  const getMaxMatrixValue = (matrix: number[][] | null | undefined) => {
-    if (!matrix || matrix.length === 0) return 0;
-    return Math.max(...matrix.map(row => Math.max(...row)));
+  const isMatrix2D = (cm: any): cm is number[][] =>
+    Array.isArray(cm) && cm.length > 0 && Array.isArray(cm[0]);
+
+  const getMaxMatrixValue = (matrix: any) => {
+    if (!isMatrix2D(matrix)) return 0;
+    return Math.max(...matrix.map((row: number[]) => Math.max(...row)));
   };
   const maxMatrixVal = getMaxMatrixValue(selectedModel?.confusion_matrix);
 
@@ -311,14 +314,14 @@ export const ModelPerformance: React.FC<ModelPerformanceProps> = ({
                   <h3 className="text-xs font-semibold text-slate-300 font-mono uppercase tracking-wider mb-2">Confusion Matrix Heatmap</h3>
                   <p className="text-[11px] text-slate-400 font-light mb-4">Actual Categories (rows) vs Predicted Categories (columns).</p>
                 </div>
-                {selectedModel.confusion_matrix && selectedModel.confusion_matrix.length > 0 ? (
+                {isMatrix2D(selectedModel.confusion_matrix) ? (
                   <div className="overflow-x-auto py-2">
                     <div className="min-w-[400px] grid grid-cols-12 gap-1 text-center font-mono text-[10px]">
                       <div className="col-span-3 py-2 text-right pr-2 text-slate-500 font-semibold uppercase">Actual / Pred</div>
                       {selectedModel.classes && selectedModel.classes.map((cls, idx) => (
                         <div key={idx} className="col-span-1 py-2 text-slate-400 font-semibold truncate" title={cls}>{cls.substring(0, 5)}</div>
                       ))}
-                      {selectedModel.confusion_matrix.map((row, rIdx) => (
+                      {(selectedModel.confusion_matrix as number[][]).map((row, rIdx) => (
                         <React.Fragment key={rIdx}>
                           <div className="col-span-3 py-2.5 text-right pr-2 font-semibold text-slate-300 truncate" title={selectedModel.classes?.[rIdx]}>{selectedModel.classes?.[rIdx]}</div>
                           {row.map((val, cIdx) => (

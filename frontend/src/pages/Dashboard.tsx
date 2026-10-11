@@ -142,6 +142,16 @@ export const Dashboard: React.FC<DashboardProps> = ({
     setCaptureResult(res);
     if (res.overall_explainability) {
       setLatestPrediction(res.overall_explainability);
+    } else if (res.flows_extracted === 0) {
+      // 0 flows captured: cleanly set benign state rather than retaining old stale predictions
+      setLatestPrediction({
+        label: 'Benign',
+        confidence: 1.0,
+        probabilities: { 'Benign': 1.0 },
+        top_contributing_features: [],
+        shap_values: {}
+      });
+      setActiveIncident(null);
     }
     if (res.overall_incident) {
       setActiveIncident(res.overall_incident);

@@ -33,7 +33,7 @@ export interface MLModel {
   recall_score: number | null;
   f1_score: number | null;
   metrics_json: Record<string, any> | null;
-  confusion_matrix: number[][] | null;
+  confusion_matrix: number[][] | Record<string, any> | null;
   feature_importance: Record<string, number> | null;
   created_at: string;
 }

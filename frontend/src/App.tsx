@@ -44,10 +44,42 @@ function App() {
     }
   });
 
-  const [activeIncident, setActiveIncident] = useState<IncidentState | null>(null);
-  const [incidentsList, setIncidentsList] = useState<IncidentState[]>([]);
+  const [activeIncident, setActiveIncident] = useState<IncidentState | null>(() => {
+    try {
+      const saved = sessionStorage.getItem('iotshield_active_incident');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [incidentsList, setIncidentsList] = useState<IncidentState[]>(() => {
+    try {
+      const saved = sessionStorage.getItem('iotshield_incidents_list');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
 
   // Sync state to sessionStorage
+  useEffect(() => {
+    try {
+      if (activeIncident) {
+        sessionStorage.setItem('iotshield_active_incident', JSON.stringify(activeIncident));
+      } else {
+        sessionStorage.removeItem('iotshield_active_incident');
+      }
+    } catch (e) {}
+  }, [activeIncident]);
+
+  useEffect(() => {
+    try {
+      if (incidentsList && incidentsList.length > 0) {
+        sessionStorage.setItem('iotshield_incidents_list', JSON.stringify(incidentsList));
+      }
+    } catch (e) {}
+  }, [incidentsList]);
+
   useEffect(() => {
     try {
       if (captureResult) {
@@ -152,14 +184,35 @@ function App() {
       const list = await apiService.getSocIncidents();
       if (list && list.length > 0) {
         setIncidentsList(list);
-        if (!activeIncident) {
-          setActiveIncident(list[0]);
+        setActiveIncident(prev => {
+          if (!prev) return list[0];
+          // If active incident exists in fresh list, keep it updated
+          const found = list.find(i => i.incident_id === prev.incident_id);
+          return found || prev;
+        });
+        // Sync latest prediction for Explainability page if not yet populated
+        if (!latestPrediction && list[0]?.detection) {
+          const d = list[0].detection;
+          setLatestPrediction({
+            label: d.attack_type,
+            confidence: d.confidence,
+            probabilities: d.probabilities || {},
+            top_contributing_features: d.top_contributing_features || [],
+            shap_values: d.shap_values || {}
+          });
         }
       }
     } catch (err) {
       // silent
     }
   };
+
+  // Re-sync incidents and detections when switching between tabs
+  useEffect(() => {
+    if (activePage === 'incidents' || activePage === 'dashboard' || activePage === 'explainability') {
+      loadIncidents();
+    }
+  }, [activePage]);
 
   // Sync selection defaults
   useEffect(() => {

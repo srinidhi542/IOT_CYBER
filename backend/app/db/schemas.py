@@ -52,7 +52,7 @@ class MLModelResponse(BaseModel):
     recall_score: Optional[float] = None
     f1_score: Optional[float] = None
     metrics_json: Optional[Dict[str, Any]] = None
-    confusion_matrix: Optional[List[List[int]]] = None
+    confusion_matrix: Optional[Any] = None
     feature_importance: Optional[Dict[str, float]] = None
     created_at: datetime
 

@@ -249,6 +249,7 @@ def get_vector_store() -> VectorStore:
     global _vector_store_instance
     if _vector_store_instance is None:
         from app.core.config import settings, load_platform_settings
+        rag_cfg = load_platform_settings().get("rag", {})
         raw_persist = rag_cfg.get("persist_directory")
         if raw_persist:
             if os.path.isabs(raw_persist):

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { IncidentState } from '../types';
 import { AgentPipelineWorkflow } from '../components/soc/AgentPipelineWorkflow';
 import { IncidentDetailView } from '../components/soc/IncidentDetailView';
@@ -44,6 +44,12 @@ export const Incidents: React.FC<IncidentsProps> = ({
   const [viewMode, setViewMode] = useState<'triage' | 'report'>('triage');
   const [copiedMd, setCopiedMd] = useState<boolean>(false);
   const [reportSubTab, setReportSubTab] = useState<'formatted' | 'raw'>('formatted');
+
+  useEffect(() => {
+    if (refreshIncidents) {
+      refreshIncidents();
+    }
+  }, []);
 
   const downloadReport = () => {
     if (!activeIncident?.report?.markdown_content) return;

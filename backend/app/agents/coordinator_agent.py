@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import logging
 import traceback
@@ -111,6 +112,70 @@ class CoordinatorAgent:
     def __init__(self, max_history: int = 100):
         self.incidents: OrderedDict[str, IncidentState] = OrderedDict()
         self.max_history = max_history
+        self._load_persisted_incidents()
+
+    def _load_persisted_incidents(self):
+        """Loads previously saved incidents from storage/reports/*.json so incidents persist across backend reloads."""
+        try:
+            from app.core.config import settings
+            reports_dir = settings.STORAGE_REPORTS_DIR
+            if not os.path.exists(reports_dir):
+                return
+            
+            json_files = [f for f in os.listdir(reports_dir) if f.startswith("REP-") and f.endswith(".json")]
+            # Sort by file modification time ascending so that the newest file is inserted LAST into OrderedDict.
+            # Then list(reversed(self.incidents.values())) will return the NEWEST incident first!
+            json_files.sort(key=lambda f: os.path.getmtime(os.path.join(reports_dir, f)))
+            
+            for fname in json_files[:self.max_history]:
+                fpath = os.path.join(reports_dir, fname)
+                try:
+                    with open(fpath, "r", encoding="utf-8") as f:
+                        data = json.load(f)
+                    
+                    inc_id = data.get("incident_id")
+                    if not inc_id or inc_id in self.incidents:
+                        continue
+                    
+                    # Construct IncidentState from stored report json
+                    det_data = data.get("detection")
+                    ti_data = data.get("threat_intel")
+                    risk_data = data.get("risk")
+                    resp_data = data.get("response")
+                    rep_data = data.get("report")
+                    tl_data = data.get("timeline") or []
+                    
+                    det_obj = DetectionOutput(**det_data) if det_data else None
+                    ti_obj = ThreatIntelOutput(**ti_data) if ti_data else None
+                    risk_obj = RiskAssessmentOutput(**risk_data) if risk_data else None
+                    resp_obj = ResponseOutput(**resp_data) if resp_data else None
+                    rep_obj = IncidentReportOutput(**rep_data) if rep_data else None
+                    tl_objs = [TimelineEvent(**t) for t in tl_data]
+                    
+                    created_at_val = rep_data.get("generated_at") if rep_data else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    
+                    incident_state = IncidentState(
+                        incident_id=inc_id,
+                        created_at=str(created_at_val),
+                        status="CONTAINED" if resp_obj and resp_obj.approval_status == "APPROVED" else "PENDING_APPROVAL",
+                        overall_status="COMPLETE",
+                        detection=det_obj,
+                        threat_intel=ti_obj,
+                        risk_assessment=risk_obj,
+                        response=resp_obj,
+                        report=rep_obj,
+                        timeline=tl_objs,
+                        agent_status={"detection": "COMPLETED", "threat_intel": "COMPLETED", "risk_assessment": "COMPLETED", "response": "COMPLETED", "incident_report": "COMPLETED"},
+                        correlation_note=None
+                    )
+                    self.incidents[inc_id] = incident_state
+                except Exception as e:
+                    logger.debug(f"Could not load stored incident from {fname}: {e}")
+            
+            logger.info(f"Loaded {len(self.incidents)} persisted incidents from disk.")
+        except Exception as err:
+            logger.warning(f"Error loading persisted incidents: {err}")
+
 
     def run_pipeline(
         self,
