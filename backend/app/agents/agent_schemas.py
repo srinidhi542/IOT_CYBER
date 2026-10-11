@@ -19,6 +19,12 @@ class ShapEvidence(BaseModel):
     direction: str  # "increases" or "decreases"
 
 
+class AgentError(BaseModel):
+    agent: str
+    error: str
+    timestamp: str
+
+
 class DetectionOutput(BaseModel):
     attack_type: str
     confidence: float
@@ -27,6 +33,10 @@ class DetectionOutput(BaseModel):
     top_contributing_features: List[ShapEvidence] = Field(default_factory=list)
     shap_values: Dict[str, float] = Field(default_factory=dict)
     raw_record: Dict[str, Any] = Field(default_factory=dict)
+    analyst_explanation: Optional[str] = None
+    generated_by: Optional[str] = "rule_based"  # "llm" or "rule_based_fallback"
+    llm_model: Optional[str] = None
+    latency_ms: Optional[float] = None
 
 
 class MitreAttackItem(BaseModel):
@@ -35,6 +45,7 @@ class MitreAttackItem(BaseModel):
     tactic: str
     description: str
     url: str
+    similarity_score: Optional[float] = None
 
 
 class CveItem(BaseModel):
@@ -44,6 +55,7 @@ class CveItem(BaseModel):
     severity: str
     description: str
     url: str
+    similarity_score: Optional[float] = None
 
 
 class CisaAdvisoryItem(BaseModel):
@@ -52,6 +64,7 @@ class CisaAdvisoryItem(BaseModel):
     release_date: str
     summary: str
     url: str
+    similarity_score: Optional[float] = None
 
 
 class ThreatIntelOutput(BaseModel):
@@ -61,6 +74,9 @@ class ThreatIntelOutput(BaseModel):
     iot_threat_context: str
     retrieval_confidence: float
     sources: List[str] = Field(default_factory=list)
+    generated_by: Optional[str] = "rule_based"  # "llm" or "rule_based_fallback"
+    llm_model: Optional[str] = None
+    latency_ms: Optional[float] = None
 
 
 class RiskAssessmentOutput(BaseModel):
@@ -70,6 +86,9 @@ class RiskAssessmentOutput(BaseModel):
     impact: str
     likelihood: str
     reasoning: List[str] = Field(default_factory=list)
+    generated_by: Optional[str] = "rule_based"  # "llm" or "rule_based_fallback"
+    llm_model: Optional[str] = None
+    latency_ms: Optional[float] = None
 
 
 class FirewallCommand(BaseModel):
@@ -88,6 +107,9 @@ class ResponseOutput(BaseModel):
     reviewed_by: Optional[str] = None
     review_timestamp: Optional[str] = None
     review_notes: Optional[str] = None
+    generated_by: Optional[str] = "rule_based"  # "llm" or "rule_based_fallback"
+    llm_model: Optional[str] = None
+    latency_ms: Optional[float] = None
 
 
 class TimelineEvent(BaseModel):
@@ -95,7 +117,7 @@ class TimelineEvent(BaseModel):
     agent: str
     action: str
     details: str
-    status: str = "COMPLETED"
+    status: str = "COMPLETED"  # "COMPLETED", "DEGRADED", "FAILED", "SKIPPED"
 
 
 class IncidentReportOutput(BaseModel):
@@ -109,15 +131,22 @@ class IncidentReportOutput(BaseModel):
     risk_score: float
     timeline: List[TimelineEvent] = Field(default_factory=list)
     markdown_content: str
+    generated_by: Optional[str] = "rule_based"  # "llm" or "rule_based_fallback"
+    llm_model: Optional[str] = None
+    latency_ms: Optional[float] = None
 
 
 class IncidentState(BaseModel):
     incident_id: str
     created_at: str
-    status: str  # "TRIAGED", "CONTAINED", "PENDING_APPROVAL", "CLOSED"
-    detection: DetectionOutput
+    status: str = "PENDING_APPROVAL"  # "TRIAGED", "CONTAINED", "PENDING_APPROVAL", "CLOSED", "FAILED"
+    overall_status: str = "COMPLETE"   # "COMPLETE", "PARTIAL", "FAILED"
+    detection: Optional[DetectionOutput] = None
     threat_intel: Optional[ThreatIntelOutput] = None
     risk_assessment: Optional[RiskAssessmentOutput] = None
     response: Optional[ResponseOutput] = None
     report: Optional[IncidentReportOutput] = None
     timeline: List[TimelineEvent] = Field(default_factory=list)
+    agent_status: Dict[str, str] = Field(default_factory=dict)
+    errors: List[AgentError] = Field(default_factory=list)
+    correlation_note: Optional[str] = None

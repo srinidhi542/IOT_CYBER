@@ -350,6 +350,55 @@ export const apiService = {
 
   getStoredReportDownloadUrl(reportId: string, format: 'md' | 'json' = 'md'): string {
     return `${API_BASE_URL}/reports/storage/${encodeURIComponent(reportId)}/download?format=${format}`;
+  },
+
+  // ═══════════════════════════════════════════════════
+  // RAG & LLM ENGINE ENDPOINTS
+  // ═══════════════════════════════════════════════════
+  async getRAGStatus(): Promise<{ status: string; stats: Record<string, any> }> {
+    const res = await fetch(`${API_BASE_URL}/rag/status`);
+    return handleResponse<{ status: string; stats: Record<string, any> }>(res);
+  },
+
+  async refreshRAGIndex(refreshOnline = false): Promise<{ status: string; results: Record<string, any> }> {
+    const res = await fetch(`${API_BASE_URL}/rag/refresh?refresh_online=${refreshOnline}`, {
+      method: 'POST'
+    });
+    return handleResponse<{ status: string; results: Record<string, any> }>(res);
+  },
+
+  async searchRAG(query: string, top_k = 5, doc_type?: string): Promise<{ query: string; count: number; results: any[] }> {
+    const res = await fetch(`${API_BASE_URL}/rag/search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, top_k, doc_type })
+    });
+    return handleResponse<{ query: string; count: number; results: any[] }>(res);
+  },
+
+  async getLLMStatus(): Promise<{
+    enabled: boolean;
+    provider: string;
+    model: string;
+    temperature: number;
+    is_available: boolean;
+    cache_size: number;
+    recent_calls_count: number;
+    recent_calls: any[];
+    agent_toggles: Record<string, boolean>;
+  }> {
+    const res = await fetch(`${API_BASE_URL}/llm/status`);
+    return handleResponse<{
+      enabled: boolean;
+      provider: string;
+      model: string;
+      temperature: number;
+      is_available: boolean;
+      cache_size: number;
+      recent_calls_count: number;
+      recent_calls: any[];
+      agent_toggles: Record<string, boolean>;
+    }>(res);
   }
 };
 

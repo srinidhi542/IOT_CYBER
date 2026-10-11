@@ -208,6 +208,7 @@ export interface MitreAttackItem {
   tactic: string;
   description: string;
   url: string;
+  similarity_score?: number;
 }
 
 export interface CveItem {
@@ -217,6 +218,7 @@ export interface CveItem {
   severity: string;
   description: string;
   url: string;
+  similarity_score?: number;
 }
 
 export interface CisaAdvisoryItem {
@@ -225,6 +227,7 @@ export interface CisaAdvisoryItem {
   release_date: string;
   summary: string;
   url: string;
+  similarity_score?: number;
 }
 
 export interface ThreatIntelData {
@@ -234,6 +237,9 @@ export interface ThreatIntelData {
   iot_threat_context: string;
   retrieval_confidence: number;
   sources: string[];
+  generated_by?: string;
+  llm_model?: string;
+  latency_ms?: number;
 }
 
 export interface RiskAssessmentData {
@@ -243,6 +249,9 @@ export interface RiskAssessmentData {
   impact: string;
   likelihood: string;
   reasoning: string[];
+  generated_by?: string;
+  llm_model?: string;
+  latency_ms?: number;
 }
 
 export interface FirewallCommand {
@@ -261,6 +270,9 @@ export interface ResponsePlanData {
   reviewed_by?: string | null;
   review_timestamp?: string | null;
   review_notes?: string | null;
+  generated_by?: string;
+  llm_model?: string;
+  latency_ms?: number;
 }
 
 export interface TimelineEvent {
@@ -282,12 +294,22 @@ export interface IncidentReportData {
   risk_score: number;
   timeline: TimelineEvent[];
   markdown_content: string;
+  generated_by?: string;
+  llm_model?: string;
+  latency_ms?: number;
+}
+
+export interface AgentError {
+  agent: string;
+  error: string;
+  timestamp: string;
 }
 
 export interface IncidentState {
   incident_id: string;
   created_at: string;
   status: string;
+  overall_status?: 'COMPLETE' | 'PARTIAL' | 'FAILED' | string;
   detection: {
     attack_type: string;
     confidence: number;
@@ -296,12 +318,19 @@ export interface IncidentState {
     top_contributing_features: ShapContribution[];
     shap_values: Record<string, number>;
     raw_record: Record<string, any>;
+    analyst_explanation?: string;
+    generated_by?: string;
+    llm_model?: string;
+    latency_ms?: number;
   };
   threat_intel?: ThreatIntelData | null;
   risk_assessment?: RiskAssessmentData | null;
   response?: ResponsePlanData | null;
   report?: IncidentReportData | null;
   timeline: TimelineEvent[];
+  agent_status?: Record<string, string>;
+  errors?: AgentError[];
+  correlation_note?: string;
 }
 
 export interface CaptureProcessResult {
@@ -362,6 +391,23 @@ export interface PlatformSettings {
     flow_csv_path: string;
     report_path: string;
     retention_days: number;
+  };
+  llm?: {
+    enabled: boolean;
+    provider: string;
+    model: string;
+    temperature: number;
+    agent_toggles?: Record<string, boolean>;
+  };
+  rag?: {
+    enabled: boolean;
+    vector_store: string;
+    embedding_model: string;
+    hybrid_alpha: number;
+    min_relevance_score: number;
+    auto_refresh_hours: number;
+    persist_directory?: string;
+    cache_directory?: string;
   };
 }
 

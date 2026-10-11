@@ -6,7 +6,7 @@ from typing import Dict, Any
 class Settings(BaseSettings):
     PROJECT_NAME: str = "IOTShield"
     API_V1_STR: str = "/api"
-    
+
     # Paths
     BASE_DIR: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     UPLOAD_DIR: str = os.path.join(BASE_DIR, "uploads")
@@ -19,6 +19,18 @@ class Settings(BaseSettings):
     # MongoDB Persistent Storage
     MONGODB_URI: str = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
     MONGODB_DB_NAME: str = os.environ.get("MONGODB_DB_NAME", "iot_sentinel")
+
+    # LLM Provider (ollama | openai | gemini)
+    LLM_PROVIDER: str = os.environ.get("LLM_PROVIDER", "ollama")
+    LLM_MODEL: str = os.environ.get("LLM_MODEL", "llama3.2")
+    OLLAMA_BASE_URL: str = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+    OPENAI_API_KEY: str = os.environ.get("OPENAI_API_KEY", "")
+    GEMINI_API_KEY: str = os.environ.get("GEMINI_API_KEY", "")
+
+    # Redis (for daily LLM token budgeting)
+    REDIS_HOST: str = os.environ.get("REDIS_HOST", "localhost")
+    REDIS_PORT: int = int(os.environ.get("REDIS_PORT", "6379"))
+    REDIS_DB: int = int(os.environ.get("REDIS_DB", "0"))
 
     class Config:
         case_sensitive = True
@@ -51,12 +63,42 @@ DEFAULT_PLATFORM_SETTINGS: Dict[str, Any] = {
     "multi_agent_pipeline": {
         "execution_mode": "coordinated",
         "analyst_approval_required": True,
+        "agent_timeout_seconds": 30,
     },
     "threat_intelligence": {
         "enable_mitre": True,
         "enable_nvd_cve": True,
         "enable_cisa": True,
         "rag_top_k": 3,
+    },
+    "llm": {
+        "enabled": True,
+        "provider": "ollama",
+        "model": "llama3.2",
+        "temperature": 0.2,
+        "max_output_tokens": 300,
+        "daily_budget": {
+            "enabled": True,
+            "max_tokens": 100000
+        },
+        "agent_toggles": {
+            "detection": True,
+            "coordinator": True,
+            "threat_intel": True,
+            "risk_assessment": True,
+            "response": True,
+            "incident_report": True
+        }
+    },
+    "rag": {
+        "enabled": True,
+        "vector_store": "chromadb",
+        "embedding_model": "BAAI/bge-small-en-v1.5",
+        "hybrid_alpha": 0.5,
+        "min_relevance_score": 0.35,
+        "auto_refresh_hours": 24,
+        "persist_directory": os.path.join(settings.BASE_DIR, "data", "chroma_db"),
+        "cache_directory": os.path.join(settings.BASE_DIR, "data", "rag_cache"),
     },
     "data_storage": {
         "pcap_path": settings.UPLOAD_DIR,

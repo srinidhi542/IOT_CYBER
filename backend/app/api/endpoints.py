@@ -23,6 +23,7 @@ from app.ml.threat_engine.threat_engine import evaluate_threat
 from app.api.capture_endpoints import router as capture_router
 from app.api.agent_endpoints import router as agents_router
 from app.api.report_endpoints import router as report_storage_router
+from app.api.rag_endpoints import router as rag_router
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ router = APIRouter()
 router.include_router(capture_router)
 router.include_router(agents_router)
 router.include_router(report_storage_router)
+router.include_router(rag_router)
 
 # ----------------- 1. HEALTH & SYSTEM STATUS -----------------
 @router.get("/health", response_model=Dict[str, str])
@@ -89,13 +91,29 @@ def get_platform_settings(db: Session = Depends(get_db)):
     ml_status = "Ready" if XGBOOST_AVAILABLE else "Operational"
     ml_details = "XGBoost + Random Forest active" if XGBOOST_AVAILABLE else "Random Forest fallback active"
 
+    from app.llm.client import get_llm_client
+    from app.rag.vector_store import get_vector_store
+
+    llm_c = get_llm_client()
+    llm_status = "Operational" if llm_c.is_available() else "Fallback Mode"
+    llm_details = f"Provider: {llm_c.provider.upper()} ({llm_c.model}) - {'Ready' if llm_c.is_available() else 'No API key set, rule fallback active'}"
+
+    try:
+        vs_count = get_vector_store().count()
+        rag_status = "Operational" if vs_count > 0 else "Ready"
+        rag_details = f"Vector index active ({vs_count} authoritative documents indexed)"
+    except Exception:
+        rag_status = "Fallback Mode"
+        rag_details = "Knowledge retriever offline"
+
     health = {
         "api": {"name": "API Service", "status": "Operational", "details": "FastAPI v1 engine online"},
         "tshark": {"name": "TShark Sniffer", "status": tshark_status, "details": tshark_details},
         "cicflowmeter": {"name": "CICFlowMeter", "status": "Ready", "details": "PCAP & Flow feature extractor online"},
         "xgboost": {"name": "XGBoost Engine", "status": ml_status, "details": ml_details},
         "shap": {"name": "SHAP Explainer", "status": "Ready", "details": "SHAP TreeExplainer feature attribution active"},
-        "rag": {"name": "Threat Intel RAG", "status": "Ready", "details": "MITRE ATT&CK & NVD CVE knowledge retriever online"},
+        "rag": {"name": "Threat Intel RAG", "status": rag_status, "details": rag_details},
+        "llm": {"name": "Shared LLM Engine", "status": llm_status, "details": llm_details},
     }
 
     agents_health = {

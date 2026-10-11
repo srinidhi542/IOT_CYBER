@@ -1,0 +1,13 @@
+{
+  "engine": "chromadb",
+  "persist_dir": "backend/data/chroma_db",
+  "total_documents": 914,
+  "by_type": {
+    "mitre_attack": 818,
+    "cve": 43,
+    "cisa_advisory": 50,
+    "guideline": 3
+  },
+  "last_refresh": "2026-10-11 12:11:55 UTC",
+  "ingest_duration_seconds": 39.71
+}

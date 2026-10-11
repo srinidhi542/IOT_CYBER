@@ -143,6 +143,8 @@ class PlatformSettingsSchema(BaseModel):
     multi_agent_pipeline: Dict[str, Any]
     threat_intelligence: Dict[str, Any]
     data_storage: Dict[str, Any]
+    llm: Optional[Dict[str, Any]] = None
+    rag: Optional[Dict[str, Any]] = None
 
 class PlatformSettingsResponse(BaseModel):
     settings: PlatformSettingsSchema

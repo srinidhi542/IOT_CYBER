@@ -17,13 +17,38 @@
   },
   "multi_agent_pipeline": {
     "execution_mode": "coordinated",
-    "analyst_approval_required": true
+    "analyst_approval_required": true,
+    "agent_timeout_seconds": 30
   },
   "threat_intelligence": {
     "enable_mitre": true,
     "enable_nvd_cve": true,
     "enable_cisa": true,
     "rag_top_k": 2
+  },
+  "llm": {
+    "enabled": true,
+    "provider": "gemini",
+    "model": "gemini-1.5-flash",
+    "temperature": 0.2,
+    "agent_toggles": {
+      "detection": true,
+      "coordinator": true,
+      "threat_intel": true,
+      "risk_assessment": true,
+      "response": true,
+      "incident_report": true
+    }
+  },
+  "rag": {
+    "enabled": true,
+    "vector_store": "chromadb",
+    "embedding_model": "BAAI/bge-small-en-v1.5",
+    "hybrid_alpha": 0.5,
+    "min_relevance_score": 0.35,
+    "auto_refresh_hours": 24,
+    "persist_directory": "backend/data/chroma_db",
+    "cache_directory": "backend/data/rag_cache"
   },
   "data_storage": {
     "pcap_path": "backend/uploads",
