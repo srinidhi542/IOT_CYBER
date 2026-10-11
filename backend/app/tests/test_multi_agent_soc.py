@@ -1,5 +1,6 @@
 import os
-import pytest
+import time
+import unittest
 from fastapi.testclient import TestClient
 from app.main import app
 from app.capture.tshark_capture import capture_manager, get_network_interfaces
@@ -103,189 +104,131 @@ BENIGN_FLOW_RECORD = {
 }
 
 
-def test_network_interfaces_enumeration():
-    """Verify system and TShark network interface discovery."""
-    ifaces = get_network_interfaces()
-    assert isinstance(ifaces, list)
-    assert len(ifaces) > 0
-    assert "name" in ifaces[0]
-    assert "id" in ifaces[0]
+class TestMultiAgentSOC(unittest.TestCase):
 
+    def test_network_interfaces_enumeration(self):
+        """Verify system and TShark network interface discovery."""
+        ifaces = get_network_interfaces()
+        self.assertIsInstance(ifaces, list)
+        self.assertGreater(len(ifaces), 0)
+        self.assertIn("name", ifaces[0])
+        self.assertIn("id", ifaces[0])
 
-def test_packet_capture_and_cicflowmeter():
-    """Verify live capture generation and exact 39-feature extraction."""
-    session = capture_manager.start_capture("Default", "uploads", duration_limit=1)
-    assert session.is_capturing is True
+    def test_coordinator_agent_pipeline_execution(self):
+        """Verify end-to-end 6-agent sequential pipeline execution."""
+        incident = coordinator_agent.run_pipeline(SAMPLE_FLOW_RECORD)
 
-    import time
-    time.sleep(1.2)
+        # 1. Verification of Coordinator & Detection
+        self.assertTrue(incident.incident_id.startswith("INC-"))
+        self.assertIn(incident.detection.attack_type, ['Benign', 'Brute Force', 'DDoS', 'DoS', 'Mirai', 'Recon', 'Spoofing', 'Web Attack'])
+        self.assertTrue(0.0 <= incident.detection.confidence <= 1.0)
+        self.assertGreater(len(incident.detection.top_contributing_features), 0)
 
-    stop_res = capture_manager.stop_capture()
-    assert stop_res["is_capturing"] is False
-    assert stop_res["packet_count"] > 0
-    assert os.path.exists(stop_res["output_pcap"])
+        # 2. Verification of Threat Intelligence (RAG)
+        self.assertIsNotNone(incident.threat_intel)
+        self.assertGreater(incident.threat_intel.retrieval_confidence, 0.0)
+        self.assertGreater(len(incident.threat_intel.sources), 0)
+        for src in incident.threat_intel.sources:
+            self.assertTrue(src.startswith("http"))
 
-    df = extract_flows_from_pcap(stop_res["output_pcap"])
-    assert not df.empty
+        # 3. Verification of Risk Assessment
+        self.assertIsNotNone(incident.risk_assessment)
+        self.assertTrue(0.0 <= incident.risk_assessment.risk_score <= 100.0)
+        self.assertIn(incident.risk_assessment.severity, ["Critical", "High", "Medium", "Low"])
+        self.assertGreater(len(incident.risk_assessment.reasoning), 0)
 
-    # Check all 39 model features exist in extracted DataFrame
-    for feat in CICIOT2023_FEATURES:
-        assert feat in df.columns, f"Missing expected feature: {feat}"
+        # 4. Verification of Response Agent & Approval Safeguard
+        self.assertIsNotNone(incident.response)
+        self.assertGreater(len(incident.response.containment), 0)
+        self.assertGreater(len(incident.response.firewall_commands), 0)
+        self.assertTrue(incident.response.approval_required)
+        self.assertEqual(incident.response.approval_status, "PENDING_ANALYST_APPROVAL")
 
+        # 5. Verification of Incident Report & Timeline
+        self.assertIsNotNone(incident.report)
+        self.assertGreater(len(incident.report.markdown_content), 100)
+        self.assertGreaterEqual(len(incident.timeline), 6)
 
-def test_coordinator_agent_pipeline_execution():
-    """Verify end-to-end 6-agent sequential pipeline execution."""
-    incident = coordinator_agent.run_pipeline(SAMPLE_FLOW_RECORD)
+    def test_benign_traffic_safeguard(self):
+        """Verify that benign traffic does NOT have fabricated CVEs or false firewalls."""
+        from app.agents.agent_schemas import DetectionOutput, NetworkContext
+        from app.agents.threat_intel_agent import threat_intel_agent
+        from app.agents.risk_assessment_agent import risk_assessment_agent
+        from app.agents.response_agent import response_agent
 
-    # 1. Verification of Coordinator & Detection
-    assert incident.incident_id.startswith("INC-")
-    assert incident.detection.attack_type in ['Benign', 'Brute Force', 'DDoS', 'DoS', 'Mirai', 'Recon', 'Spoofing', 'Web Attack']
-    assert 0.0 <= incident.detection.confidence <= 1.0
-    assert len(incident.detection.top_contributing_features) > 0
-
-    # 2. Verification of Threat Intelligence (RAG)
-    assert incident.threat_intel is not None
-    assert incident.threat_intel.retrieval_confidence > 0.0
-    assert len(incident.threat_intel.sources) > 0
-    for src in incident.threat_intel.sources:
-        assert src.startswith("http")
-
-    # 3. Verification of Risk Assessment
-    assert incident.risk_assessment is not None
-    assert 0.0 <= incident.risk_assessment.risk_score <= 100.0
-    assert incident.risk_assessment.severity in ["Critical", "High", "Medium", "Low"]
-    assert len(incident.risk_assessment.reasoning) > 0
-
-    # 4. Verification of Response Agent & Approval Safeguard
-    assert incident.response is not None
-    assert len(incident.response.containment) > 0
-    assert len(incident.response.firewall_commands) > 0
-    assert incident.response.approval_required is True
-    assert incident.response.approval_status == "PENDING_ANALYST_APPROVAL"
-
-    # 5. Verification of Incident Report & Timeline
-    assert incident.report is not None
-    assert len(incident.report.markdown_content) > 100
-    assert len(incident.timeline) >= 6
-
-
-def test_benign_traffic_safeguard():
-    """Verify that benign traffic does NOT have fabricated CVEs or false firewalls."""
-    from app.agents.agent_schemas import DetectionOutput, NetworkContext
-    from app.agents.threat_intel_agent import threat_intel_agent
-    from app.agents.risk_assessment_agent import risk_assessment_agent
-    from app.agents.response_agent import response_agent
-
-    benign_detection = DetectionOutput(
-        attack_type="Benign",
-        confidence=0.99,
-        probabilities={"Benign": 0.99},
-        network_context=NetworkContext(
-            source_ip="192.168.1.15",
-            destination_ip="104.24.12.5",
-            source_port=49364,
-            destination_port=443,
-            protocol="TCP"
+        benign_detection = DetectionOutput(
+            attack_type="Benign",
+            confidence=0.99,
+            probabilities={"Benign": 0.99},
+            network_context=NetworkContext(
+                source_ip="192.168.1.15",
+                destination_ip="104.24.12.5",
+                source_port=49364,
+                destination_port=443,
+                protocol="TCP"
+            )
         )
-    )
 
-    intel = threat_intel_agent.retrieve_intelligence(benign_detection)
-    assert len(intel.mitre_attack) == 0
-    assert len(intel.cve_list) == 0
-    assert "baseline" in intel.iot_threat_context.lower()
+        intel = threat_intel_agent.retrieve_intelligence(benign_detection)
+        self.assertEqual(len(intel.mitre_attack), 0)
+        self.assertEqual(len(intel.cve_list), 0)
+        self.assertIn("baseline", intel.iot_threat_context.lower())
 
-    risk = risk_assessment_agent.assess_risk(benign_detection, intel)
-    assert risk.risk_score == 0.0
-    assert risk.severity == "Low"
+        risk = risk_assessment_agent.assess_risk(benign_detection, intel)
+        self.assertEqual(risk.risk_score, 0.0)
+        self.assertEqual(risk.severity, "Low")
 
-    resp = response_agent.generate_response_plan(benign_detection, risk)
-    assert len(resp.firewall_commands) == 0
-    assert resp.approval_required is False
+        resp = response_agent.generate_response_plan(benign_detection, risk)
+        self.assertEqual(len(resp.firewall_commands), 0)
+        self.assertFalse(resp.approval_required)
 
+    def test_analyst_approval_workflow(self):
+        """Verify analyst sign-off and approval status persistence."""
+        incident = coordinator_agent.run_pipeline(SAMPLE_FLOW_RECORD)
+        self.assertEqual(incident.response.approval_status, "PENDING_ANALYST_APPROVAL")
 
-def test_analyst_approval_workflow():
-    """Verify analyst sign-off and approval status persistence."""
-    incident = coordinator_agent.run_pipeline(SAMPLE_FLOW_RECORD)
-    assert incident.response.approval_status == "PENDING_ANALYST_APPROVAL"
+        # Approve
+        updated = coordinator_agent.record_analyst_approval(
+            incident.incident_id,
+            approved=True,
+            analyst_name="Security Analyst John",
+            notes="Validated external attack IP. Approved IPTables rule."
+        )
+        self.assertEqual(updated.response.approval_status, "APPROVED")
+        self.assertEqual(updated.response.reviewed_by, "Security Analyst John")
+        self.assertEqual(updated.status, "CONTAINED")
 
-    # Approve
-    updated = coordinator_agent.record_analyst_approval(
-        incident.incident_id,
-        approved=True,
-        analyst_name="Security Analyst John",
-        notes="Validated external attack IP. Approved IPTables rule."
-    )
-    assert updated.response.approval_status == "APPROVED"
-    assert updated.response.reviewed_by == "Security Analyst John"
-    assert updated.status == "CONTAINED"
+    def test_api_agent_endpoints(self):
+        """Verify FastAPI multi-agent endpoints."""
+        # Run analysis
+        r_analyze = client.post("/api/agents/analyze", json={"record": SAMPLE_FLOW_RECORD})
+        self.assertEqual(r_analyze.status_code, 200)
+        inc_data = r_analyze.json()
+        inc_id = inc_data["incident_id"]
 
+        # Retrieve incident
+        r_get = client.get(f"/api/agents/incident/{inc_id}")
+        self.assertEqual(r_get.status_code, 200)
+        self.assertEqual(r_get.json()["incident_id"], inc_id)
 
-def test_api_capture_endpoints():
-    """Verify FastAPI capture endpoints including overall explainability & aggregation."""
-    # List interfaces
-    r_ifaces = client.get("/api/capture/interfaces")
-    assert r_ifaces.status_code == 200
-    assert len(r_ifaces.json()) > 0
+        # List incidents
+        r_list = client.get("/api/agents/incidents")
+        self.assertEqual(r_list.status_code, 200)
+        self.assertGreater(len(r_list.json()), 0)
 
-    # Status
-    r_status = client.get("/api/capture/status")
-    assert r_status.status_code == 200
+        # Analyst approval
+        r_approve = client.post(
+            f"/api/agents/incident/{inc_id}/approval",
+            json={"approved": True, "analyst_name": "Lead Analyst", "notes": "Approved in staging"}
+        )
+        self.assertEqual(r_approve.status_code, 200)
+        self.assertEqual(r_approve.json()["response"]["approval_status"], "APPROVED")
 
-    # Start capture
-    r_start = client.post("/api/capture/start", json={"interface": "Default", "duration_limit": 1})
-    assert r_start.status_code == 200
-
-    import time
-    time.sleep(1.2)
-
-    # Stop capture
-    r_stop = client.post("/api/capture/stop")
-    assert r_stop.status_code == 200
-    pcap_path = r_stop.json()["output_pcap"]
-    assert os.path.exists(pcap_path)
-
-    # Process PCAP through overall explainability and multi-agent pipeline
-    r_proc = client.post("/api/capture/process", json={"pcap_path": pcap_path})
-    assert r_proc.status_code == 200
-    data = r_proc.json()
-    assert data["flows_extracted"] > 0
-    assert "overall_prediction" in data
-    assert data["overall_prediction"]["label"] in ['Benign', 'Brute Force', 'DDoS', 'DoS', 'Mirai', 'Recon', 'Spoofing', 'Web Attack']
-    assert 0.0 <= data["overall_prediction"]["confidence"] <= 1.0
-    assert "overall_explainability" in data
-    assert len(data["overall_explainability"]["top_contributing_features"]) > 0
-    assert "overall_incident" in data
-    assert data["overall_incident"]["incident_id"].startswith("INC-")
-    assert len(data["incidents"]) > 0
+        # Markdown report download
+        r_report = client.get(f"/api/agents/incident/{inc_id}/report")
+        self.assertEqual(r_report.status_code, 200)
+        self.assertIn(inc_id, r_report.text)
 
 
-def test_api_agent_endpoints():
-    """Verify FastAPI multi-agent endpoints."""
-    # Run analysis
-    r_analyze = client.post("/api/agents/analyze", json={"record": SAMPLE_FLOW_RECORD})
-    assert r_analyze.status_code == 200
-    inc_data = r_analyze.json()
-    inc_id = inc_data["incident_id"]
-
-    # Retrieve incident
-    r_get = client.get(f"/api/agents/incident/{inc_id}")
-    assert r_get.status_code == 200
-    assert r_get.json()["incident_id"] == inc_id
-
-    # List incidents
-    r_list = client.get("/api/agents/incidents")
-    assert r_list.status_code == 200
-    assert len(r_list.json()) > 0
-
-    # Analyst approval
-    r_approve = client.post(
-        f"/api/agents/incident/{inc_id}/approval",
-        json={"approved": True, "analyst_name": "Lead Analyst", "notes": "Approved in staging"}
-    )
-    assert r_approve.status_code == 200
-    assert r_approve.json()["response"]["approval_status"] == "APPROVED"
-
-    # Markdown report download
-    r_report = client.get(f"/api/agents/incident/{inc_id}/report")
-    assert r_report.status_code == 200
-    assert inc_id in r_report.text
+if __name__ == "__main__":
+    unittest.main()

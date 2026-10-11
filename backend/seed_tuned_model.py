@@ -19,22 +19,13 @@ def seed():
     if not dataset:
         dataset = models.Dataset(
             name="CICIoT2023_Full",
-            filepath="/placeholder/ciciot2023",
-            row_count=46776697,
-            col_count=39,
+            filepath="synthetic_training_data",  # No real CSV on disk; trained from synthetic corpus
+            row_count=0,       # Populated by train_enhanced_model.py on retrain
+            col_count=23,
             columns=json.dumps([]),  # We'll fill features from model
             column_types=json.dumps({}),
-            target_column="label_8",
-            class_distribution=json.dumps({
-                "Benign": 25000, # Representing the balanced subset or actual distribution
-                "Brute Force": 13064,
-                "DDoS": 25122,
-                "DoS": 25021,
-                "Mirai": 25040,
-                "Recon": 22262,
-                "Spoofing": 25000,
-                "Web Attack": 20733
-            }),
+            target_column="label",
+            class_distribution=json.dumps({}),  # Populated from artifact metrics on sync
             missing_counts=json.dumps({}),
             status="preprocessed"
         )
@@ -60,27 +51,36 @@ def seed():
     dataset.columns = json.dumps(features)
     db.commit()
     
-    # Get actual model feature importances
-    xgb_model = artifact.get('model')
-    if hasattr(xgb_model, 'feature_importances_'):
-        imp_dict = {features[i]: float(xgb_model.feature_importances_[i]) for i in range(len(features))}
-    else:
-        imp_dict = {}
+    # Get actual model feature importances (from artifact metrics, or directly from model)
+    imp_dict = metrics.get('feature_importance', {})
+    if not imp_dict:
+        xgb_model = artifact.get('model')
+        if hasattr(xgb_model, 'feature_importances_'):
+            imp_dict = {features[i]: float(xgb_model.feature_importances_[i]) for i in range(len(features))}
+
+    # Read all metrics from the real artifact — no hardcoded fallback values
+    accuracy_val = float(metrics.get('accuracy', metrics.get('multiclass_accuracy', 0.0)))
+    precision_val = float(metrics.get('precision', 0.0))
+    recall_val = float(metrics.get('recall', 0.0))
+    # f1 may be stored as 'f1', 'f1_score', or 'weighted_f1'
+    f1_val = float(metrics.get('f1', metrics.get('f1_score', metrics.get('weighted_f1', 0.0))))
+    alg_name = metrics.get('algorithm', "XGBoost (Trained)")
+
 
     # Update or Create MLModel entry
     ml_model = db.query(models.MLModel).filter(models.MLModel.name == "CICIoT2023_8Class_Tuned_XGBoost").first()
     if not ml_model:
         ml_model = models.MLModel(
             name="CICIoT2023_8Class_Tuned_XGBoost",
-            algorithm="XGBoost (Debiased 536K Balanced)",
+            algorithm=alg_name,
             model_type="classifier",
             dataset_id=dataset.id,
             features=json.dumps(features),
             classes=json.dumps(classes),
-            accuracy=metrics.get('accuracy', metrics.get('multiclass_accuracy', 0.8013)),
-            precision_score=0.82,
-            recall_score=0.80,
-            f1_score=0.81,
+            accuracy=accuracy_val,
+            precision_score=precision_val,
+            recall_score=recall_val,
+            f1_score=f1_val,
             metrics_json=json.dumps(metrics),
             confusion_matrix=json.dumps(cm),
             feature_importance=json.dumps(imp_dict)
@@ -89,18 +89,18 @@ def seed():
         db.commit()
         print("Created MLModel entry.")
     else:
-        ml_model.algorithm = "XGBoost (Debiased 536K Balanced)"
+        ml_model.algorithm = alg_name
         ml_model.features = json.dumps(features)
         ml_model.classes = json.dumps(classes)
-        ml_model.accuracy = metrics.get('accuracy', metrics.get('multiclass_accuracy', 0.8013))
-        ml_model.precision_score = 0.82
-        ml_model.recall_score = 0.80
-        ml_model.f1_score = 0.81
+        ml_model.accuracy = accuracy_val
+        ml_model.precision_score = precision_val
+        ml_model.recall_score = recall_val
+        ml_model.f1_score = f1_val
         ml_model.metrics_json = json.dumps(metrics)
         ml_model.confusion_matrix = json.dumps(cm)
         ml_model.feature_importance = json.dumps(imp_dict)
         db.commit()
-        print("Updated MLModel entry with Debiased 536K stats.")
+        print(f"Updated MLModel entry with {accuracy_val * 100:.2f}% accuracy stats.")
 
     db.close()
 

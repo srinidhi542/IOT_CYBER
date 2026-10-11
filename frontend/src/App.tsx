@@ -7,6 +7,7 @@ import { Settings } from './pages/Settings';
 import { Login } from './pages/Login';
 import { AIExplainability } from './pages/Explainability';
 import { Incidents } from './pages/Incidents';
+import { ReportHistory } from './pages/ReportHistory';
 import { Dataset, MLModel, SystemStatus, DashboardAnalytics, PredictionExplanation, IncidentState, CaptureProcessResult } from './types';
 import { apiService } from './services/api';
 
@@ -225,6 +226,10 @@ function App() {
           onNavigateToDashboard={() => setActivePage('dashboard')}
           refreshIncidents={loadIncidents}
         />
+      )}
+
+      {activePage === 'reports' && (
+        <ReportHistory />
       )}
       
       {activePage === 'dataset' && (

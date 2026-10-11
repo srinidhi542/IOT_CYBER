@@ -73,7 +73,7 @@ class Flow:
     def to_features(self) -> Dict[str, Any]:
         """Calculates the exact 39 CICIoT2023 features for this flow."""
         pkt_count = len(self.packets)
-        dur = max(self.last_time - self.start_time, 0.0001)
+        actual_dur = self.last_time - self.start_time  # real observed duration, may be 0
 
         lengths = [p.length for p in self.packets]
         tot_sum = sum(lengths)
@@ -84,16 +84,22 @@ class Flow:
         variance = float(np.var(lengths)) if pkt_count > 1 else 0.0
         std_len = math.sqrt(variance)
 
-        # Header length sum
-        header_len = sum(p.header_length for p in self.packets)
+        # Average header length across flow packets (matches CICIoT2023 schema)
+        header_len = float(sum(p.header_length for p in self.packets) / pkt_count)
 
         # Average TTL
         ttls = [p.ttl for p in self.packets if p.ttl > 0]
         avg_ttl = float(np.mean(ttls)) if ttls else 64.0
 
-        # Rate stabilization: prevent microscopic duration division
-        effective_dur = max(dur, 0.5)
-        rate = min(float(pkt_count / effective_dur), 1000.0)
+        # Flow transmission rate (packets / second).
+        # For single-packet flows (dur==0) use 0.0 — not 1/0.0001=10000.
+        # Inflating Rate to 10000 for single-pkt flows causes Recon misclassification
+        # because the model's training Recon samples have very high rates.
+        # CICIoT2023 schema: Rate = total_packets / flow_duration; 0 if no duration.
+        if actual_dur > 0:
+            rate = float(pkt_count / actual_dur)
+        else:
+            rate = 0.0
 
         # Inter-arrival times (IAT)
         if pkt_count > 1:
@@ -325,7 +331,8 @@ def extract_flows_from_pcap(pcap_path: str, max_packets: int = 10000) -> pd.Data
 
     records = [flow.to_features() for flow in flows.values()]
     df = pd.DataFrame(records)
-    logger.info(f"CICFlowMeter extracted {len(df)} flows from {pcap_path}")
+    df.attrs['total_packets'] = packet_count
+    logger.info(f"CICFlowMeter parsed {packet_count} packets into {len(df)} flows from {pcap_path}")
     return df
 
 
@@ -382,49 +389,67 @@ def aggregate_flow_features(df: pd.DataFrame) -> Tuple[Dict[str, float], Dict[st
     # 1. Evaluate each individual flow
     flow_predictions = []
     for idx, row in df.iterrows():
+        record = row.to_dict()
         try:
-            pred = predict_tuned(row.to_dict())
+            pred = predict_tuned(record)
             flow_predictions.append((idx, pred))
-        except Exception:
-            flow_predictions.append((idx, {"label": "Benign", "confidence": 0.85}))
+            logger.debug(
+                f"Flow {idx}: Rate={record.get('Rate', 0):.2f} "
+                f"Std={record.get('Std', 0):.2f} "
+                f"Variance={record.get('Variance', 0):.2f} "
+                f"Number={record.get('Number', 0)} "
+                f"-> {pred['label']} ({pred['confidence']*100:.1f}%)"
+            )
+        except Exception as e:
+            logger.error(
+                f"Flow {idx} prediction failed: {e} | "
+                f"Rate={record.get('Rate', '?')} Std={record.get('Std', '?')} "
+                f"Number={record.get('Number', '?')}"
+            )
+            # Skip failed flows — do NOT fall back to a hardcoded label
+            continue
 
-    # 2. Count Attack vs Benign flows
-    attack_flows = [(idx, p) for idx, p in flow_predictions if p["label"].lower() not in ["benign", "normal"]]
+    if not flow_predictions:
+        logger.warning("All flow predictions failed — cannot determine representative flow.")
+        return {}, {}
+
+    # 2. Separate attack vs benign flows
+    attack_flows = [
+        (idx, p) for idx, p in flow_predictions
+        if p["label"].lower() not in ["benign", "normal"]
+    ]
+    benign_flows = [
+        (idx, p) for idx, p in flow_predictions
+        if p["label"].lower() in ["benign", "normal"]
+    ]
     total_flows = len(flow_predictions)
-    attack_ratio = len(attack_flows) / max(total_flows, 1)
 
-    # 3. Decision Logic: If at least 50% of flows indicate genuine attacks, flag the most dominant attack flow
-    if attack_ratio >= 0.50 and attack_flows:
-        attack_labels = [p["label"] for _, p in attack_flows]
-        dominant_attack = max(set(attack_labels), key=attack_labels.count)
-        # Select the highest-confidence flow belonging to the dominant attack category
-        chosen_idx, chosen_pred = max(
-            [(idx, p) for idx, p in attack_flows if p["label"] == dominant_attack],
-            key=lambda x: x[1]["confidence"]
+    logger.info(
+        f"Flow breakdown: {total_flows} total | "
+        f"{len(attack_flows)} attack | {len(benign_flows)} benign"
+    )
+
+    # 3. Model-driven representative selection:
+    # If attack flows detected → pick the one with highest confidence.
+    # If all flows are benign → pick the flow with most packets (most traffic activity).
+    if attack_flows:
+        chosen_idx, chosen_pred = max(attack_flows, key=lambda x: x[1]["confidence"])
+        logger.info(
+            f"Representative: attack flow {chosen_idx} -> "
+            f"{chosen_pred['label']} ({chosen_pred['confidence']*100:.1f}%)"
         )
     else:
-        # Predominantly benign network traffic: select highest-volume application benign flow
-        benign_flows = [(idx, p) for idx, p in flow_predictions if p["label"].lower() in ["benign", "normal"]]
-        if benign_flows:
-            benign_indices = [idx for idx, _ in benign_flows]
-            sub_df = df.loc[benign_indices]
-            # Prioritize genuine TCP/UDP application traffic over idle ARP/broadcasts if present
-            app_flows = sub_df[sub_df['Protocol_Name'].isin(['TCP', 'UDP', 'HTTP', 'HTTPS', 'DNS'])]
-            if not app_flows.empty:
-                if 'Number' in app_flows.columns:
-                    chosen_idx = app_flows['Number'].idxmax()
-                else:
-                    chosen_idx = app_flows.index[0]
-            elif 'Number' in sub_df.columns:
-                chosen_idx = sub_df['Number'].idxmax()
-            else:
-                chosen_idx = benign_indices[0]
-        else:
-            chosen_idx = df.index[0]
+        chosen_idx = df['Number'].idxmax() if 'Number' in df.columns else df.index[0]
+        logger.info(f"Representative: benign flow {chosen_idx} (highest packet count)")
 
-    # 4. Use the genuine uncorrupted feature set of the chosen flow as the representative record
+    # 4. Use the genuine feature set of the chosen flow as the representative record
     representative_row = df.loc[chosen_idx].to_dict()
     agg_record = {col: float(representative_row.get(col, 0.0)) for col in CICIOT2023_FEATURES}
+    agg_record['Source_IP'] = representative_row.get('Source_IP', '')
+    agg_record['Destination_IP'] = representative_row.get('Destination_IP', '')
+    agg_record['Protocol_Name'] = representative_row.get('Protocol_Name', '')
+    agg_record['Source_Port'] = representative_row.get('Source_Port', 0)
+    agg_record['Destination_Port'] = representative_row.get('Destination_Port', 0)
 
     # Extract overall network context
     src_ips = [str(x) for x in df['Source_IP'].dropna().unique().tolist()] if 'Source_IP' in df.columns else []
@@ -434,6 +459,8 @@ def aggregate_flow_features(df: pd.DataFrame) -> Tuple[Dict[str, float], Dict[st
     primary_src = str(representative_row.get('Source_IP', src_ips[0] if src_ips else "0.0.0.0"))
     primary_dst = str(representative_row.get('Destination_IP', dst_ips[0] if dst_ips else "0.0.0.0"))
 
+    total_pkts = df.attrs.get('total_packets', int(df['Number'].sum()) if 'Number' in df.columns else len(df))
+
     net_ctx = {
         "Timestamp": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         "Source_IP": primary_src,
@@ -441,10 +468,14 @@ def aggregate_flow_features(df: pd.DataFrame) -> Tuple[Dict[str, float], Dict[st
         "Source_Port": int(representative_row.get('Source_Port', 0)),
         "Destination_Port": int(representative_row.get('Destination_Port', 0)),
         "Protocol_Name": str(representative_row.get('Protocol_Name', protos[0] if protos else "IP")),
-        "total_flows": len(df),
+        "total_packets": total_pkts,
+        "total_flows": total_flows,
+        "attack_flows": len(attack_flows),
+        "benign_flows": len(benign_flows),
         "unique_source_ips": src_ips,
         "unique_destination_ips": dst_ips,
         "observed_protocols": protos
     }
 
     return agg_record, net_ctx
+

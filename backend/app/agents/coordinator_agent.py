@@ -182,6 +182,25 @@ class CoordinatorAgent:
         if len(self.incidents) > self.max_history:
             self.incidents.popitem(last=False)
 
+        # -------------------------------------------------------------
+        # 8. PERSIST REPORT TO MONGODB & DEDICATED STORAGE DIRECTORY
+        # -------------------------------------------------------------
+        try:
+            from app.reports.storage_service import ReportStorageService
+            ReportStorageService.save_incident_report(
+                incident_id=incident_id,
+                detection_data=detection_output.dict(),
+                threat_intel_data=threat_intel.dict(),
+                risk_data=risk_assessment.dict(),
+                response_data=response_plan.dict(),
+                report_data=report.dict(),
+                timeline_data=[t.dict() for t in timeline],
+                source="coordinator_pipeline"
+            )
+            logger.info(f"Persisted incident report for {incident_id} to MongoDB and storage/reports/")
+        except Exception as se:
+            logger.warning(f"Could not persist report {incident_id} to MongoDB/disk (continuing in-memory): {se}")
+
         logger.info(f"Pipeline finished for {incident_id} in {time.time() - start_time:.2f}s.")
         return incident_state
 

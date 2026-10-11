@@ -1,0 +1,342 @@
+{
+  "report_id": "REP-INC-20261011-70861",
+  "incident_id": "INC-20261011-70861",
+  "detection": {
+    "attack_type": "Web Attack",
+    "confidence": 0.9998915195465088,
+    "probabilities": {
+      "Benign": 5.4351537983166054e-05,
+      "Brute Force": 3.129208562313579e-05,
+      "DDoS": 1.6713104287191527e-06,
+      "DoS": 9.36367086978862e-06,
+      "Mirai": 2.1718028619943652e-06,
+      "Recon": 3.0670908017782494e-06,
+      "Spoofing": 6.558388577104779e-06,
+      "Web Attack": 0.9998915195465088
+    },
+    "network_context": {
+      "timestamp": "2026-10-11 10:19:30",
+      "source_ip": "192.168.137.167",
+      "destination_ip": "54.69.37.156",
+      "source_port": 51331,
+      "destination_port": 443,
+      "protocol": "TCP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Std",
+        "value": 121.4044,
+        "shap_value": 1.3452,
+        "direction": "increases"
+      },
+      {
+        "feature": "Variance",
+        "value": 14739.0278,
+        "shap_value": 1.285,
+        "direction": "increases"
+      },
+      {
+        "feature": "ack_count",
+        "value": 17.0,
+        "shap_value": 1.16,
+        "direction": "increases"
+      },
+      {
+        "feature": "Rate",
+        "value": 13.5434,
+        "shap_value": 1.0677,
+        "direction": "increases"
+      },
+      {
+        "feature": "syn_count",
+        "value": 2.0,
+        "shap_value": 0.5138,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Std": 1.3452,
+      "Variance": 1.285,
+      "ack_count": 1.16,
+      "Rate": 1.0677,
+      "syn_count": 0.5138,
+      "Max": 0.474,
+      "Number": 0.4576,
+      "Time_To_Live": -0.2795,
+      "Min": 0.1066,
+      "psh_flag_number": 0.0603,
+      "Header_Length": -0.0516,
+      "IAT": -0.0371,
+      "AVG": -0.0324,
+      "syn_flag_number": 0.02,
+      "rst_flag_number": 0.0145,
+      "Tot size": 0.0127,
+      "Tot sum": -0.004,
+      "rst_count": 0.0033,
+      "fin_flag_number": -0.0021,
+      "fin_count": -0.0014,
+      "ack_flag_number": -0.0001,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 40.44,
+      "Protocol Type": 6.0,
+      "Time_To_Live": 243.44,
+      "Rate": 13.5434,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 1.0,
+      "rst_flag_number": 1.0,
+      "psh_flag_number": 1.0,
+      "ack_flag_number": 1.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 17.0,
+      "syn_count": 2.0,
+      "fin_count": 0.0,
+      "rst_count": 1.0,
+      "HTTP": 0.0,
+      "HTTPS": 1.0,
+      "DNS": 0.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 1.0,
+      "UDP": 0.0,
+      "DHCP": 0.0,
+      "ARP": 0.0,
+      "ICMP": 0.0,
+      "IGMP": 0.0,
+      "IPv": 1.0,
+      "LLC": 0.0,
+      "Tot sum": 2529.0,
+      "Min": 60.0,
+      "Max": 459.0,
+      "AVG": 140.5,
+      "Std": 121.4044,
+      "Tot size": 2529.0,
+      "IAT": 0.07818,
+      "Number": 18.0,
+      "Variance": 14739.0278,
+      "Source_IP": "192.168.137.167",
+      "Destination_IP": "54.69.37.156",
+      "Protocol_Name": "TCP",
+      "Source_Port": 51331,
+      "Destination_Port": 443
+    }
+  },
+  "threat_intel": {
+    "mitre_attack": [
+      {
+        "id": "T1190",
+        "name": "Exploit Public-Facing Application",
+        "tactic": "Initial Access",
+        "description": "Adversaries may exploit vulnerabilities in Internet-facing IoT applications, such as router web administration panels, camera RTSP streamers, or UPnP daemon entry points, to execute arbitrary operating system commands.",
+        "url": "https://attack.mitre.org/techniques/T1190/"
+      },
+      {
+        "id": "T1498",
+        "name": "Network Denial of Service",
+        "tactic": "Impact",
+        "description": "Adversaries may perform Network Denial of Service (DoS) attacks to degrade or block the availability of targeted resources to users by exhausting network bandwidth through direct flooding or reflection amplification. In IoT environments, compromised devices are frequently enslaved to generate high-bandwidth UDP or TCP SYN floods targeting critical network nodes.",
+        "url": "https://attack.mitre.org/techniques/T1498/"
+      }
+    ],
+    "cve_list": [
+      {
+        "cve_id": "CVE-2021-36260",
+        "affected_systems": "Hikvision IP Cameras and NVR firmware (multiple model lines)",
+        "cvss_score": 9.8,
+        "severity": "CRITICAL",
+        "description": "A command injection vulnerability in the web server of certain Hikvision IP camera models allows an attacker to send specially crafted messages with malicious shell payloads. Active in CISA KEV catalog; extensively targeted by Mirai, Mozi, and Gafgyt botnets to harvest cameras for high-bandwidth DDoS reflection attacks.",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-36260"
+      },
+      {
+        "cve_id": "CVE-2022-30525",
+        "affected_systems": "Zyxel USG/ZyWALL/ATP firewalls with ZLD firmware",
+        "cvss_score": 9.8,
+        "severity": "CRITICAL",
+        "description": "Unauthenticated remote command injection in the web management CGI of Zyxel firewall and IoT edge gateway devices via the libcli daemon. Allows remote attackers to execute arbitrary OS commands as nobody user.",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2022-30525"
+      }
+    ],
+    "cisa_advisories": [
+      {
+        "id": "AA23-074A",
+        "title": "#StopRansomware: Initial Access Brokers Weaponizing IoT Network Appliances",
+        "release_date": "2023-03-15",
+        "summary": "Threat actors are weaponizing newly disclosed NVD CVEs against internet-exposed edge network appliances, VPN routers, and IoT smart devices within hours of proof-of-concept release to establish footholds and lateral movement runways.",
+        "url": "https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-074a"
+      },
+      {
+        "id": "AA22-110A",
+        "title": "Russian State-Sponsored and Criminal Cyber Actors Target Network Infrastructure and IoT Gateways",
+        "release_date": "2022-04-20",
+        "summary": "CISA and partner security agencies issue guidance warning that cyber actors routinely compromise small-office/home-office (SOHO) routers and IoT network appliances via default credentials and known unpatched vulnerabilities to deploy persistent botnet agents, conduct reconnaissance, and proxy malicious network traffic.",
+        "url": "https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-110a"
+      }
+    ],
+    "iot_threat_context": "Associated with MITRE ATT&CK technique(s): T1190 (Exploit Public-Facing Application), T1498 (Network Denial of Service). Correlates with known IoT vulnerabilities: CVE-2021-36260 (CVSS 9.8), CVE-2022-30525 (CVSS 9.8). Referenced in CISA advisories: AA23-074A, AA22-110A.",
+    "retrieval_confidence": 0.92,
+    "sources": [
+      "https://attack.mitre.org/techniques/T1190/",
+      "https://attack.mitre.org/techniques/T1498/",
+      "https://nvd.nist.gov/vuln/detail/CVE-2021-36260",
+      "https://nvd.nist.gov/vuln/detail/CVE-2022-30525",
+      "https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-074a",
+      "https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-110a"
+    ]
+  },
+  "risk": {
+    "risk_score": 97.0,
+    "severity": "Critical",
+    "priority": "P1 - Critical Urgent",
+    "impact": "Catastrophic or severe degradation of IoT gateway and dependent network infrastructure.",
+    "likelihood": "Active Exploitation in Progress",
+    "reasoning": [
+      "Classified as 'Web Attack' with 100.0% model confidence.",
+      "Elevated SHAP attribution on 'Std' (value: 121.40, SHAP: +1.3452), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Variance' (value: 14739.03, SHAP: +1.2850), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Ack Count' (value: 17.00, SHAP: +1.1600), which strongly increases threat probability.",
+      "Correlated with Critical severity CVEs (CVSS score 9.8/10).",
+      "Referenced in active CISA cyber defense advisory (AA23-074A).",
+      "Targeting critical IoT service port 443 (TCP).",
+      "Network 5-tuple context: Source 192.168.137.167:51331 -> Destination 54.69.37.156:443 (TCP)."
+    ]
+  },
+  "response": {
+    "containment": [
+      "Block web application requests containing command injection signatures from 192.168.137.167.",
+      "Temporarily disable internet WAN access to device management interface on port 443.",
+      "Place vulnerable IoT web server behind a Web Application Firewall (WAF).",
+      "Inspect web server access logs for anomalous POST requests to CGI endpoints."
+    ],
+    "recovery": [
+      "Power-cycle / reboot the affected IoT node to purge volatile memory-resident malware payloads.",
+      "Re-flash firmware using verified cryptographically signed vendor media if filesystem tampering is suspected.",
+      "Rotate all administrative passwords, SSH keys, and MQTT broker access tokens immediately.",
+      "Conduct post-incident integrity check before restoring node to production VLAN."
+    ],
+    "prevention": [
+      "Implement microsegmentation (NIST SP 800-213) placing IoT devices into isolated VLANs without direct WAN routing.",
+      "Permanently disable legacy, unencrypted management services (Telnet port 23, HTTP port 80, UPnP) on all IoT devices.",
+      "Enforce 802.1X Network Access Control (NAC) to prevent rogue physical device attachments.",
+      "Establish continuous automated vulnerability scanning against known IoT CVE databases."
+    ],
+    "firewall_commands": [
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 192.168.137.167 -p tcp --dport 443 -j DROP",
+        "description": "Linux Netfilter rule to drop inbound packets from attacker 192.168.137.167."
+      },
+      {
+        "firewall_type": "windows_netsh",
+        "command": "netsh advfirewall firewall add rule name=\"IoTShield_Block_Web_Attack_192.168.137.167\" dir=in action=block remoteip=192.168.137.167 protocol=TCP localport=443",
+        "description": "Windows Advanced Firewall rule to block inbound traffic from 192.168.137.167."
+      },
+      {
+        "firewall_type": "cisco_acl",
+        "command": "access-list 100 deny tcp host 192.168.137.167 host 54.69.37.156 eq 443",
+        "description": "Cisco IOS standard extended ACL dropping traffic from 192.168.137.167 to 54.69.37.156."
+      }
+    ],
+    "approval_required": true,
+    "approval_status": "PENDING_ANALYST_APPROVAL",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated execution disabled by policy. Requires SOC Analyst sign-off."
+  },
+  "report": {
+    "incident_id": "INC-20261011-70861",
+    "generated_at": "2026-10-11 10:19:30 UTC",
+    "title": "SOC Incident Assessment: INC-20261011-70861 [Web Attack]",
+    "executive_summary": "SECURITY INCIDENT ALERT: High-priority security incident INC-20261011-70861 detected. Network telemetry exhibits active 'Web Attack' threat patterns from 192.168.137.167:51331 targeting 54.69.37.156:443 (TCP) with 100.0% classification certainty. Assessed Risk Score is 97.0/100 (Critical Severity, P1 - Critical Urgent). Associated with MITRE ATT&CK technique(s): T1190 (Exploit Public-Facing Application), T1498 (Network Denial of Service). Correlates with known IoT vulnerabilities: CVE-2021-36260 (CVSS 9.8), CVE-2022-30525 (CVSS 9.8). Referenced in CISA advisories: AA23-074A, AA22-110A. Containment actions have been formulated and require SOC Analyst approval.",
+    "attack_type": "Web Attack",
+    "severity": "Critical",
+    "priority": "P1 - Critical Urgent",
+    "risk_score": 97.0,
+    "timeline": [
+      {
+        "timestamp": "+0.035s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.035s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated incident tracker INC-20261011-70861 (Execution Mode: COORDINATED). Initiating Threat Intelligence RAG retrieval.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.036s",
+        "agent": "Threat Intelligence Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 2 MITRE ATT&CK technique(s) and 2 verified CVE record(s). Zero hallucination checks passed.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.037s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 97.0/100 (Critical Severity, P1 - Critical Urgent).",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.037s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 3 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+        "status": "COMPLETED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENTIAL ASSESSMENT REPORT: INC-20261011-70861\n**Generated:** 2026-10-11 10:19:30 UTC  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n## 1. Executive Summary\nSECURITY INCIDENT ALERT: High-priority security incident INC-20261011-70861 detected. Network telemetry exhibits active 'Web Attack' threat patterns from 192.168.137.167:51331 targeting 54.69.37.156:443 (TCP) with 100.0% classification certainty. Assessed Risk Score is 97.0/100 (Critical Severity, P1 - Critical Urgent). Associated with MITRE ATT&CK technique(s): T1190 (Exploit Public-Facing Application), T1498 (Network Denial of Service). Correlates with known IoT vulnerabilities: CVE-2021-36260 (CVSS 9.8), CVE-2022-30525 (CVSS 9.8). Referenced in CISA advisories: AA23-074A, AA22-110A. Containment actions have been formulated and require SOC Analyst approval.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `Web Attack`\n- **Classification Confidence:** `99.99%`\n- **Source Endpoint:** `192.168.137.167:51331`\n- **Destination Endpoint:** `54.69.37.156:443`\n- **Transport Protocol:** `TCP`\n- **Detection Timestamp:** `2026-10-11 10:19:30`\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 0.01% `` |\n| Brute Force | 0.00% `` |\n| DDoS | 0.00% `` |\n| DoS | 0.00% `` |\n| Mirai | 0.00% `` |\n| Recon | 0.00% `` |\n| Spoofing | 0.00% `` |\n| Web Attack | 99.99% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Std` | 121.404 | +1.3452 | INCREASES |\n| 2 | `Variance` | 14739.028 | +1.2850 | INCREASES |\n| 3 | `ack_count` | 17.000 | +1.1600 | INCREASES |\n| 4 | `Rate` | 13.543 | +1.0677 | INCREASES |\n| 5 | `syn_count` | 2.000 | +0.5138 | INCREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 92%\n\n### MITRE ATT&CK Mapping\n- **[T1190: Exploit Public-Facing Application](https://attack.mitre.org/techniques/T1190/)** (Tactic: *Initial Access*)\n  Adversaries may exploit vulnerabilities in Internet-facing IoT applications, such as router web administration panels, camera RTSP streamers, or UPnP daemon entry points, to execute arbitrary operating system commands.\n- **[T1498: Network Denial of Service](https://attack.mitre.org/techniques/T1498/)** (Tactic: *Impact*)\n  Adversaries may perform Network Denial of Service (DoS) attacks to degrade or block the availability of targeted resources to users by exhausting network bandwidth through direct flooding or reflection amplification. In IoT environments, compromised devices are frequently enslaved to generate high-bandwidth UDP or TCP SYN floods targeting critical network nodes.\n\n### Correlated NVD / CVE Records\n- **[CVE-2021-36260](https://nvd.nist.gov/vuln/detail/CVE-2021-36260)** - CVSS `9.8` (CRITICAL)\n  *Affected:* Hikvision IP Cameras and NVR firmware (multiple model lines)\n  A command injection vulnerability in the web server of certain Hikvision IP camera models allows an attacker to send specially crafted messages with malicious shell payloads. Active in CISA KEV catalog; extensively targeted by Mirai, Mozi, and Gafgyt botnets to harvest cameras for high-bandwidth DDoS reflection attacks.\n- **[CVE-2022-30525](https://nvd.nist.gov/vuln/detail/CVE-2022-30525)** - CVSS `9.8` (CRITICAL)\n  *Affected:* Zyxel USG/ZyWALL/ATP firewalls with ZLD firmware\n  Unauthenticated remote command injection in the web management CGI of Zyxel firewall and IoT edge gateway devices via the libcli daemon. Allows remote attackers to execute arbitrary OS commands as nobody user.\n\n### CISA Security Advisories\n- **[AA23-074A: #StopRansomware: Initial Access Brokers Weaponizing IoT Network Appliances](https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-074a)** (Released 2023-03-15)\n- **[AA22-110A: Russian State-Sponsored and Criminal Cyber Actors Target Network Infrastructure and IoT Gateways](https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-110a)** (Released 2022-04-20)\n\n### Authoritative Sources\n- <https://attack.mitre.org/techniques/T1190/>\n- <https://attack.mitre.org/techniques/T1498/>\n- <https://nvd.nist.gov/vuln/detail/CVE-2021-36260>\n- <https://nvd.nist.gov/vuln/detail/CVE-2022-30525>\n- <https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-074a>\n- <https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-110a>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `97.0 / 100.0`\n- **Assigned Severity:** `CRITICAL`\n- **Operational Priority:** `P1 - Critical Urgent`\n- **Potential Impact:** Catastrophic or severe degradation of IoT gateway and dependent network infrastructure.\n- **Threat Likelihood:** Active Exploitation in Progress\n\n### Analytical Justification\n- Classified as 'Web Attack' with 100.0% model confidence.\n- Elevated SHAP attribution on 'Std' (value: 121.40, SHAP: +1.3452), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Variance' (value: 14739.03, SHAP: +1.2850), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Ack Count' (value: 17.00, SHAP: +1.1600), which strongly increases threat probability.\n- Correlated with Critical severity CVEs (CVSS score 9.8/10).\n- Referenced in active CISA cyber defense advisory (AA23-074A).\n- Targeting critical IoT service port 443 (TCP).\n- Network 5-tuple context: Source 192.168.137.167:51331 -> Destination 54.69.37.156:443 (TCP).\n\n---\n\n## 6. Recommended Response & Containment Playbook\n\n### Immediate Containment Steps\n1. Block web application requests containing command injection signatures from 192.168.137.167.\n1. Temporarily disable internet WAN access to device management interface on port 443.\n1. Place vulnerable IoT web server behind a Web Application Firewall (WAF).\n1. Inspect web server access logs for anomalous POST requests to CGI endpoints.\n\n### Recovery Procedures\n1. Power-cycle / reboot the affected IoT node to purge volatile memory-resident malware payloads.\n1. Re-flash firmware using verified cryptographically signed vendor media if filesystem tampering is suspected.\n1. Rotate all administrative passwords, SSH keys, and MQTT broker access tokens immediately.\n1. Conduct post-incident integrity check before restoring node to production VLAN.\n\n### Long-Term Prevention & Hardening\n- Implement microsegmentation (NIST SP 800-213) placing IoT devices into isolated VLANs without direct WAN routing.\n- Permanently disable legacy, unencrypted management services (Telnet port 23, HTTP port 80, UPnP) on all IoT devices.\n- Enforce 802.1X Network Access Control (NAC) to prevent rogue physical device attachments.\n- Establish continuous automated vulnerability scanning against known IoT CVE databases.\n\n### Firewall & Access Control Rules\n> [!CAUTION]\n> **ANALYST APPROVAL REQUIRED**: Automated execution is strictly disabled. Verify host parameters before executing.\n\n#### IPTABLES: Linux Netfilter rule to drop inbound packets from attacker 192.168.137.167.\n```bash\niptables -A INPUT -s 192.168.137.167 -p tcp --dport 443 -j DROP\n```\n\n#### WINDOWS_NETSH: Windows Advanced Firewall rule to block inbound traffic from 192.168.137.167.\n```bash\nnetsh advfirewall firewall add rule name=\"IoTShield_Block_Web_Attack_192.168.137.167\" dir=in action=block remoteip=192.168.137.167 protocol=TCP localport=443\n```\n\n#### CISCO_ACL: Cisco IOS standard extended ACL dropping traffic from 192.168.137.167 to 54.69.37.156.\n```bash\naccess-list 100 deny tcp host 192.168.137.167 host 54.69.37.156 eq 443\n```\n\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +0.035s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std. |\n| +0.035s | `Coordinator Agent` | Incident State Initialized | Allocated incident tracker INC-20261011-70861 (Execution Mode: COORDINATED). Initiating Threat Intelligence RAG retrieval. |\n| +0.036s | `Threat Intelligence Agent` | Knowledge Base RAG Retrieval | Retrieved 2 MITRE ATT&CK technique(s) and 2 verified CVE record(s). Zero hallucination checks passed. |\n| +0.037s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 97.0/100 (Critical Severity, P1 - Critical Urgent). |\n| +0.037s | `Response Agent` | Mitigation & ACL Formulation | Generated 3 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL. |"
+  },
+  "timeline": [
+    {
+      "timestamp": "+0.035s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.035s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated incident tracker INC-20261011-70861 (Execution Mode: COORDINATED). Initiating Threat Intelligence RAG retrieval.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.036s",
+      "agent": "Threat Intelligence Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 2 MITRE ATT&CK technique(s) and 2 verified CVE record(s). Zero hallucination checks passed.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.037s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 97.0/100 (Critical Severity, P1 - Critical Urgent).",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.037s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 3 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.037s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized comprehensive SOC assessment report for INC-20261011-70861 (8650 bytes).",
+      "status": "COMPLETED"
+    }
+  ]
+}

@@ -12,8 +12,13 @@ class Settings(BaseSettings):
     UPLOAD_DIR: str = os.path.join(BASE_DIR, "uploads")
     MODEL_DIR: str = os.path.join(BASE_DIR, "models")
     REPORTS_DIR: str = os.path.join(BASE_DIR, "reports")
+    STORAGE_REPORTS_DIR: str = os.path.join(BASE_DIR, "storage", "reports")
     SETTINGS_FILE: str = os.path.join(BASE_DIR, "platform_settings.json")
     DATABASE_URL: str = f"sqlite:///{os.path.join(BASE_DIR, 'iot_sentinel.db')}"
+
+    # MongoDB Persistent Storage
+    MONGODB_URI: str = os.environ.get("MONGODB_URI", "mongodb://localhost:27017")
+    MONGODB_DB_NAME: str = os.environ.get("MONGODB_DB_NAME", "iot_sentinel")
 
     class Config:
         case_sensitive = True
@@ -24,6 +29,7 @@ settings = Settings()
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 os.makedirs(settings.MODEL_DIR, exist_ok=True)
 os.makedirs(settings.REPORTS_DIR, exist_ok=True)
+os.makedirs(settings.STORAGE_REPORTS_DIR, exist_ok=True)
 
 DEFAULT_PLATFORM_SETTINGS: Dict[str, Any] = {
     "network_capture": {

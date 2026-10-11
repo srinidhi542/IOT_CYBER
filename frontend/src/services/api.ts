@@ -14,7 +14,9 @@ import {
   IncidentState,
   CaptureProcessResult,
   PlatformSettings,
-  PlatformSettingsResponse
+  PlatformSettingsResponse,
+  PersistentReport,
+  StorageStatus
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -314,5 +316,40 @@ export const apiService = {
       body: JSON.stringify(settings),
     });
     return handleResponse<PlatformSettingsResponse>(res);
+  },
+
+  // ═══════════════════════════════════════════════════
+  // PERSISTENT REPORT STORAGE (MONGODB & FILESYSTEM)
+  // ═══════════════════════════════════════════════════
+  async getReportStorageStatus(): Promise<StorageStatus> {
+    const res = await fetch(`${API_BASE_URL}/reports/storage/status`);
+    return handleResponse<StorageStatus>(res);
+  },
+
+  async getStoredReports(limit = 50, skip = 0, attack?: string, severity?: string): Promise<PersistentReport[]> {
+    const params = new URLSearchParams();
+    params.set('limit', limit.toString());
+    params.set('skip', skip.toString());
+    if (attack) params.set('attack', attack);
+    if (severity) params.set('severity', severity);
+    const res = await fetch(`${API_BASE_URL}/reports/storage?${params.toString()}`);
+    return handleResponse<PersistentReport[]>(res);
+  },
+
+  async getStoredReport(reportId: string): Promise<PersistentReport> {
+    const res = await fetch(`${API_BASE_URL}/reports/storage/${encodeURIComponent(reportId)}`);
+    return handleResponse<PersistentReport>(res);
+  },
+
+  async deleteStoredReport(reportId: string): Promise<{ message: string; report_id: string; deleted: boolean }> {
+    const res = await fetch(`${API_BASE_URL}/reports/storage/${encodeURIComponent(reportId)}`, {
+      method: 'DELETE',
+    });
+    return handleResponse<{ message: string; report_id: string; deleted: boolean }>(res);
+  },
+
+  getStoredReportDownloadUrl(reportId: string, format: 'md' | 'json' = 'md'): string {
+    return `${API_BASE_URL}/reports/storage/${encodeURIComponent(reportId)}/download?format=${format}`;
   }
 };
+

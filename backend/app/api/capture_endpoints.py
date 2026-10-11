@@ -162,6 +162,7 @@ def process_pcap(payload: ProcessPcapRequest):
 
         return {
             "pcap_path": pcap_path,
+            "packets_analyzed": net_ctx.get("total_packets", 0),
             "flows_extracted": len(df),
             "capture_stats": net_ctx,
             "overall_prediction": overall_pred,

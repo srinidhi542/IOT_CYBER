@@ -137,6 +137,39 @@ def get_network_interfaces() -> List[Dict[str, Any]]:
     return interfaces
 
 
+def _count_packets_in_pcap(pcap_path: str) -> int:
+    """
+    Counts the number of packets in a PCAP file without loading all into memory.
+    Uses TShark -r if available (fast), falls back to Scapy rdpcap.
+    Returns 0 on failure — never raises.
+    """
+    if not os.path.exists(pcap_path):
+        return 0
+
+    # Try TShark fast count first
+    tshark_path = find_tshark_path()
+    if tshark_path:
+        try:
+            result = subprocess.run(
+                [tshark_path, "-r", pcap_path, "-T", "fields", "-e", "frame.number"],
+                capture_output=True, text=True, timeout=10, check=False
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                lines = [l for l in result.stdout.strip().splitlines() if l.strip()]
+                return len(lines)
+        except Exception:
+            pass
+
+    # Fallback: Scapy
+    try:
+        from scapy.utils import rdpcap
+        pkts = rdpcap(pcap_path)
+        return len(pkts)
+    except Exception as ex:
+        logger.warning(f"Could not count packets in {pcap_path}: {ex}")
+        return 0
+
+
 class CaptureSession:
     def __init__(
         self,
@@ -158,6 +191,35 @@ class CaptureSession:
         self.process: Optional[subprocess.Popen] = None
         self._stop_event = threading.Event()
         self._thread: Optional[threading.Thread] = None
+        self._tshark_stderr_lines: List[str] = []  # captures TShark progress lines
+
+    def _read_tshark_stderr(self):
+        """
+        Background thread: reads TShark stderr to extract live packet count.
+        TShark writes progress lines like "Capturing on 'Wi-Fi'\n100 packets captured"
+        to stderr. We parse these to update packet_count in real time.
+        """
+        if not self.process or not self.process.stderr:
+            return
+        try:
+            for line in self.process.stderr:
+                line = line.strip()
+                if not line:
+                    continue
+                self._tshark_stderr_lines.append(line)
+                # TShark prints "N packets captured" or "N " periodically
+                if "packet" in line.lower():
+                    parts = line.split()
+                    for i, part in enumerate(parts):
+                        try:
+                            count = int(part)
+                            if count > 0:
+                                self.packet_count = count
+                                break
+                        except ValueError:
+                            continue
+        except Exception:
+            pass
 
     def to_dict(self) -> Dict[str, Any]:
         duration = 0.0
@@ -191,7 +253,8 @@ class CaptureSession:
 class CaptureManager:
     """
     Singleton Manager for Network Packet Captures.
-    Supports TShark subprocess execution and Native Scapy fallback capture.
+    Supports TShark subprocess execution only — no simulated/synthetic fallback.
+    If TShark is unavailable, an error is raised so the user knows to install it.
     """
     _instance = None
 
@@ -217,137 +280,72 @@ class CaptureManager:
             if self._active_session and self._active_session.is_capturing:
                 raise RuntimeError("A packet capture session is already in progress.")
 
+            tshark_path = find_tshark_path()
+            if not tshark_path:
+                raise RuntimeError(
+                    "TShark is not installed or not on PATH. "
+                    "Install Wireshark (with TShark) from https://www.wireshark.org/download.html "
+                    "to enable live packet capture."
+                )
+
             session_id = f"cap_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
             os.makedirs(output_dir, exist_ok=True)
             output_pcap = os.path.join(output_dir, f"{session_id}.pcap")
-
-            tshark_path = find_tshark_path()
-            mode = "tshark" if tshark_path else "native_stream"
 
             session = CaptureSession(
                 session_id=session_id,
                 interface=interface,
                 output_pcap=output_pcap,
-                mode=mode
+                mode="tshark"
             )
             session.start_time = datetime.now()
             session.is_capturing = True
 
-            if mode == "tshark" and tshark_path:
-                try:
-                    # Resolve interface name to TShark index or NPF GUID if possible
-                    iface_arg = str(interface)
-                    all_ifaces = get_network_interfaces()
-                    matched = next((i for i in all_ifaces if i["name"] == interface or i["id"] == interface), None)
-                    if matched and matched.get("id"):
-                        iface_arg = str(matched["id"])
+            # Resolve interface name → TShark index or NPF GUID
+            iface_arg = str(interface)
+            try:
+                all_ifaces = get_network_interfaces()
+                matched = next(
+                    (i for i in all_ifaces if i["name"] == interface or i["id"] == interface),
+                    None
+                )
+                if matched and matched.get("id"):
+                    iface_arg = str(matched["id"])
+            except Exception as ie:
+                logger.warning(f"Interface resolution failed, using raw name: {ie}")
 
-                    cmd = [tshark_path, "-i", iface_arg, "-F", "pcap", "-w", output_pcap]
-                    if duration_limit and duration_limit > 0:
-                        cmd.extend(["-a", f"duration:{duration_limit}"])
-                    if packet_limit and packet_limit > 0:
-                        cmd.extend(["-c", str(packet_limit)])
+            cmd = [tshark_path, "-i", iface_arg, "-F", "pcap", "-w", output_pcap]
+            if duration_limit and duration_limit > 0:
+                cmd.extend(["-a", f"duration:{duration_limit}"])
+            if packet_limit and packet_limit > 0:
+                cmd.extend(["-c", str(packet_limit)])
 
-                    logger.info(f"Starting TShark capture: {' '.join(cmd)}")
-                    session.process = subprocess.Popen(
-                        cmd,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        text=True
-                    )
-                except Exception as e:
-                    logger.error(f"Failed to spawn TShark: {e}. Falling back to native capture mode.")
-                    session.mode = "native_stream"
-                    self._start_native_capture(session, duration_limit, packet_limit)
-            else:
-                self._start_native_capture(session, duration_limit, packet_limit)
+            logger.info(f"Starting TShark capture: {' '.join(cmd)}")
+            try:
+                session.process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True
+                )
+                # Start background thread to read live packet count from TShark stderr
+                stderr_thread = threading.Thread(
+                    target=session._read_tshark_stderr,
+                    daemon=True
+                )
+                stderr_thread.start()
+                logger.info(
+                    f"TShark started (PID={session.process.pid}) on interface '{iface_arg}' "
+                    f"→ {output_pcap}"
+                )
+            except Exception as e:
+                session.is_capturing = False
+                session.error = str(e)
+                logger.error(f"Failed to spawn TShark process: {e}")
+                raise RuntimeError(f"Failed to start TShark: {e}")
 
             self._active_session = session
             return session
-
-    def _start_native_capture(
-        self,
-        session: CaptureSession,
-        duration_limit: Optional[int],
-        packet_limit: Optional[int]
-    ):
-        """
-        Runs a background native packet capture using Scapy and realistic IoT traffic telemetry.
-        Generates genuine PCAP files with valid IPv4, TCP, UDP, and application layers.
-        """
-        session._stop_event.clear()
-
-        def capture_worker():
-            try:
-                from scapy.utils import PcapWriter
-                from scapy.layers.inet import IP, TCP, UDP, ICMP
-                import random
-
-                writer = PcapWriter(session.output_pcap, append=True, sync=True)
-                start_ts = time.time()
-                packet_count = 0
-
-                # Pool of realistic IoT hosts and internet targets
-                iot_hosts = [
-                    "192.168.1.15",  # Smart Thermostat
-                    "192.168.1.20",  # Security Camera
-                    "192.168.1.50",  # Smart Hub / Gateway
-                    "192.168.1.10",  # Medical Monitor
-                    "192.168.1.110"  # Compromised Sensor
-                ]
-                external_targets = [
-                    "104.24.12.5",   # Cloud API
-                    "45.227.254.12", # Suspicious C2
-                    "210.10.85.14",  # Attacker IP
-                    "8.8.8.8",       # DNS Server
-                    "192.168.1.1"    # Local Router
-                ]
-
-                while not session._stop_event.is_set():
-                    elapsed = time.time() - start_ts
-                    if duration_limit and elapsed >= duration_limit:
-                        break
-                    if packet_limit and packet_count >= packet_limit:
-                        break
-
-                    # Generate realistic IoT packet burst
-                    src_ip = random.choice(iot_hosts)
-                    dst_ip = random.choice(external_targets)
-                    protocol_choice = random.choices(["TCP", "UDP", "ICMP"], weights=[0.65, 0.30, 0.05])[0]
-
-                    if protocol_choice == "TCP":
-                        dport = random.choice([80, 443, 1883, 23, 22, 8080])
-                        sport = random.randint(30000, 65000)
-                        flags = random.choice(["S", "A", "PA", "FA", "R"])
-                        payload = b"\x00" * random.randint(20, 500)
-                        pkt = IP(src=src_ip, dst=dst_ip, ttl=random.choice([64, 128, 54])) / \
-                              TCP(sport=sport, dport=dport, flags=flags) / payload
-                    elif protocol_choice == "UDP":
-                        dport = random.choice([53, 1883, 123, 67])
-                        sport = random.randint(30000, 65000)
-                        payload = b"\x01" * random.randint(30, 200)
-                        pkt = IP(src=src_ip, dst=dst_ip, ttl=64) / \
-                              UDP(sport=sport, dport=dport) / payload
-                    else:
-                        pkt = IP(src=src_ip, dst=dst_ip, ttl=128) / ICMP()
-
-                    writer.write(pkt)
-                    packet_count += 1
-                    session.packet_count = packet_count
-
-                    time.sleep(random.uniform(0.01, 0.05))
-
-                writer.close()
-                session.end_time = datetime.now()
-                session.is_capturing = False
-            except Exception as ex:
-                logger.error(f"Native capture error: {ex}")
-                session.error = str(ex)
-                session.is_capturing = False
-
-        thread = threading.Thread(target=capture_worker, daemon=True)
-        session._thread = thread
-        thread.start()
 
     def stop_capture(self) -> Dict[str, Any]:
         with self._lock:
@@ -358,62 +356,42 @@ class CaptureManager:
             session.is_capturing = False
             session.end_time = datetime.now()
 
-            # If TShark subprocess is running, terminate it
+            # Terminate TShark subprocess
             if session.process:
                 try:
                     session.process.terminate()
-                    session.process.wait(timeout=3)
-                except Exception:
+                    session.process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
                     try:
                         session.process.kill()
+                        session.process.wait(timeout=2)
                     except Exception:
                         pass
+                except Exception:
+                    pass
                 session.process = None
 
-            # If native thread is running, signal stop
-            if session._stop_event:
-                session._stop_event.set()
-                if session._thread and session._thread.is_alive():
-                    session._thread.join(timeout=2)
-
-            # Recalculate packet count and size from saved file
+            # Count actual packets captured from the real PCAP file
             if os.path.exists(session.output_pcap):
                 session.file_size = os.path.getsize(session.output_pcap)
-                try:
-                    from scapy.utils import rdpcap
-                    pkts = rdpcap(session.output_pcap)
-                    session.packet_count = len(pkts)
-                except Exception as ex:
-                    logger.warning(f"Could not read packet count via scapy: {ex}")
+                real_count = _count_packets_in_pcap(session.output_pcap)
+                session.packet_count = real_count
+                logger.info(
+                    f"Capture stopped. PCAP: {session.output_pcap} | "
+                    f"File size: {session.file_size} bytes | "
+                    f"Packets captured: {real_count}"
+                )
+                if real_count == 0:
+                    logger.warning(
+                        "TShark captured 0 packets. Possible causes: "
+                        "(1) Wrong interface selected — check /capture/interfaces. "
+                        "(2) No network activity during capture window. "
+                        "(3) Npcap/WinPcap not installed or requires admin privileges. "
+                        "Run the backend as Administrator for raw packet access."
+                    )
+            else:
+                logger.warning(f"PCAP file not found after capture: {session.output_pcap}")
 
-            # If TShark captured 0 packets (e.g., interface down or inactive link), generate simulated telemetry fallback
-            if session.packet_count == 0:
-                logger.info("Captured 0 packets via TShark. Generating fallback IoT packet stream into PCAP.")
-                try:
-                    from scapy.utils import PcapWriter
-                    from scapy.layers.inet import IP, TCP, UDP
-                    import random
-
-                    writer = PcapWriter(session.output_pcap, append=True, sync=True)
-                    local_ip = "192.168.1.100"
-                    dns_server = "8.8.8.8"
-                    gateway = "192.168.1.1"
-
-                    # Generate realistic benign standard DNS and HTTPS traffic
-                    for _ in range(20):
-                        # Benign DNS query / response pair
-                        writer.write(IP(src=local_ip, dst=dns_server, ttl=64) / UDP(sport=random.randint(49152, 65535), dport=53) / b"\xaa\xaa\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00\x07example\x03com\x00\x00\x01\x00\x01")
-                        # Benign HTTPS connection keep-alive
-                        writer.write(IP(src=local_ip, dst=gateway, ttl=64) / TCP(sport=random.randint(49152, 65535), dport=443, flags="A"))
-                    writer.close()
-
-                    session.file_size = os.path.getsize(session.output_pcap)
-                    pkts = rdpcap(session.output_pcap)
-                    session.packet_count = len(pkts)
-                except Exception as ex:
-                    logger.error(f"Fallback packet generation failed: {ex}")
-
-            logger.info(f"Capture stopped. Saved {session.packet_count} packets to {session.output_pcap}")
             return session.to_dict()
 
     def get_status(self) -> Dict[str, Any]:
@@ -431,12 +409,24 @@ class CaptureManager:
                     "tshark_path": find_tshark_path()
                 }
 
-            # Check if tshark process terminated on its own (e.g. duration limit reached)
-            if self._active_session.process and self._active_session.process.poll() is not None:
-                self._active_session.is_capturing = False
-                self._active_session.end_time = datetime.now()
+            session = self._active_session
 
-            return self._active_session.to_dict()
+            # Check if TShark process has terminated on its own (e.g. duration limit)
+            if session.process and session.process.poll() is not None:
+                if session.is_capturing:
+                    session.is_capturing = False
+                    session.end_time = datetime.now()
+                    # Update packet count from file
+                    if os.path.exists(session.output_pcap):
+                        session.file_size = os.path.getsize(session.output_pcap)
+                        real_count = _count_packets_in_pcap(session.output_pcap)
+                        session.packet_count = real_count
+                        logger.info(
+                            f"TShark process ended (duration limit or packet limit reached). "
+                            f"Captured {real_count} packets."
+                        )
+
+            return session.to_dict()
 
 
 # Global capture manager singleton

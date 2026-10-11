@@ -48,15 +48,17 @@ def predict_tuned(record: Dict[str, Any]) -> Dict[str, Any]:
     # -------------------------------------------------------------------------
     # Two-Stage Hierarchical Inference
     # -------------------------------------------------------------------------
-    # Stage 1: If binary model exists, check if flow is Benign first
-    is_binary_benign = False
-    binary_conf = 0.90
+    # Stage 1: Binary Anomaly / Threat Gate
+    is_binary_attack = False
+    bin_conf = 0.50
     if binary_model is not None:
         bin_pred = binary_model.predict(X_scaled)[0]
         bin_probs = binary_model.predict_proba(X_scaled)[0]
-        if bin_pred == 0:  # 0 = Benign
-            is_binary_benign = True
-            binary_conf = float(bin_probs[0])
+        if bin_pred == 1:
+            is_binary_attack = True
+            bin_conf = float(bin_probs[1])
+        else:
+            bin_conf = float(bin_probs[0])
             
     # Stage 2: Multi-class prediction
     probs = model.predict_proba(X_scaled)[0]
@@ -64,41 +66,21 @@ def predict_tuned(record: Dict[str, Any]) -> Dict[str, Any]:
     raw_pred_class = str(le.inverse_transform([pred_idx])[0])
     raw_conf = float(probs[pred_idx])
 
-    # Domain Policy Checks (Defense in Depth)
-    is_arp = float(record.get('ARP', 0.0)) > 0.5 or float(record.get('Protocol Type', 0.0)) == 2054.0
-    pkt_count = float(record.get('Number', 1.0))
-    rate = float(record.get('Rate', 0.0))
-    is_routine_arp = is_arp and (pkt_count <= 8 and rate < 20.0)
-
-    is_http_https = float(record.get('HTTP', 0.0)) > 0.5 or float(record.get('HTTPS', 0.0)) > 0.5
-    is_tcp = float(record.get('TCP', 0.0)) > 0.5 or float(record.get('Protocol Type', 0.0)) == 6.0 or str(record.get('Protocol_Name', '')).upper() == 'TCP'
-    is_standard_web = is_http_https and is_tcp and rate < 50.0
-
-    # Genuine ARP/DNS spoofing requires ARP protocol or severe DNS/IP anomalies;
-    # small outbound unicast TCP handshakes (Rate < 30, Number < 15, Min >= 40) are routine benign traffic
-    is_routine_tcp = is_tcp and not is_arp and rate < 30.0 and pkt_count <= 15 and float(record.get('Min', 0.0)) >= 40.0
-
-    # Determine Final Classification
-    if is_binary_benign:
-        # Stage 1 Binary Model confirmed Benign
-        benign_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() in ["benign", "normal"]]
-        pred_class = str(le.classes_[benign_indices[0]]) if benign_indices else "Benign"
-        confidence = binary_conf
-    elif is_routine_arp or is_routine_tcp or (raw_pred_class == "Web Attack" and is_standard_web and raw_conf < 0.85):
-        benign_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() in ["benign", "normal"]]
-        pred_class = str(le.classes_[benign_indices[0]]) if benign_indices else "Benign"
-        confidence = 0.95
-    elif raw_pred_class.lower() not in ["benign", "normal"] and raw_conf < 0.65:
-        benign_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() in ["benign", "normal"]]
-        if benign_indices:
-            pred_class = str(le.classes_[benign_indices[0]])
-            confidence = float(max(probs[benign_indices[0]], 0.85))
+    # Pure ML Model Decision
+    if is_binary_attack:
+        if raw_pred_class.lower() in ["benign", "normal"]:
+            # Binary stage flagged threat: select highest-probability attack class
+            attack_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() not in ["benign", "normal"]]
+            best_att_idx = max(attack_indices, key=lambda i: probs[i])
+            pred_class = str(le.classes_[best_att_idx])
+            confidence = float(probs[best_att_idx])
         else:
-            pred_class = "Benign"
-            confidence = 0.85
+            pred_class = raw_pred_class
+            confidence = raw_conf
     else:
-        pred_class = raw_pred_class
-        confidence = raw_conf
+        benign_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() in ["benign", "normal"]]
+        pred_class = str(le.classes_[benign_indices[0]]) if benign_indices else raw_pred_class
+        confidence = float(probs[benign_indices[0]]) if benign_indices else bin_conf
     
     # Build probabilities dict
     class_probs = {str(le.classes_[i]): float(probs[i]) for i in range(len(le.classes_))}
@@ -140,49 +122,33 @@ def explain_prediction(record: Dict[str, Any], top_k: Optional[int] = None) -> D
     raw_pred_class = str(le.inverse_transform([raw_pred_idx])[0])
     raw_conf = float(probs[raw_pred_idx])
     binary_model = artifact.get('binary_model', None)
-    is_binary_benign = False
-    binary_conf = 0.90
+    is_binary_attack = False
+    bin_conf = 0.50
     if binary_model is not None:
         bin_pred = binary_model.predict(X_scaled)[0]
         bin_probs = binary_model.predict_proba(X_scaled)[0]
-        if bin_pred == 0:  # 0 = Benign
-            is_binary_benign = True
-            binary_conf = float(bin_probs[0])
+        if bin_pred == 1:
+            is_binary_attack = True
+            bin_conf = float(bin_probs[1])
+        else:
+            bin_conf = float(bin_probs[0])
 
-    # 1. Routine ARP discovery check
-    is_arp = float(record.get('ARP', 0.0)) > 0.5 or float(record.get('Protocol Type', 0.0)) == 2054.0
-    pkt_count = float(record.get('Number', 1.0))
-    rate = float(record.get('Rate', 0.0))
-    is_routine_arp = is_arp and (pkt_count <= 8 and rate < 20.0)
-
-    # 2. Standard Outbound Web Browsing check
-    is_http_https = float(record.get('HTTP', 0.0)) > 0.5 or float(record.get('HTTPS', 0.0)) > 0.5
-    is_tcp = float(record.get('TCP', 0.0)) > 0.5 or float(record.get('Protocol Type', 0.0)) == 6.0 or str(record.get('Protocol_Name', '')).upper() == 'TCP'
-    is_standard_web = is_http_https and is_tcp and rate < 50.0
-
-    # 3. Routine outbound TCP check
-    is_routine_tcp = is_tcp and not is_arp and rate < 30.0 and pkt_count <= 15 and float(record.get('Min', 0.0)) >= 40.0
-
-    # Apply Domain Gating & Confidence Thresholding
-    if is_binary_benign:
-        benign_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() in ["benign", "normal"]]
-        pred_idx = benign_indices[0] if benign_indices else raw_pred_idx
-        pred_class = str(le.classes_[pred_idx])
-        confidence = binary_conf
-    elif is_routine_arp or is_routine_tcp or (raw_pred_class == "Web Attack" and is_standard_web and raw_conf < 0.85):
-        benign_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() in ["benign", "normal"]]
-        pred_idx = benign_indices[0] if benign_indices else raw_pred_idx
-        pred_class = str(le.classes_[pred_idx])
-        confidence = 0.95
-    elif raw_pred_class.lower() not in ["benign", "normal"] and raw_conf < 0.65:
-        benign_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() in ["benign", "normal"]]
-        pred_idx = benign_indices[0] if benign_indices else raw_pred_idx
-        pred_class = str(le.classes_[pred_idx])
-        confidence = float(max(probs[pred_idx], 0.85))
+    # Pure ML Model Decision
+    if is_binary_attack:
+        if raw_pred_class.lower() in ["benign", "normal"]:
+            attack_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() not in ["benign", "normal"]]
+            pred_idx = max(attack_indices, key=lambda i: probs[i])
+            pred_class = str(le.classes_[pred_idx])
+            confidence = float(probs[pred_idx])
+        else:
+            pred_idx = raw_pred_idx
+            pred_class = raw_pred_class
+            confidence = raw_conf
     else:
-        pred_idx = raw_pred_idx
-        pred_class = raw_pred_class
-        confidence = raw_conf
+        benign_indices = [i for i, c in enumerate(le.classes_) if str(c).lower() in ["benign", "normal"]]
+        pred_idx = benign_indices[0] if benign_indices else raw_pred_idx
+        pred_class = str(le.classes_[pred_idx]) if benign_indices else raw_pred_class
+        confidence = float(probs[benign_indices[0]]) if benign_indices else bin_conf
     class_probs = {str(le.classes_[i]): float(probs[i]) for i in range(len(le.classes_))}
     
     # Compute real SHAP values

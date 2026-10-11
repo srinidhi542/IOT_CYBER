@@ -115,7 +115,7 @@ class TestAnomalyAndThreatEngine(unittest.TestCase):
         self.assertEqual(res["attack_type"], "Unknown / Suspicious")
         self.assertGreaterEqual(res["risk_score"], 50.0)
         self.assertEqual(res["severity"], "High")
-        self.assertIn("does not strongly match", res["scenario_description"])
+        self.assertIn("does not match a known attack category", res["scenario_description"])
 
     def test_feature_deviation_assessment(self):
         """

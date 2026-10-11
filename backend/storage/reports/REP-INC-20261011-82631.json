@@ -1,0 +1,264 @@
+{
+  "report_id": "REP-INC-20261011-82631",
+  "incident_id": "INC-20261011-82631",
+  "detection": {
+    "attack_type": "Benign",
+    "confidence": 0.9997584223747253,
+    "probabilities": {
+      "Benign": 0.9997584223747253,
+      "Brute Force": 1.0170615496463142e-06,
+      "DDoS": 7.684076308578369e-07,
+      "DoS": 3.9323000237345695e-05,
+      "Mirai": 2.1928572095930576e-06,
+      "Recon": 2.0054280867043417e-06,
+      "Spoofing": 0.0001306858757743612,
+      "Web Attack": 6.563193892361596e-05
+    },
+    "network_context": {
+      "timestamp": "2026-10-11 10:14:41",
+      "source_ip": "192.168.48.1",
+      "destination_ip": "224.0.0.251",
+      "source_port": 5353,
+      "destination_port": 5353,
+      "protocol": "UDP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Rate",
+        "value": 6.233,
+        "shap_value": 3.5026,
+        "direction": "increases"
+      },
+      {
+        "feature": "Number",
+        "value": 5.0,
+        "shap_value": 2.9624,
+        "direction": "increases"
+      },
+      {
+        "feature": "syn_count",
+        "value": 0.0,
+        "shap_value": 0.8149,
+        "direction": "increases"
+      },
+      {
+        "feature": "IAT",
+        "value": 0.200545,
+        "shap_value": 0.3745,
+        "direction": "increases"
+      },
+      {
+        "feature": "ack_count",
+        "value": 0.0,
+        "shap_value": -0.2423,
+        "direction": "decreases"
+      }
+    ],
+    "shap_values": {
+      "Rate": 3.5026,
+      "Number": 2.9624,
+      "syn_count": 0.8149,
+      "IAT": 0.3745,
+      "ack_count": -0.2423,
+      "Max": -0.2204,
+      "ack_flag_number": -0.1991,
+      "Std": -0.1497,
+      "Tot sum": 0.1225,
+      "Min": -0.1048,
+      "Variance": -0.1006,
+      "syn_flag_number": 0.0844,
+      "psh_flag_number": 0.0722,
+      "AVG": -0.0632,
+      "Time_To_Live": 0.03,
+      "Header_Length": 0.0237,
+      "Tot size": 0.0213,
+      "rst_flag_number": 0.0098,
+      "fin_count": -0.004,
+      "fin_flag_number": 0.002,
+      "rst_count": 0.0004,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 28.0,
+      "Protocol Type": 17.0,
+      "Time_To_Live": 1.0,
+      "Rate": 6.233,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ack_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 0.0,
+      "syn_count": 0.0,
+      "fin_count": 0.0,
+      "rst_count": 0.0,
+      "HTTP": 0.0,
+      "HTTPS": 0.0,
+      "DNS": 0.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 0.0,
+      "UDP": 1.0,
+      "DHCP": 0.0,
+      "ARP": 0.0,
+      "ICMP": 0.0,
+      "IGMP": 0.0,
+      "IPv": 1.0,
+      "LLC": 0.0,
+      "Tot sum": 743.0,
+      "Min": 86.0,
+      "Max": 271.0,
+      "AVG": 148.6,
+      "Std": 78.7594,
+      "Tot size": 743.0,
+      "IAT": 0.200545,
+      "Number": 5.0,
+      "Variance": 6203.04,
+      "Source_IP": "192.168.48.1",
+      "Destination_IP": "224.0.0.251",
+      "Protocol_Name": "UDP",
+      "Source_Port": 5353,
+      "Destination_Port": 5353
+    }
+  },
+  "threat_intel": {
+    "mitre_attack": [],
+    "cve_list": [],
+    "cisa_advisories": [],
+    "iot_threat_context": "Traffic exhibits normal baseline behavioral patterns consistent with authorized IoT telemetry. No active MITRE ATT&CK exploitation techniques or CISA KEV alerts correlate with this flow. Adherence to NIST SP 800-213 IoT device cybersecurity baseline monitoring is recommended.",
+    "retrieval_confidence": 1.0,
+    "sources": [
+      "https://csrc.nist.gov/publications/detail/sp/800-213/final",
+      "https://attack.mitre.org"
+    ]
+  },
+  "risk": {
+    "risk_score": 0.0,
+    "severity": "Low",
+    "priority": "P4 - Low / Informational",
+    "impact": "Minimal - Routine Authorized IoT Operations",
+    "likelihood": "Negligible",
+    "reasoning": [
+      "Network traffic behavior matches known benign telemetry baseline.",
+      "No anomalous feature spikes or unauthorized access vectors detected.",
+      "Model confidence in benign classification is 100.0%."
+    ]
+  },
+  "response": {
+    "containment": [
+      "No active containment required for baseline network traffic.",
+      "Keep endpoint under continuous passive anomaly monitoring."
+    ],
+    "recovery": [
+      "Maintain standard device telemetry logging.",
+      "Verify normal heartbeat synchronization."
+    ],
+    "prevention": [
+      "Periodically review IoT device firmware against vendor security bulletins.",
+      "Maintain zero-trust network segregation for sensitive endpoints."
+    ],
+    "firewall_commands": [],
+    "approval_required": false,
+    "approval_status": "APPROVED",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated benign baseline approval."
+  },
+  "report": {
+    "incident_id": "INC-20261011-82631",
+    "generated_at": "2026-10-11 10:14:42 UTC",
+    "title": "SOC Incident Assessment: INC-20261011-82631 [Benign]",
+    "executive_summary": "Incident INC-20261011-82631 evaluated network traffic between 192.168.48.1:5353 and 224.0.0.251:5353 (UDP). The flow was classified as Benign baseline activity with 100.0% confidence. Overall Risk Score is 0.0/100 (Low). No active malicious exploitation was identified.",
+    "attack_type": "Benign",
+    "severity": "Low",
+    "priority": "P4 - Low / Informational",
+    "risk_score": 0.0,
+    "timeline": [
+      {
+        "timestamp": "+0.066s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Benign' with 100.0% confidence. Primary feature driver: Rate.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.066s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated incident tracker INC-20261011-82631 (Execution Mode: COORDINATED). Initiating Threat Intelligence RAG retrieval.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.067s",
+        "agent": "Threat Intelligence Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 0 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero hallucination checks passed.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.067s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 0.0/100 (Low Severity, P4 - Low / Informational).",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.067s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 0 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+        "status": "COMPLETED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENTIAL ASSESSMENT REPORT: INC-20261011-82631\n**Generated:** 2026-10-11 10:14:42 UTC  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n## 1. Executive Summary\nIncident INC-20261011-82631 evaluated network traffic between 192.168.48.1:5353 and 224.0.0.251:5353 (UDP). The flow was classified as Benign baseline activity with 100.0% confidence. Overall Risk Score is 0.0/100 (Low). No active malicious exploitation was identified.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `Benign`\n- **Classification Confidence:** `99.98%`\n- **Source Endpoint:** `192.168.48.1:5353`\n- **Destination Endpoint:** `224.0.0.251:5353`\n- **Transport Protocol:** `UDP`\n- **Detection Timestamp:** `2026-10-11 10:14:41`\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 99.98% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n| Brute Force | 0.00% `` |\n| DDoS | 0.00% `` |\n| DoS | 0.00% `` |\n| Mirai | 0.00% `` |\n| Recon | 0.00% `` |\n| Spoofing | 0.01% `` |\n| Web Attack | 0.01% `` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Rate` | 6.233 | +3.5026 | INCREASES |\n| 2 | `Number` | 5.000 | +2.9624 | INCREASES |\n| 3 | `syn_count` | 0.000 | +0.8149 | INCREASES |\n| 4 | `IAT` | 0.201 | +0.3745 | INCREASES |\n| 5 | `ack_count` | 0.000 | -0.2423 | DECREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 100%\n\n### MITRE ATT&CK Mapping\n- *No active MITRE ATT&CK techniques associated with baseline traffic.*\n\n### Correlated NVD / CVE Records\n- *No matching high-risk CVE vulnerabilities found in verified database.*\n\n### Authoritative Sources\n- <https://csrc.nist.gov/publications/detail/sp/800-213/final>\n- <https://attack.mitre.org>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `0.0 / 100.0`\n- **Assigned Severity:** `LOW`\n- **Operational Priority:** `P4 - Low / Informational`\n- **Potential Impact:** Minimal - Routine Authorized IoT Operations\n- **Threat Likelihood:** Negligible\n\n### Analytical Justification\n- Network traffic behavior matches known benign telemetry baseline.\n- No anomalous feature spikes or unauthorized access vectors detected.\n- Model confidence in benign classification is 100.0%.\n\n---\n\n## 6. Recommended Response & Containment Playbook\n\n### Immediate Containment Steps\n1. No active containment required for baseline network traffic.\n1. Keep endpoint under continuous passive anomaly monitoring.\n\n### Recovery Procedures\n1. Maintain standard device telemetry logging.\n1. Verify normal heartbeat synchronization.\n\n### Long-Term Prevention & Hardening\n- Periodically review IoT device firmware against vendor security bulletins.\n- Maintain zero-trust network segregation for sensitive endpoints.\n\n### Firewall & Access Control Rules\n> [!CAUTION]\n> **ANALYST APPROVAL REQUIRED**: Automated execution is strictly disabled. Verify host parameters before executing.\n\n*No active firewall blocks recommended for benign traffic.*\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +0.066s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'Benign' with 100.0% confidence. Primary feature driver: Rate. |\n| +0.066s | `Coordinator Agent` | Incident State Initialized | Allocated incident tracker INC-20261011-82631 (Execution Mode: COORDINATED). Initiating Threat Intelligence RAG retrieval. |\n| +0.067s | `Threat Intelligence Agent` | Knowledge Base RAG Retrieval | Retrieved 0 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero hallucination checks passed. |\n| +0.067s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 0.0/100 (Low Severity, P4 - Low / Informational). |\n| +0.067s | `Response Agent` | Mitigation & ACL Formulation | Generated 0 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL. |"
+  },
+  "timeline": [
+    {
+      "timestamp": "+0.066s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Benign' with 100.0% confidence. Primary feature driver: Rate.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.066s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated incident tracker INC-20261011-82631 (Execution Mode: COORDINATED). Initiating Threat Intelligence RAG retrieval.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.067s",
+      "agent": "Threat Intelligence Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 0 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero hallucination checks passed.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.067s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 0.0/100 (Low Severity, P4 - Low / Informational).",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.067s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 0 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.067s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized comprehensive SOC assessment report for INC-20261011-82631 (4126 bytes).",
+      "status": "COMPLETED"
+    }
+  ]
+}

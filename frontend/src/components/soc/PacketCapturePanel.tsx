@@ -141,9 +141,9 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
         }
         if (procResult.incidents && procResult.incidents.length > 0) {
           onIncidentsGenerated(procResult.incidents);
-          setSuccessMsg(`Extracted ${procResult.flows_extracted} flows. Analyzed overall traffic profile through Multi-Agent SOC Pipeline.`);
+          setSuccessMsg(`Extracted ${procResult.flows_extracted} flows (${procResult.packets_analyzed || stopRes.packet_count || 0} packets). Classified as ${procResult.overall_prediction?.label || 'Analyzed'}.`);
         } else {
-          setSuccessMsg(`Captured ${stopRes.packet_count} packets. Traffic evaluated as Benign.`);
+          setSuccessMsg(`Captured ${stopRes.packet_count || procResult.packets_analyzed || 0} packets (${procResult.flows_extracted} flows). Classified as ${procResult.overall_prediction?.label || 'Benign'}.`);
         }
       }
     } catch (err: any) {
@@ -185,9 +185,9 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
       }
       if (procResult.incidents && procResult.incidents.length > 0) {
         onIncidentsGenerated(procResult.incidents);
-        setSuccessMsg(`Successfully parsed ${procResult.flows_extracted} flows. Generated overall SOC Incident Assessment.`);
+        setSuccessMsg(`Parsed ${procResult.flows_extracted} flows (${procResult.packets_analyzed || 0} packets). Classified as ${procResult.overall_prediction?.label || 'Analyzed'}.`);
       } else {
-        setSuccessMsg(`Processed PCAP. Traffic evaluated as Benign.`);
+        setSuccessMsg(`Parsed ${procResult.flows_extracted} flows. Classified as ${procResult.overall_prediction?.label || 'Benign'}.`);
       }
     } catch (err: any) {
       setErrorMsg(err.message || "PCAP processing failed");
@@ -332,7 +332,7 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
                 <span>PACKETS</span>
               </div>
               <span className="text-lg font-bold text-purple-400">
-                {captureStatus?.packet_count || (capturing ? Math.floor(durationTimer * 24) : 0)}
+                {captureStatus?.packet_count || 0}
               </span>
             </div>
           </div>

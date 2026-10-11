@@ -307,6 +307,7 @@ export interface IncidentState {
 export interface CaptureProcessResult {
   pcap_path: string;
   flows_extracted: number;
+  packets_analyzed?: number;
   capture_stats?: {
     Timestamp?: string;
     Source_IP?: string;
@@ -369,4 +370,76 @@ export interface PlatformSettingsResponse {
   health: Record<string, { name: string; status: string; details?: string }>;
   agents_health: Record<string, { name: string; status: string; details?: string }>;
 }
+
+export interface PersistentReport {
+  report_id: string;
+  incident_id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  source: string;
+  filename: string;
+  filepath: string;
+  file_size: number;
+  mime_type: string;
+  file_exists?: boolean;
+  attack_classification: string;
+  confidence: number;
+  probabilities: Record<string, number>;
+  flow_statistics: {
+    source_ip?: string;
+    source_port?: number;
+    destination_ip?: string;
+    destination_port?: number;
+    protocol?: string;
+    timestamp?: string;
+    total_packets?: number;
+    total_flows?: number;
+  };
+  shap_explanations: {
+    top_contributing_features: Array<{
+      feature: string;
+      value: number;
+      shap_value: number;
+      direction: string;
+    }>;
+    shap_values: Record<string, number>;
+  };
+  agent_findings: {
+    executive_summary?: string;
+    mitre_attack?: Record<string, any>;
+    threat_category?: string;
+    nvd_cves?: Array<{ cve_id: string; description: string; cvss: number }>;
+    cisa_known_exploited?: boolean;
+    iot_threat_context?: string;
+    risk_score: number;
+    severity: 'Critical' | 'High' | 'Medium' | 'Low';
+    priority: string;
+    contributing_factors?: string[];
+  };
+  mitigation_recommendations: {
+    actions?: string[];
+    firewall_rules?: string[];
+    requires_human_authorization?: boolean;
+    recommendations?: string[];
+  };
+  timeline?: Array<{
+    timestamp: string;
+    agent_name: string;
+    action: string;
+    details: string;
+  }>;
+  markdown_content?: string;
+}
+
+export interface StorageStatus {
+  mongodb_connected: boolean;
+  mongodb_uri: string;
+  mongodb_database: string;
+  storage_directory: string;
+  directory_exists: boolean;
+  total_files_on_disk: number;
+  total_records_in_db: number;
+}
+
 

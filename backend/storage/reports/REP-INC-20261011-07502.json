@@ -1,0 +1,342 @@
+{
+  "report_id": "REP-INC-20261011-07502",
+  "incident_id": "INC-20261011-07502",
+  "detection": {
+    "attack_type": "DDoS",
+    "confidence": 0.999523401260376,
+    "probabilities": {
+      "Benign": 1.4398440725926775e-05,
+      "Brute Force": 1.4953137679185602e-06,
+      "DDoS": 0.999523401260376,
+      "DoS": 2.9553671083704103e-06,
+      "Mirai": 2.391777570664999e-06,
+      "Recon": 1.0702140116336523e-06,
+      "Spoofing": 9.577622677170439e-07,
+      "Web Attack": 0.0004533155879471451
+    },
+    "network_context": {
+      "timestamp": "2026-10-11 10:11:47",
+      "source_ip": "192.168.1.110",
+      "destination_ip": "192.168.1.20",
+      "source_port": 57332,
+      "destination_port": 23,
+      "protocol": "TCP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Rate",
+        "value": 4500.0,
+        "shap_value": 3.8387,
+        "direction": "increases"
+      },
+      {
+        "feature": "Min",
+        "value": 40.0,
+        "shap_value": 1.346,
+        "direction": "increases"
+      },
+      {
+        "feature": "AVG",
+        "value": 60.0,
+        "shap_value": 1.1804,
+        "direction": "increases"
+      },
+      {
+        "feature": "Number",
+        "value": 500.0,
+        "shap_value": 0.9371,
+        "direction": "increases"
+      },
+      {
+        "feature": "Header_Length",
+        "value": 13.2,
+        "shap_value": -0.4319,
+        "direction": "decreases"
+      }
+    ],
+    "shap_values": {
+      "Rate": 3.8387,
+      "Min": 1.346,
+      "AVG": 1.1804,
+      "Number": 0.9371,
+      "Header_Length": -0.4319,
+      "syn_count": 0.2325,
+      "Time_To_Live": -0.2301,
+      "IAT": 0.1693,
+      "Max": 0.096,
+      "Variance": -0.0709,
+      "Std": -0.0475,
+      "Tot sum": 0.0408,
+      "Tot size": -0.0039,
+      "ack_count": -0.0004,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ack_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "fin_count": 0.0,
+      "rst_count": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 13.2,
+      "Protocol Type": 6,
+      "Time_To_Live": 64.0,
+      "Rate": 4500.0,
+      "fin_flag_number": 0,
+      "syn_flag_number": 1,
+      "rst_flag_number": 0,
+      "psh_flag_number": 0,
+      "ack_flag_number": 0,
+      "ece_flag_number": 0,
+      "cwr_flag_number": 0,
+      "ack_count": 0,
+      "syn_count": 500,
+      "fin_count": 0,
+      "rst_count": 0,
+      "HTTP": 0,
+      "HTTPS": 0,
+      "DNS": 0,
+      "Telnet": 1,
+      "SMTP": 0,
+      "SSH": 0,
+      "IRC": 0,
+      "TCP": 1,
+      "UDP": 0,
+      "DHCP": 0,
+      "ARP": 0,
+      "ICMP": 0,
+      "IGMP": 0,
+      "IPv": 1,
+      "LLC": 1,
+      "Tot sum": 25000,
+      "Min": 40,
+      "Max": 1500,
+      "AVG": 60,
+      "Std": 120,
+      "Tot size": 25000,
+      "IAT": 0.0002,
+      "Number": 500,
+      "Variance": 14400.0,
+      "Source_IP": "192.168.1.110",
+      "Destination_IP": "192.168.1.20",
+      "Source_Port": 57332,
+      "Destination_Port": 23,
+      "Protocol_Name": "TCP"
+    }
+  },
+  "threat_intel": {
+    "mitre_attack": [
+      {
+        "id": "T1498",
+        "name": "Network Denial of Service",
+        "tactic": "Impact",
+        "description": "Adversaries may perform Network Denial of Service (DoS) attacks to degrade or block the availability of targeted resources to users by exhausting network bandwidth through direct flooding or reflection amplification. In IoT environments, compromised devices are frequently enslaved to generate high-bandwidth UDP or TCP SYN floods targeting critical network nodes.",
+        "url": "https://attack.mitre.org/techniques/T1498/"
+      },
+      {
+        "id": "T1499",
+        "name": "Endpoint Denial of Service",
+        "tactic": "Impact",
+        "description": "Adversaries may target endpoints with packets engineered to exhaust system memory, CPU cycles, or state tables (e.g. TCP connection state exhaustion). Resource-constrained IoT embedded microcontrollers and smart sensors are particularly vulnerable to crashing when subjected to malformed protocol headers or rapid connection opens.",
+        "url": "https://attack.mitre.org/techniques/T1499/"
+      }
+    ],
+    "cve_list": [
+      {
+        "cve_id": "CVE-2016-10401",
+        "affected_systems": "ZyXEL and generic BusyBox-based IoT routers / embedded Linux devices",
+        "cvss_score": 9.8,
+        "severity": "CRITICAL",
+        "description": "Hardcoded and default credential vulnerability in embedded BusyBox Linux firmware used across multiple consumer router and IP device vendors. Mirai botnet scan engines automate rapid dictionary attacks matching known default usernames/passwords over Telnet port 23.",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2016-10401"
+      },
+      {
+        "cve_id": "CVE-2020-11896",
+        "affected_systems": "Treck TCP/IP Embedded Stack (Ripple20 vulnerabilities)",
+        "cvss_score": 10.0,
+        "severity": "CRITICAL",
+        "description": "Multiple memory corruption vulnerabilities in the Treck TCP/IP stack (Ripple20) when processing IPv4 fragments over UDP or ICMP. Allows an unauthenticated network attacker to trigger remote code execution or complete system crash (Denial of Service) across industrial, medical, and smart infrastructure IoT devices.",
+        "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-11896"
+      }
+    ],
+    "cisa_advisories": [
+      {
+        "id": "AA20-302A",
+        "title": "Ransomware and Botnet Activity Targeting Critical Infrastructure and Healthcare IoT",
+        "release_date": "2020-10-28",
+        "summary": "CISA, FBI, and HHS warn that threat actors are leveraging compromised IoT devices and botnets to execute high-volume DDoS attacks and disruption campaigns against healthcare facilities, clinical monitoring IoT devices, and public sector networks.",
+        "url": "https://www.cisa.gov/news-events/cybersecurity-advisories/aa20-302a"
+      },
+      {
+        "id": "ICSA-20-168-01",
+        "title": "Treck TCP/IP Stack Vulnerabilities (Ripple20)",
+        "release_date": "2020-06-16",
+        "summary": "CISA warning regarding 19 distinct vulnerabilities in the Treck embedded TCP/IP stack (Ripple20). Multiple vulnerabilities can lead to unauthenticated remote code execution or complete denial-of-service crashes across hundreds of millions of industrial and consumer IoT microcontrollers.",
+        "url": "https://www.cisa.gov/news-events/ics-advisories/icsa-20-168-01"
+      }
+    ],
+    "iot_threat_context": "Associated with MITRE ATT&CK technique(s): T1498 (Network Denial of Service), T1499 (Endpoint Denial of Service). Correlates with known IoT vulnerabilities: CVE-2016-10401 (CVSS 9.8), CVE-2020-11896 (CVSS 10.0). Referenced in CISA advisories: AA20-302A, ICSA-20-168-01.",
+    "retrieval_confidence": 0.92,
+    "sources": [
+      "https://attack.mitre.org/techniques/T1498/",
+      "https://attack.mitre.org/techniques/T1499/",
+      "https://nvd.nist.gov/vuln/detail/CVE-2016-10401",
+      "https://nvd.nist.gov/vuln/detail/CVE-2020-11896",
+      "https://www.cisa.gov/news-events/cybersecurity-advisories/aa20-302a",
+      "https://www.cisa.gov/news-events/ics-advisories/icsa-20-168-01"
+    ]
+  },
+  "risk": {
+    "risk_score": 100.0,
+    "severity": "Critical",
+    "priority": "P1 - Critical Urgent",
+    "impact": "Catastrophic or severe degradation of IoT gateway and dependent network infrastructure.",
+    "likelihood": "Active Exploitation in Progress",
+    "reasoning": [
+      "Classified as 'DDoS' with 100.0% model confidence.",
+      "Elevated SHAP attribution on 'Rate' (value: 4500.00, SHAP: +3.8387), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Min' (value: 40.00, SHAP: +1.3460), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Avg' (value: 60.00, SHAP: +1.1804), which strongly increases threat probability.",
+      "Correlated with Critical severity CVEs (CVSS score 10.0/10).",
+      "Referenced in active CISA cyber defense advisory (AA20-302A).",
+      "Targeting critical IoT service port 23 (TCP).",
+      "Network 5-tuple context: Source 192.168.1.110:57332 -> Destination 192.168.1.20:23 (TCP)."
+    ]
+  },
+  "response": {
+    "containment": [
+      "Quarantine target endpoint 192.168.1.20 in an isolated VLAN to protect upstream bandwidth.",
+      "Apply ingress rate limiting on border gateway targeting source subnet for 192.168.1.110.",
+      "Engage upstream ISP / Cloud Scrubbing Center to filter high-volume volumetric flood.",
+      "Verify connection state tables on border firewalls to prevent state exhaustion."
+    ],
+    "recovery": [
+      "Power-cycle / reboot the affected IoT node to purge volatile memory-resident malware payloads.",
+      "Re-flash firmware using verified cryptographically signed vendor media if filesystem tampering is suspected.",
+      "Rotate all administrative passwords, SSH keys, and MQTT broker access tokens immediately.",
+      "Conduct post-incident integrity check before restoring node to production VLAN."
+    ],
+    "prevention": [
+      "Implement microsegmentation (NIST SP 800-213) placing IoT devices into isolated VLANs without direct WAN routing.",
+      "Permanently disable legacy, unencrypted management services (Telnet port 23, HTTP port 80, UPnP) on all IoT devices.",
+      "Enforce 802.1X Network Access Control (NAC) to prevent rogue physical device attachments.",
+      "Establish continuous automated vulnerability scanning against known IoT CVE databases."
+    ],
+    "firewall_commands": [
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 192.168.1.110 -p tcp --dport 23 -j DROP",
+        "description": "Linux Netfilter rule to drop inbound packets from attacker 192.168.1.110."
+      },
+      {
+        "firewall_type": "windows_netsh",
+        "command": "netsh advfirewall firewall add rule name=\"IoTShield_Block_DDoS_192.168.1.110\" dir=in action=block remoteip=192.168.1.110 protocol=TCP localport=23",
+        "description": "Windows Advanced Firewall rule to block inbound traffic from 192.168.1.110."
+      },
+      {
+        "firewall_type": "cisco_acl",
+        "command": "access-list 100 deny tcp host 192.168.1.110 host 192.168.1.20 eq 23",
+        "description": "Cisco IOS standard extended ACL dropping traffic from 192.168.1.110 to 192.168.1.20."
+      }
+    ],
+    "approval_required": true,
+    "approval_status": "PENDING_ANALYST_APPROVAL",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated execution disabled by policy. Requires SOC Analyst sign-off."
+  },
+  "report": {
+    "incident_id": "INC-20261011-07502",
+    "generated_at": "2026-10-11 10:11:47 UTC",
+    "title": "SOC Incident Assessment: INC-20261011-07502 [DDoS]",
+    "executive_summary": "SECURITY INCIDENT ALERT: High-priority security incident INC-20261011-07502 detected. Network telemetry exhibits active 'DDoS' threat patterns from 192.168.1.110:57332 targeting 192.168.1.20:23 (TCP) with 100.0% classification certainty. Assessed Risk Score is 100.0/100 (Critical Severity, P1 - Critical Urgent). Associated with MITRE ATT&CK technique(s): T1498 (Network Denial of Service), T1499 (Endpoint Denial of Service). Correlates with known IoT vulnerabilities: CVE-2016-10401 (CVSS 9.8), CVE-2020-11896 (CVSS 10.0). Referenced in CISA advisories: AA20-302A, ICSA-20-168-01. Containment actions have been formulated and require SOC Analyst approval.",
+    "attack_type": "DDoS",
+    "severity": "Critical",
+    "priority": "P1 - Critical Urgent",
+    "risk_score": 100.0,
+    "timeline": [
+      {
+        "timestamp": "+0.045s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'DDoS' with 100.0% confidence. Primary feature driver: Rate.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.045s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated incident tracker INC-20261011-07502 (Execution Mode: COORDINATED). Initiating Threat Intelligence RAG retrieval.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.047s",
+        "agent": "Threat Intelligence Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 2 MITRE ATT&CK technique(s) and 2 verified CVE record(s). Zero hallucination checks passed.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.048s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 100.0/100 (Critical Severity, P1 - Critical Urgent).",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.048s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 3 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+        "status": "COMPLETED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENTIAL ASSESSMENT REPORT: INC-20261011-07502\n**Generated:** 2026-10-11 10:11:47 UTC  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n## 1. Executive Summary\nSECURITY INCIDENT ALERT: High-priority security incident INC-20261011-07502 detected. Network telemetry exhibits active 'DDoS' threat patterns from 192.168.1.110:57332 targeting 192.168.1.20:23 (TCP) with 100.0% classification certainty. Assessed Risk Score is 100.0/100 (Critical Severity, P1 - Critical Urgent). Associated with MITRE ATT&CK technique(s): T1498 (Network Denial of Service), T1499 (Endpoint Denial of Service). Correlates with known IoT vulnerabilities: CVE-2016-10401 (CVSS 9.8), CVE-2020-11896 (CVSS 10.0). Referenced in CISA advisories: AA20-302A, ICSA-20-168-01. Containment actions have been formulated and require SOC Analyst approval.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `DDoS`\n- **Classification Confidence:** `99.95%`\n- **Source Endpoint:** `192.168.1.110:57332`\n- **Destination Endpoint:** `192.168.1.20:23`\n- **Transport Protocol:** `TCP`\n- **Detection Timestamp:** `2026-10-11 10:11:47`\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 0.00% `` |\n| Brute Force | 0.00% `` |\n| DDoS | 99.95% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n| DoS | 0.00% `` |\n| Mirai | 0.00% `` |\n| Recon | 0.00% `` |\n| Spoofing | 0.00% `` |\n| Web Attack | 0.05% `` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Rate` | 4500.000 | +3.8387 | INCREASES |\n| 2 | `Min` | 40.000 | +1.3460 | INCREASES |\n| 3 | `AVG` | 60.000 | +1.1804 | INCREASES |\n| 4 | `Number` | 500.000 | +0.9371 | INCREASES |\n| 5 | `Header_Length` | 13.200 | -0.4319 | DECREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 92%\n\n### MITRE ATT&CK Mapping\n- **[T1498: Network Denial of Service](https://attack.mitre.org/techniques/T1498/)** (Tactic: *Impact*)\n  Adversaries may perform Network Denial of Service (DoS) attacks to degrade or block the availability of targeted resources to users by exhausting network bandwidth through direct flooding or reflection amplification. In IoT environments, compromised devices are frequently enslaved to generate high-bandwidth UDP or TCP SYN floods targeting critical network nodes.\n- **[T1499: Endpoint Denial of Service](https://attack.mitre.org/techniques/T1499/)** (Tactic: *Impact*)\n  Adversaries may target endpoints with packets engineered to exhaust system memory, CPU cycles, or state tables (e.g. TCP connection state exhaustion). Resource-constrained IoT embedded microcontrollers and smart sensors are particularly vulnerable to crashing when subjected to malformed protocol headers or rapid connection opens.\n\n### Correlated NVD / CVE Records\n- **[CVE-2016-10401](https://nvd.nist.gov/vuln/detail/CVE-2016-10401)** - CVSS `9.8` (CRITICAL)\n  *Affected:* ZyXEL and generic BusyBox-based IoT routers / embedded Linux devices\n  Hardcoded and default credential vulnerability in embedded BusyBox Linux firmware used across multiple consumer router and IP device vendors. Mirai botnet scan engines automate rapid dictionary attacks matching known default usernames/passwords over Telnet port 23.\n- **[CVE-2020-11896](https://nvd.nist.gov/vuln/detail/CVE-2020-11896)** - CVSS `10.0` (CRITICAL)\n  *Affected:* Treck TCP/IP Embedded Stack (Ripple20 vulnerabilities)\n  Multiple memory corruption vulnerabilities in the Treck TCP/IP stack (Ripple20) when processing IPv4 fragments over UDP or ICMP. Allows an unauthenticated network attacker to trigger remote code execution or complete system crash (Denial of Service) across industrial, medical, and smart infrastructure IoT devices.\n\n### CISA Security Advisories\n- **[AA20-302A: Ransomware and Botnet Activity Targeting Critical Infrastructure and Healthcare IoT](https://www.cisa.gov/news-events/cybersecurity-advisories/aa20-302a)** (Released 2020-10-28)\n- **[ICSA-20-168-01: Treck TCP/IP Stack Vulnerabilities (Ripple20)](https://www.cisa.gov/news-events/ics-advisories/icsa-20-168-01)** (Released 2020-06-16)\n\n### Authoritative Sources\n- <https://attack.mitre.org/techniques/T1498/>\n- <https://attack.mitre.org/techniques/T1499/>\n- <https://nvd.nist.gov/vuln/detail/CVE-2016-10401>\n- <https://nvd.nist.gov/vuln/detail/CVE-2020-11896>\n- <https://www.cisa.gov/news-events/cybersecurity-advisories/aa20-302a>\n- <https://www.cisa.gov/news-events/ics-advisories/icsa-20-168-01>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `100.0 / 100.0`\n- **Assigned Severity:** `CRITICAL`\n- **Operational Priority:** `P1 - Critical Urgent`\n- **Potential Impact:** Catastrophic or severe degradation of IoT gateway and dependent network infrastructure.\n- **Threat Likelihood:** Active Exploitation in Progress\n\n### Analytical Justification\n- Classified as 'DDoS' with 100.0% model confidence.\n- Elevated SHAP attribution on 'Rate' (value: 4500.00, SHAP: +3.8387), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Min' (value: 40.00, SHAP: +1.3460), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Avg' (value: 60.00, SHAP: +1.1804), which strongly increases threat probability.\n- Correlated with Critical severity CVEs (CVSS score 10.0/10).\n- Referenced in active CISA cyber defense advisory (AA20-302A).\n- Targeting critical IoT service port 23 (TCP).\n- Network 5-tuple context: Source 192.168.1.110:57332 -> Destination 192.168.1.20:23 (TCP).\n\n---\n\n## 6. Recommended Response & Containment Playbook\n\n### Immediate Containment Steps\n1. Quarantine target endpoint 192.168.1.20 in an isolated VLAN to protect upstream bandwidth.\n1. Apply ingress rate limiting on border gateway targeting source subnet for 192.168.1.110.\n1. Engage upstream ISP / Cloud Scrubbing Center to filter high-volume volumetric flood.\n1. Verify connection state tables on border firewalls to prevent state exhaustion.\n\n### Recovery Procedures\n1. Power-cycle / reboot the affected IoT node to purge volatile memory-resident malware payloads.\n1. Re-flash firmware using verified cryptographically signed vendor media if filesystem tampering is suspected.\n1. Rotate all administrative passwords, SSH keys, and MQTT broker access tokens immediately.\n1. Conduct post-incident integrity check before restoring node to production VLAN.\n\n### Long-Term Prevention & Hardening\n- Implement microsegmentation (NIST SP 800-213) placing IoT devices into isolated VLANs without direct WAN routing.\n- Permanently disable legacy, unencrypted management services (Telnet port 23, HTTP port 80, UPnP) on all IoT devices.\n- Enforce 802.1X Network Access Control (NAC) to prevent rogue physical device attachments.\n- Establish continuous automated vulnerability scanning against known IoT CVE databases.\n\n### Firewall & Access Control Rules\n> [!CAUTION]\n> **ANALYST APPROVAL REQUIRED**: Automated execution is strictly disabled. Verify host parameters before executing.\n\n#### IPTABLES: Linux Netfilter rule to drop inbound packets from attacker 192.168.1.110.\n```bash\niptables -A INPUT -s 192.168.1.110 -p tcp --dport 23 -j DROP\n```\n\n#### WINDOWS_NETSH: Windows Advanced Firewall rule to block inbound traffic from 192.168.1.110.\n```bash\nnetsh advfirewall firewall add rule name=\"IoTShield_Block_DDoS_192.168.1.110\" dir=in action=block remoteip=192.168.1.110 protocol=TCP localport=23\n```\n\n#### CISCO_ACL: Cisco IOS standard extended ACL dropping traffic from 192.168.1.110 to 192.168.1.20.\n```bash\naccess-list 100 deny tcp host 192.168.1.110 host 192.168.1.20 eq 23\n```\n\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +0.045s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'DDoS' with 100.0% confidence. Primary feature driver: Rate. |\n| +0.045s | `Coordinator Agent` | Incident State Initialized | Allocated incident tracker INC-20261011-07502 (Execution Mode: COORDINATED). Initiating Threat Intelligence RAG retrieval. |\n| +0.047s | `Threat Intelligence Agent` | Knowledge Base RAG Retrieval | Retrieved 2 MITRE ATT&CK technique(s) and 2 verified CVE record(s). Zero hallucination checks passed. |\n| +0.048s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 100.0/100 (Critical Severity, P1 - Critical Urgent). |\n| +0.048s | `Response Agent` | Mitigation & ACL Formulation | Generated 3 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL. |"
+  },
+  "timeline": [
+    {
+      "timestamp": "+0.045s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'DDoS' with 100.0% confidence. Primary feature driver: Rate.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.045s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated incident tracker INC-20261011-07502 (Execution Mode: COORDINATED). Initiating Threat Intelligence RAG retrieval.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.047s",
+      "agent": "Threat Intelligence Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 2 MITRE ATT&CK technique(s) and 2 verified CVE record(s). Zero hallucination checks passed.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.048s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 100.0/100 (Critical Severity, P1 - Critical Urgent).",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.048s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 3 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.048s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized comprehensive SOC assessment report for INC-20261011-07502 (8715 bytes).",
+      "status": "COMPLETED"
+    }
+  ]
+}
