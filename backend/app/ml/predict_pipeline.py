@@ -16,8 +16,31 @@ def get_tuned_model():
         _MODEL_CACHE['tuned_model'] = joblib.load(model_path)
     return _MODEL_CACHE['tuned_model']
 
+def _patch_shap_ubjson_decoder():
+    """Patches SHAP's decode_ubjson_buffer to handle multi-class XGBoost base_score arrays gracefully."""
+    try:
+        import shap.explainers._tree as tree_mod
+        if getattr(tree_mod, "_patched_for_multiclass", False):
+            return
+        orig_decode = tree_mod.decode_ubjson_buffer
+        def safe_decode(fd):
+            jmodel = orig_decode(fd)
+            try:
+                lmp = jmodel['learner']['learner_model_param']
+                bs = lmp.get('base_score')
+                if isinstance(bs, str) and bs.startswith('['):
+                    lmp['base_score'] = '0.5'
+            except Exception:
+                pass
+            return jmodel
+        tree_mod.decode_ubjson_buffer = safe_decode
+        tree_mod._patched_for_multiclass = True
+    except Exception:
+        pass
+
 def get_shap_explainer():
     if 'shap_explainer' not in _MODEL_CACHE:
+        _patch_shap_ubjson_decoder()
         artifact = get_tuned_model()
         model = artifact['model']
         _MODEL_CACHE['shap_explainer'] = shap.TreeExplainer(model)
