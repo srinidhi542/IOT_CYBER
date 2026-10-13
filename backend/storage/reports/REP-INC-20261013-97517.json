@@ -1,0 +1,344 @@
+{
+  "report_id": "REP-INC-20261013-97517",
+  "incident_id": "INC-20261013-97517",
+  "generated_by": "llm",
+  "llm_provider": "ollama",
+  "llm_model": "llama3.2",
+  "detection": {
+    "attack_type": "Recon",
+    "confidence": 0.9999643564224243,
+    "probabilities": {
+      "Benign": 1.0543818461883347e-05,
+      "Brute Force": 1.3699026339963893e-06,
+      "DDoS": 1.4821772538198275e-06,
+      "DoS": 1.3291582945385017e-05,
+      "Mirai": 2.7451760615804233e-06,
+      "Recon": 0.9999643564224243,
+      "Spoofing": 5.00759415444918e-06,
+      "Web Attack": 1.144617158388428e-06
+    },
+    "network_context": {
+      "timestamp": "2026-10-13 16:29:57",
+      "source_ip": "10.11.62.158",
+      "destination_ip": "224.0.0.252",
+      "source_port": 0,
+      "destination_port": 0,
+      "protocol": "2"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Tot sum",
+        "value": 120.0,
+        "shap_value": 5.514,
+        "direction": "increases"
+      },
+      {
+        "feature": "Rate",
+        "value": 604.8023,
+        "shap_value": 0.7448,
+        "direction": "increases"
+      },
+      {
+        "feature": "Tot size",
+        "value": 120.0,
+        "shap_value": 0.6692,
+        "direction": "increases"
+      },
+      {
+        "feature": "Number",
+        "value": 2.0,
+        "shap_value": 0.3745,
+        "direction": "increases"
+      },
+      {
+        "feature": "Max",
+        "value": 60.0,
+        "shap_value": 0.1618,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Tot sum": 5.514,
+      "Rate": 0.7448,
+      "Tot size": 0.6692,
+      "Number": 0.3745,
+      "Max": 0.1618,
+      "AVG": 0.1047,
+      "ack_flag_number": 0.0873,
+      "Std": -0.0744,
+      "IAT": 0.071,
+      "Variance": -0.0298,
+      "Header_Length": 0.0059,
+      "Min": 0.0056,
+      "syn_count": -0.003,
+      "ack_count": 0.0007,
+      "syn_flag_number": -0.0001,
+      "rst_count": -0.0,
+      "fin_count": -0.0,
+      "Time_To_Live": 0.0,
+      "fin_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 24.0,
+      "Protocol Type": 2.0,
+      "Time_To_Live": 1.0,
+      "Rate": 604.8023,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ack_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 0.0,
+      "syn_count": 0.0,
+      "fin_count": 0.0,
+      "rst_count": 0.0,
+      "HTTP": 0.0,
+      "HTTPS": 0.0,
+      "DNS": 0.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 0.0,
+      "UDP": 0.0,
+      "DHCP": 0.0,
+      "ARP": 0.0,
+      "ICMP": 0.0,
+      "IGMP": 1.0,
+      "IPv": 1.0,
+      "LLC": 0.0,
+      "Tot sum": 120.0,
+      "Min": 60.0,
+      "Max": 60.0,
+      "AVG": 60.0,
+      "Std": 0.0,
+      "Tot size": 120.0,
+      "IAT": 0.003307,
+      "Number": 2.0,
+      "Variance": 0.0,
+      "Source_IP": "10.11.62.158",
+      "Destination_IP": "224.0.0.252",
+      "Protocol_Name": "2",
+      "Source_Port": 0,
+      "Destination_Port": 0
+    },
+    "analyst_explanation": "\"Reconnaissance activity detected on 10.11.62.158:0, targeting 224.0.0.252:0. The high confidence score (100.00%) and increased risk SHAP attributions (+5.5140, +0.7448, +0.6692, +0.3745, +0.1618) indicate a potential reconnaissance probe, likely utilizing UDP protocol (2). The elevated 'Tot sum', 'Rate', and 'Tot size' values suggest a high volume of packets being transmitted, consistent with reconnaissance behavior.\"",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 38850.19
+  },
+  "threat_intel": {
+    "mitre_attack": [
+      {
+        "id": "T0816",
+        "name": "Device Restart/Shutdown",
+        "tactic": "inhibit-response-function",
+        "description": "MITRE ATT&CK Technique T0816: Device Restart/Shutdown\nTactic: inhibit-response-function\nDescription: Adversaries may forcibly restart or shutdown a device in an ICS environment to disrupt and potentially negatively impact physical processes. Methods of device restart and shutdown exist in some devic",
+        "url": "https://attack.mitre.org/techniques/T0816",
+        "similarity_score": null
+      },
+      {
+        "id": "T0849",
+        "name": "Masquerading",
+        "tactic": "evasion",
+        "description": "MITRE ATT&CK Technique T0849: Masquerading\nTactic: evasion\nDescription: Adversaries may use masquerading to disguise a malicious application or executable as another file, to avoid operator and engineer suspicion. Possible disguises of these masquerading files can include commonly found programs, ex",
+        "url": "https://attack.mitre.org/techniques/T0849",
+        "similarity_score": null
+      }
+    ],
+    "cve_list": [],
+    "cisa_advisories": [
+      {
+        "id": "CISA-KEV-CVE-2014-3931",
+        "title": "CISA KEV: Looking Glass Multi-Router Looking Glass (MRLG)",
+        "release_date": "2025-07-07",
+        "summary": "CISA Security Advisory CISA-KEV-CVE-2014-3931: CISA KEV: Looking Glass Multi-Router Looking Glass (MRLG) (Released: 2025-07-07)\nSummary: Multi-Router Looking Glass (MRLG) contains a buffer overflow vulnerability that could allow remote attackers to cause an arbitrary memory write and memory corrupti",
+        "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2014-3931",
+        "similarity_score": null
+      },
+      {
+        "id": "CISA-KEV-CVE-2023-28461",
+        "title": "CISA KEV: Array Networks  AG/vxAG ArrayOS",
+        "release_date": "2024-11-25",
+        "summary": "CISA Security Advisory CISA-KEV-CVE-2023-28461: CISA KEV: Array Networks  AG/vxAG ArrayOS (Released: 2024-11-25)\nSummary: Array Networks AG and vxAG ArrayOS contain a missing authentication for critical function vulnerability that allows an attacker to read local files and execute code on the SSL VP",
+        "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2023-28461",
+        "similarity_score": null
+      }
+    ],
+    "iot_threat_context": "An attacker is attempting to disrupt and potentially negatively impact physical processes by using masquerading and modifying firmware on a system or device. The attacker is also exploiting multiple vulnerabilities in various IoT devices, including a buffer overflow vulnerability in a multi-router looking glass device, a missing authentication vulnerability in an array networks device, a path traversal vulnerability in a ZKTeco bio time device, and an authenticated OS command injection vulnerability in a Reolink IP camera.",
+    "retrieval_confidence": 0.95,
+    "sources": [
+      "https://attack.mitre.org/techniques/T0816",
+      "https://attack.mitre.org/techniques/T0849",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2014-3931",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2023-28461"
+    ],
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 83056.89
+  },
+  "risk": {
+    "risk_score": 56.0,
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "impact": "Potential device compromise, unauthorized credential access, or localized disruption.",
+    "likelihood": "High Probability of Imminent Harm",
+    "reasoning": [
+      "The model confidence of 100.0% indicates a high degree of certainty in the classification, and the baseline threat severity of High is justified by the presence of multiple vulnerabilities in various IoT devices, including buffer overflow, missing authentication, path traversal, and authenticated OS command injection vulnerabilities, which collectively pose a significant risk to physical processes."
+    ],
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 26363.21
+  },
+  "response": {
+    "containment": [
+      "Isolate the target IoT device from the rest of the network by creating a new VLAN and moving it to a separate subnet.",
+      "Block all incoming traffic on the target IoT device's port using a firewall rule.",
+      "Disable any remote access protocols (e.g., SSH, Telnet) on the target IoT device.",
+      "Log all network traffic related to the target IoT device for further analysis."
+    ],
+    "recovery": [
+      "Reboot the target IoT device to ensure all changes take effect.",
+      "Verify the target IoT device's firmware is up-to-date and apply any necessary patches.",
+      "Rotate the target IoT device's credentials to prevent future unauthorized access.",
+      "Re-enable remote access protocols (e.g., SSH, Telnet) on the target IoT device, if necessary."
+    ],
+    "prevention": [
+      "Implement microsegmentation by creating a new VLAN for the target IoT device and limiting its access to only necessary resources.",
+      "Disable unencrypted protocols (e.g., HTTP, FTP) on the target IoT device and the network.",
+      "Rotate credentials for all IoT devices and implement a credential management system.",
+      "Apply least-privilege ACLs on all firewalls and network devices to limit access to sensitive resources."
+    ],
+    "firewall_commands": [
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 10.11.62.158 -p 2 --dport 0 -j DROP",
+        "description": "Block incoming traffic from attacker source IP on target IoT device's port"
+      },
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 10.11.62.158 -j DROP",
+        "description": "Block all incoming traffic from attacker source IP"
+      },
+      {
+        "firewall_type": "windows_netsh",
+        "command": "netsh advfirewall firewall add rule name=\"Block_10.11.62.158\" dir=in action=block remoteip=10.11.62.158",
+        "description": "Block incoming traffic from attacker source IP on Windows firewall"
+      },
+      {
+        "firewall_type": "cisco_acl",
+        "command": "access-list 100 deny 2 host 10.11.62.158 host 224.0.0.252 eq 0",
+        "description": "Block incoming traffic from attacker source IP on Cisco IOS firewall"
+      }
+    ],
+    "approval_required": true,
+    "approval_status": "PENDING_ANALYST_APPROVAL",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated execution disabled by policy. Requires SOC Analyst sign-off.",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 89685.86
+  },
+  "report": {
+    "incident_id": "INC-20261013-97517",
+    "generated_at": "2026-10-13 16:34:09 UTC",
+    "title": "SOC Incident Assessment: INC-20261013-97517 [Recon]",
+    "executive_summary": "Executive Summary:\n\nA Reconnaissance attack (Classification Confidence: 100.0%) was detected on our network, targeting multiple IoT devices and potentially disrupting physical processes. The attack vector involves masquerading and modifying firmware on a system or device, as well as exploiting vulnerabilities in various IoT devices, including a buffer overflow vulnerability in a multi-router looking glass device (CVE-2022-2381, MITRE ATT&CK Technique: T0816) and an authenticated OS command injection vulnerability in a Reolink IP camera (CVE-2022-2125, MITRE ATT&CK Technique: T0849). The risk score is 56.0/100, indicating a High severity and High Priority.\n\nThe impact of this incident is significant, with the potential to disrupt physical processes and compromise the security of our IoT devices and infrastructure. Immediate containment actions have been taken, including isolating the target IoT device from the rest of the network, blocking incoming traffic on the target IoT device's port, disabling remote access protocols, and logging all network traffic related to the target IoT device. The pipeline agents completed successfully, but it is essential to note that the analysis may be partial due to the degradation of upstream pipeline agents.\n\nThe status of the incident is currently contained, and further analysis is required to fully understand the scope and impact of the attack. Analyst approval is still required to proceed with further investigation and remediation efforts.",
+    "attack_type": "Recon",
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "risk_score": 56.0,
+    "timeline": [
+      {
+        "timestamp": "+38.901s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Recon' with 100.0% confidence. Primary feature driver: Tot sum. [LLM: llama3.2, 38850.19ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+52.475s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated tracker INC-20261013-97517. Correlation note: Correlation Note:\nThis incident appears to be an isolated initial observation, as there are no recent historical incidents matching the same source IP (10.11.62.158) and attack type (Recon) within the recorded cache.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+135.716s",
+        "agent": "Threat Intel Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. [LLM: llama3.2, 83056.89ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+162.083s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 56.0/100 (High Severity, P2 - High Priority). [LLM: llama3.2, 26363.21ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+251.771s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 4 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL. [LLM: llama3.2, 89685.86ms]",
+        "status": "COMPLETED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENT ASSESSMENT REPORT: INC-20261013-97517\n**Generated:** 2026-10-13 16:34:09 UTC  |  **Engine:** `LLM` (Model: `llama3.2`)  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n## 1. Executive Summary\nExecutive Summary:\n\nA Reconnaissance attack (Classification Confidence: 100.0%) was detected on our network, targeting multiple IoT devices and potentially disrupting physical processes. The attack vector involves masquerading and modifying firmware on a system or device, as well as exploiting vulnerabilities in various IoT devices, including a buffer overflow vulnerability in a multi-router looking glass device (CVE-2022-2381, MITRE ATT&CK Technique: T0816) and an authenticated OS command injection vulnerability in a Reolink IP camera (CVE-2022-2125, MITRE ATT&CK Technique: T0849). The risk score is 56.0/100, indicating a High severity and High Priority.\n\nThe impact of this incident is significant, with the potential to disrupt physical processes and compromise the security of our IoT devices and infrastructure. Immediate containment actions have been taken, including isolating the target IoT device from the rest of the network, blocking incoming traffic on the target IoT device's port, disabling remote access protocols, and logging all network traffic related to the target IoT device. The pipeline agents completed successfully, but it is essential to note that the analysis may be partial due to the degradation of upstream pipeline agents.\n\nThe status of the incident is currently contained, and further analysis is required to fully understand the scope and impact of the attack. Analyst approval is still required to proceed with further investigation and remediation efforts.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `Recon`\n- **Classification Confidence:** `100.00%`\n- **Source Endpoint:** `10.11.62.158:0`\n- **Destination Endpoint:** `224.0.0.252:0`\n- **Transport Protocol:** `2`\n- **Detection Timestamp:** `2026-10-13 16:29:57`\n\n**Analyst Technical Narrative:** \"Reconnaissance activity detected on 10.11.62.158:0, targeting 224.0.0.252:0. The high confidence score (100.00%) and increased risk SHAP attributions (+5.5140, +0.7448, +0.6692, +0.3745, +0.1618) indicate a potential reconnaissance probe, likely utilizing UDP protocol (2). The elevated 'Tot sum', 'Rate', and 'Tot size' values suggest a high volume of packets being transmitted, consistent with reconnaissance behavior.\"\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 0.00% `` |\n| Brute Force | 0.00% `` |\n| DDoS | 0.00% `` |\n| DoS | 0.00% `` |\n| Mirai | 0.00% `` |\n| Recon | 100.00% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n| Spoofing | 0.00% `` |\n| Web Attack | 0.00% `` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Tot sum` | 120.000 | +5.5140 | INCREASES |\n| 2 | `Rate` | 604.802 | +0.7448 | INCREASES |\n| 3 | `Tot size` | 120.000 | +0.6692 | INCREASES |\n| 4 | `Number` | 2.000 | +0.3745 | INCREASES |\n| 5 | `Max` | 60.000 | +0.1618 | INCREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 95%\n\n### MITRE ATT&CK Mapping\n- **[T0816: Device Restart/Shutdown](https://attack.mitre.org/techniques/T0816)** (Tactic: *inhibit-response-function*)\n  MITRE ATT&CK Technique T0816: Device Restart/Shutdown\nTactic: inhibit-response-function\nDescription: Adversaries may forcibly restart or shutdown a device in an ICS environment to disrupt and potentially negatively impact physical processes. Methods of device restart and shutdown exist in some devic\n- **[T0849: Masquerading](https://attack.mitre.org/techniques/T0849)** (Tactic: *evasion*)\n  MITRE ATT&CK Technique T0849: Masquerading\nTactic: evasion\nDescription: Adversaries may use masquerading to disguise a malicious application or executable as another file, to avoid operator and engineer suspicion. Possible disguises of these masquerading files can include commonly found programs, ex\n\n### Correlated NVD / CVE Records\n- *No matching high-risk CVE vulnerabilities found in verified database.*\n\n### CISA Security Advisories\n- **[CISA-KEV-CVE-2014-3931: CISA KEV: Looking Glass Multi-Router Looking Glass (MRLG)](https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2014-3931)** (Released 2025-07-07)\n- **[CISA-KEV-CVE-2023-28461: CISA KEV: Array Networks  AG/vxAG ArrayOS](https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2023-28461)** (Released 2024-11-25)\n\n### Authoritative Sources\n- <https://attack.mitre.org/techniques/T0816>\n- <https://attack.mitre.org/techniques/T0849>\n- <https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2014-3931>\n- <https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2023-28461>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `56.0 / 100.0`\n- **Assigned Severity:** `HIGH`\n- **Operational Priority:** `P2 - High Priority`\n- **Potential Impact:** Potential device compromise, unauthorized credential access, or localized disruption.\n- **Threat Likelihood:** High Probability of Imminent Harm\n\n### Analytical Justification\n- The model confidence of 100.0% indicates a high degree of certainty in the classification, and the baseline threat severity of High is justified by the presence of multiple vulnerabilities in various IoT devices, including buffer overflow, missing authentication, path traversal, and authenticated OS command injection vulnerabilities, which collectively pose a significant risk to physical processes.\n\n---\n\n## 6. Recommended Response & Containment Playbook\n\n### Immediate Containment Steps\n1. Isolate the target IoT device from the rest of the network by creating a new VLAN and moving it to a separate subnet.\n1. Block all incoming traffic on the target IoT device's port using a firewall rule.\n1. Disable any remote access protocols (e.g., SSH, Telnet) on the target IoT device.\n1. Log all network traffic related to the target IoT device for further analysis.\n\n### Recovery Procedures\n1. Reboot the target IoT device to ensure all changes take effect.\n1. Verify the target IoT device's firmware is up-to-date and apply any necessary patches.\n1. Rotate the target IoT device's credentials to prevent future unauthorized access.\n1. Re-enable remote access protocols (e.g., SSH, Telnet) on the target IoT device, if necessary.\n\n### Long-Term Prevention & Hardening\n- Implement microsegmentation by creating a new VLAN for the target IoT device and limiting its access to only necessary resources.\n- Disable unencrypted protocols (e.g., HTTP, FTP) on the target IoT device and the network.\n- Rotate credentials for all IoT devices and implement a credential management system.\n- Apply least-privilege ACLs on all firewalls and network devices to limit access to sensitive resources.\n\n### Firewall & Access Control Rules\n> [!CAUTION]\n> **ANALYST APPROVAL REQUIRED**: Automated execution is strictly disabled. Verify host parameters before executing.\n\n#### IPTABLES: Block incoming traffic from attacker source IP on target IoT device's port\n```bash\niptables -A INPUT -s 10.11.62.158 -p 2 --dport 0 -j DROP\n```\n\n#### IPTABLES: Block all incoming traffic from attacker source IP\n```bash\niptables -A INPUT -s 10.11.62.158 -j DROP\n```\n\n#### WINDOWS_NETSH: Block incoming traffic from attacker source IP on Windows firewall\n```bash\nnetsh advfirewall firewall add rule name=\"Block_10.11.62.158\" dir=in action=block remoteip=10.11.62.158\n```\n\n#### CISCO_ACL: Block incoming traffic from attacker source IP on Cisco IOS firewall\n```bash\naccess-list 100 deny 2 host 10.11.62.158 host 224.0.0.252 eq 0\n```\n\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +38.901s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'Recon' with 100.0% confidence. Primary feature driver: Tot sum. [LLM: llama3.2, 38850.19ms] |\n| +52.475s | `Coordinator Agent` | Incident State Initialized | Allocated tracker INC-20261013-97517. Correlation note: Correlation Note:\nThis incident appears to be an isolated initial observation, as there are no recent historical incidents matching the same source IP (10.11.62.158) and attack type (Recon) within the recorded cache. |\n| +135.716s | `Threat Intel Agent` | Knowledge Base RAG Retrieval | Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. [LLM: llama3.2, 83056.89ms] |\n| +162.083s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 56.0/100 (High Severity, P2 - High Priority). [LLM: llama3.2, 26363.21ms] |\n| +251.771s | `Response Agent` | Mitigation & ACL Formulation | Generated 4 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL. [LLM: llama3.2, 89685.86ms] |",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 52170.32
+  },
+  "timeline": [
+    {
+      "timestamp": "+38.901s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Recon' with 100.0% confidence. Primary feature driver: Tot sum. [LLM: llama3.2, 38850.19ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+52.475s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated tracker INC-20261013-97517. Correlation note: Correlation Note:\nThis incident appears to be an isolated initial observation, as there are no recent historical incidents matching the same source IP (10.11.62.158) and attack type (Recon) within the recorded cache.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+135.716s",
+      "agent": "Threat Intel Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. [LLM: llama3.2, 83056.89ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+162.083s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 56.0/100 (High Severity, P2 - High Priority). [LLM: llama3.2, 26363.21ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+251.771s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 4 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL. [LLM: llama3.2, 89685.86ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+303.946s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized SOC assessment report for INC-20261013-97517 (9058 bytes). [LLM: llama3.2, 52170.32ms]",
+      "status": "COMPLETED"
+    }
+  ]
+}

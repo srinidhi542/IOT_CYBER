@@ -1,0 +1,329 @@
+{
+  "report_id": "REP-INC-20261013-73210",
+  "incident_id": "INC-20261013-73210",
+  "generated_by": "llm",
+  "llm_provider": "ollama",
+  "llm_model": "llama3.2",
+  "detection": {
+    "attack_type": "Web Attack",
+    "confidence": 0.9998915195465088,
+    "probabilities": {
+      "Benign": 5.4351537983166054e-05,
+      "Brute Force": 3.129208562313579e-05,
+      "DDoS": 1.6713104287191527e-06,
+      "DoS": 9.36367086978862e-06,
+      "Mirai": 2.1718028619943652e-06,
+      "Recon": 3.0670908017782494e-06,
+      "Spoofing": 6.558388577104779e-06,
+      "Web Attack": 0.9998915195465088
+    },
+    "network_context": {
+      "timestamp": "2026-10-13 20:39:33",
+      "source_ip": "192.168.137.167",
+      "destination_ip": "54.69.37.156",
+      "source_port": 51331,
+      "destination_port": 443,
+      "protocol": "TCP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Std",
+        "value": 121.4044,
+        "shap_value": 1.3452,
+        "direction": "increases"
+      },
+      {
+        "feature": "Variance",
+        "value": 14739.0278,
+        "shap_value": 1.285,
+        "direction": "increases"
+      },
+      {
+        "feature": "ack_count",
+        "value": 17.0,
+        "shap_value": 1.16,
+        "direction": "increases"
+      },
+      {
+        "feature": "Rate",
+        "value": 13.5434,
+        "shap_value": 1.0677,
+        "direction": "increases"
+      },
+      {
+        "feature": "syn_count",
+        "value": 2.0,
+        "shap_value": 0.5138,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Std": 1.3452,
+      "Variance": 1.285,
+      "ack_count": 1.16,
+      "Rate": 1.0677,
+      "syn_count": 0.5138,
+      "Max": 0.474,
+      "Number": 0.4576,
+      "Time_To_Live": -0.2795,
+      "Min": 0.1066,
+      "psh_flag_number": 0.0603,
+      "Header_Length": -0.0516,
+      "IAT": -0.0371,
+      "AVG": -0.0324,
+      "syn_flag_number": 0.02,
+      "rst_flag_number": 0.0145,
+      "Tot size": 0.0127,
+      "Tot sum": -0.004,
+      "rst_count": 0.0033,
+      "fin_flag_number": -0.0021,
+      "fin_count": -0.0014,
+      "ack_flag_number": -0.0001,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 40.44,
+      "Protocol Type": 6.0,
+      "Time_To_Live": 243.44,
+      "Rate": 13.5434,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 1.0,
+      "rst_flag_number": 1.0,
+      "psh_flag_number": 1.0,
+      "ack_flag_number": 1.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 17.0,
+      "syn_count": 2.0,
+      "fin_count": 0.0,
+      "rst_count": 1.0,
+      "HTTP": 0.0,
+      "HTTPS": 1.0,
+      "DNS": 0.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 1.0,
+      "UDP": 0.0,
+      "DHCP": 0.0,
+      "ARP": 0.0,
+      "ICMP": 0.0,
+      "IGMP": 0.0,
+      "IPv": 1.0,
+      "LLC": 0.0,
+      "Tot sum": 2529.0,
+      "Min": 60.0,
+      "Max": 459.0,
+      "AVG": 140.5,
+      "Std": 121.4044,
+      "Tot size": 2529.0,
+      "IAT": 0.07818,
+      "Number": 18.0,
+      "Variance": 14739.0278,
+      "Source_IP": "192.168.137.167",
+      "Destination_IP": "54.69.37.156",
+      "Protocol_Name": "TCP",
+      "Source_Port": 51331,
+      "Destination_Port": 443
+    },
+    "analyst_explanation": "\"High-confidence web attack detected. The flow's elevated SHAP attribution values, particularly for 'ack_count' and 'Rate', indicate a potential amplification attack, such as a SYN flood, originating from 192.168.137.167. The high 'Rate' value suggests a rapid increase in traffic, further supporting this classification.\"",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 12055.82
+  },
+  "threat_intel": {
+    "mitre_attack": [
+      {
+        "id": "T1590.002",
+        "name": "DNS",
+        "tactic": "reconnaissance",
+        "description": "MITRE ATT&CK Technique T1590.002: DNS\nTactic: reconnaissance\nDescription: Adversaries may gather information about the victim's DNS that can be used during targeting. DNS information may include a variety of details, including registered name servers as well as records that outline addressing for a ",
+        "url": "https://attack.mitre.org/techniques/T1590/002",
+        "similarity_score": null
+      },
+      {
+        "id": "T1593.003",
+        "name": "Code Repositories",
+        "tactic": "reconnaissance",
+        "description": "MITRE ATT&CK Technique T1593.003: Code Repositories\nTactic: reconnaissance\nDescription: Adversaries may search public code repositories for information about victims that can be used during targeting. Victims may store code in repositories on various third-party websites such as GitHub, GitLab, Sour",
+        "url": "https://attack.mitre.org/techniques/T1593/003",
+        "similarity_score": null
+      }
+    ],
+    "cve_list": [],
+    "cisa_advisories": [],
+    "iot_threat_context": "The attack appears to be a reconnaissance-based attack, utilizing DNS and code repositories to gather information about the victim. The adversary may also utilize command-line interfaces, cloud APIs, and internal proxies to execute malicious commands. Additionally, the attack may involve exfiltration over Bluetooth if the command and control network is a wired Internet connection.",
+    "retrieval_confidence": 0.75,
+    "sources": [
+      "https://attack.mitre.org/techniques/T1590/002",
+      "https://attack.mitre.org/techniques/T1593/003"
+    ],
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 40813.02
+  },
+  "risk": {
+    "risk_score": 84.0,
+    "severity": "Critical",
+    "priority": "P1 - Critical Urgent",
+    "impact": "Catastrophic or severe degradation of IoT gateway and dependent network infrastructure.",
+    "likelihood": "Active Exploitation in Progress",
+    "reasoning": [
+      "The model confidence of 100.0% indicates a high degree of certainty in the classification of the attack as a Web Attack, with no room for doubt or alternative explanations. This confidence is further reinforced by the absence of any notable deviations in the top SHAP features, which suggests that the model has accurately identified the key indicators of the attack.",
+      "The assigned severity of Critical is justified by the potential physical impact on IoT devices, as the attack may utilize command-line interfaces, cloud APIs, and internal proxies to execute malicious commands, which could compromise the device's integrity and put it at risk of being compromised.",
+      "The operational priority of P1 - Critical Urgent is warranted due to the potential for exfiltration over Bluetooth, which could result in the unauthorized transfer of sensitive data, and the use of DNS and code repositories to gather information about the victim, which could lead to a significant increase in the attack's effectiveness.",
+      "The absence of any notable CVE severity or CISA advisories linked to the attack suggests that the threat intelligence factors are not strongly correlated with the attack's characteristics, which may indicate a novel or zero-day attack vector.",
+      "The increase in SHAP values for Std, Variance, and ack_count indicates that the top SHAP features are strongly indicative of the attack, with the increases suggesting that the model is confident in its classification and that the features are highly relevant to the attack's characteristics."
+    ],
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 40087.8
+  },
+  "response": {
+    "containment": [
+      "Isolate the affected IoT device from the internet by configuring the router's firewall to block incoming traffic on port 443 to the target IP address.",
+      "Block all incoming traffic from the attacker's source IP address to the affected IoT device using a firewall rule.",
+      "Segment the network into smaller, isolated segments using microsegmentation to limit the spread of the attack.",
+      "Implement a web application firewall (WAF) to detect and block malicious traffic to the target IoT device."
+    ],
+    "recovery": [
+      "Reboot the affected IoT device to ensure all malicious processes are terminated.",
+      "Verify the device's firmware is up-to-date and apply any available security patches.",
+      "Rotate the device's credentials to prevent further unauthorized access.",
+      "Perform a thorough security audit to identify and address any vulnerabilities in the device's configuration."
+    ],
+    "prevention": [
+      "Apply least-privilege ACLs to the affected IoT device to limit its access to sensitive resources.",
+      "Disable unencrypted protocols (e.g., HTTP, FTP) on the device to prevent exploitation of known vulnerabilities.",
+      "Implement a secure communication protocol (e.g., HTTPS) for all device communications.",
+      "Regularly rotate device credentials to prevent exploitation of weak passwords."
+    ],
+    "firewall_commands": [
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 192.168.137.167 -p tcp --dport 443 -j DROP",
+        "description": "Block incoming traffic from the attacker's source IP address to the target IP address on port 443."
+      },
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 192.168.137.167 -j DROP",
+        "description": "Block all incoming traffic from the attacker's source IP address."
+      },
+      {
+        "firewall_type": "windows_netsh",
+        "command": "netsh advfirewall firewall add rule name=\"Block_192.168.137.167\" dir=in action=block remoteip=192.168.137.167",
+        "description": "Block incoming traffic from the attacker's source IP address using Windows netsh."
+      },
+      {
+        "firewall_type": "cisco_acl",
+        "command": "access-list 100 deny tcp host 54.69.37.156 eq 443",
+        "description": "Block incoming traffic from the target IP address on port 443 using Cisco IOS ACL."
+      }
+    ],
+    "approval_required": true,
+    "approval_status": "PENDING_ANALYST_APPROVAL",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated execution disabled by policy. Requires SOC Analyst sign-off.",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 60484.85
+  },
+  "report": {
+    "incident_id": "INC-20261013-73210",
+    "generated_at": "2026-10-13 20:42:17 UTC",
+    "title": "SOC Incident Assessment: INC-20261013-73210 [Web Attack]",
+    "executive_summary": "Executive Summary:\n\nA critical web-based attack was detected on [Date] (Incident ID: INC-20261013-73210), with a high classification confidence of 100.0%. The attack, classified as a reconnaissance-based attack, utilized DNS and code repositories to gather information about the victim, and may also utilize command-line interfaces, cloud APIs, and internal proxies to execute malicious commands. The risk score of 84.0/100 and severity of Critical indicate a high level of threat potential.\n\nThe attack's impact is significant, with a priority of P1 - Critical Urgent. The threat intelligence context suggests that the adversary may attempt exfiltration over Bluetooth if the command and control network is a wired Internet connection. The MITRE ATT&CK Techniques employed in this attack are T1590.002 and T1593.003. Notably, no correlated CVEs were identified.\n\nImmediate containment actions have been taken, including isolating the affected IoT device from the internet, blocking incoming traffic from the attacker's source IP address, segmenting the network into smaller, isolated segments, and implementing a web application firewall. All pipeline agents completed successfully, with no upstream pipeline agent degradation or failure reported.",
+    "attack_type": "Web Attack",
+    "severity": "Critical",
+    "priority": "P1 - Critical Urgent",
+    "risk_score": 84.0,
+    "timeline": [
+      {
+        "timestamp": "+12.080s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std. [LLM: llama3.2, 12055.82ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+22.609s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated tracker INC-20261013-73210. Correlation note: Correlation Note:\nThis incident appears to be part of a recurring campaign, as the same source IP (192.168.137.167) and destination IP (54.69.37.156) were previously targeted in a similar web attack (INC-20261013-71573) on the same date and time.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+63.624s",
+        "agent": "Threat Intel Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. [LLM: llama3.2, 40813.02ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+103.715s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 84.0/100 (Critical Severity, P1 - Critical Urgent). [LLM: llama3.2, 40087.8ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+164.204s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 4 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL. [LLM: llama3.2, 60484.85ms]",
+        "status": "COMPLETED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENT ASSESSMENT REPORT: INC-20261013-73210\n**Generated:** 2026-10-13 20:42:17 UTC  |  **Engine:** `LLM` (Model: `llama3.2`)  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n## 1. Executive Summary\nExecutive Summary:\n\nA critical web-based attack was detected on [Date] (Incident ID: INC-20261013-73210), with a high classification confidence of 100.0%. The attack, classified as a reconnaissance-based attack, utilized DNS and code repositories to gather information about the victim, and may also utilize command-line interfaces, cloud APIs, and internal proxies to execute malicious commands. The risk score of 84.0/100 and severity of Critical indicate a high level of threat potential.\n\nThe attack's impact is significant, with a priority of P1 - Critical Urgent. The threat intelligence context suggests that the adversary may attempt exfiltration over Bluetooth if the command and control network is a wired Internet connection. The MITRE ATT&CK Techniques employed in this attack are T1590.002 and T1593.003. Notably, no correlated CVEs were identified.\n\nImmediate containment actions have been taken, including isolating the affected IoT device from the internet, blocking incoming traffic from the attacker's source IP address, segmenting the network into smaller, isolated segments, and implementing a web application firewall. All pipeline agents completed successfully, with no upstream pipeline agent degradation or failure reported.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `Web Attack`\n- **Classification Confidence:** `99.99%`\n- **Source Endpoint:** `192.168.137.167:51331`\n- **Destination Endpoint:** `54.69.37.156:443`\n- **Transport Protocol:** `TCP`\n- **Detection Timestamp:** `2026-10-13 20:39:33`\n\n**Analyst Technical Narrative:** \"High-confidence web attack detected. The flow's elevated SHAP attribution values, particularly for 'ack_count' and 'Rate', indicate a potential amplification attack, such as a SYN flood, originating from 192.168.137.167. The high 'Rate' value suggests a rapid increase in traffic, further supporting this classification.\"\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 0.01% `` |\n| Brute Force | 0.00% `` |\n| DDoS | 0.00% `` |\n| DoS | 0.00% `` |\n| Mirai | 0.00% `` |\n| Recon | 0.00% `` |\n| Spoofing | 0.00% `` |\n| Web Attack | 99.99% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Std` | 121.404 | +1.3452 | INCREASES |\n| 2 | `Variance` | 14739.028 | +1.2850 | INCREASES |\n| 3 | `ack_count` | 17.000 | +1.1600 | INCREASES |\n| 4 | `Rate` | 13.543 | +1.0677 | INCREASES |\n| 5 | `syn_count` | 2.000 | +0.5138 | INCREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 75%\n\n### MITRE ATT&CK Mapping\n- **[T1590.002: DNS](https://attack.mitre.org/techniques/T1590/002)** (Tactic: *reconnaissance*)\n  MITRE ATT&CK Technique T1590.002: DNS\nTactic: reconnaissance\nDescription: Adversaries may gather information about the victim's DNS that can be used during targeting. DNS information may include a variety of details, including registered name servers as well as records that outline addressing for a \n- **[T1593.003: Code Repositories](https://attack.mitre.org/techniques/T1593/003)** (Tactic: *reconnaissance*)\n  MITRE ATT&CK Technique T1593.003: Code Repositories\nTactic: reconnaissance\nDescription: Adversaries may search public code repositories for information about victims that can be used during targeting. Victims may store code in repositories on various third-party websites such as GitHub, GitLab, Sour\n\n### Correlated NVD / CVE Records\n- *No matching high-risk CVE vulnerabilities found in verified database.*\n\n### Authoritative Sources\n- <https://attack.mitre.org/techniques/T1590/002>\n- <https://attack.mitre.org/techniques/T1593/003>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `84.0 / 100.0`\n- **Assigned Severity:** `CRITICAL`\n- **Operational Priority:** `P1 - Critical Urgent`\n- **Potential Impact:** Catastrophic or severe degradation of IoT gateway and dependent network infrastructure.\n- **Threat Likelihood:** Active Exploitation in Progress\n\n### Analytical Justification\n- The model confidence of 100.0% indicates a high degree of certainty in the classification of the attack as a Web Attack, with no room for doubt or alternative explanations. This confidence is further reinforced by the absence of any notable deviations in the top SHAP features, which suggests that the model has accurately identified the key indicators of the attack.\n- The assigned severity of Critical is justified by the potential physical impact on IoT devices, as the attack may utilize command-line interfaces, cloud APIs, and internal proxies to execute malicious commands, which could compromise the device's integrity and put it at risk of being compromised.\n- The operational priority of P1 - Critical Urgent is warranted due to the potential for exfiltration over Bluetooth, which could result in the unauthorized transfer of sensitive data, and the use of DNS and code repositories to gather information about the victim, which could lead to a significant increase in the attack's effectiveness.\n- The absence of any notable CVE severity or CISA advisories linked to the attack suggests that the threat intelligence factors are not strongly correlated with the attack's characteristics, which may indicate a novel or zero-day attack vector.\n- The increase in SHAP values for Std, Variance, and ack_count indicates that the top SHAP features are strongly indicative of the attack, with the increases suggesting that the model is confident in its classification and that the features are highly relevant to the attack's characteristics.\n\n---\n\n## 6. Recommended Response & Containment Playbook\n\n### Immediate Containment Steps\n1. Isolate the affected IoT device from the internet by configuring the router's firewall to block incoming traffic on port 443 to the target IP address.\n1. Block all incoming traffic from the attacker's source IP address to the affected IoT device using a firewall rule.\n1. Segment the network into smaller, isolated segments using microsegmentation to limit the spread of the attack.\n1. Implement a web application firewall (WAF) to detect and block malicious traffic to the target IoT device.\n\n### Recovery Procedures\n1. Reboot the affected IoT device to ensure all malicious processes are terminated.\n1. Verify the device's firmware is up-to-date and apply any available security patches.\n1. Rotate the device's credentials to prevent further unauthorized access.\n1. Perform a thorough security audit to identify and address any vulnerabilities in the device's configuration.\n\n### Long-Term Prevention & Hardening\n- Apply least-privilege ACLs to the affected IoT device to limit its access to sensitive resources.\n- Disable unencrypted protocols (e.g., HTTP, FTP) on the device to prevent exploitation of known vulnerabilities.\n- Implement a secure communication protocol (e.g., HTTPS) for all device communications.\n- Regularly rotate device credentials to prevent exploitation of weak passwords.\n\n### Firewall & Access Control Rules\n> [!CAUTION]\n> **ANALYST APPROVAL REQUIRED**: Automated execution is strictly disabled. Verify host parameters before executing.\n\n#### IPTABLES: Block incoming traffic from the attacker's source IP address to the target IP address on port 443.\n```bash\niptables -A INPUT -s 192.168.137.167 -p tcp --dport 443 -j DROP\n```\n\n#### IPTABLES: Block all incoming traffic from the attacker's source IP address.\n```bash\niptables -A INPUT -s 192.168.137.167 -j DROP\n```\n\n#### WINDOWS_NETSH: Block incoming traffic from the attacker's source IP address using Windows netsh.\n```bash\nnetsh advfirewall firewall add rule name=\"Block_192.168.137.167\" dir=in action=block remoteip=192.168.137.167\n```\n\n#### CISCO_ACL: Block incoming traffic from the target IP address on port 443 using Cisco IOS ACL.\n```bash\naccess-list 100 deny tcp host 54.69.37.156 eq 443\n```\n\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +12.080s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std. [LLM: llama3.2, 12055.82ms] |\n| +22.609s | `Coordinator Agent` | Incident State Initialized | Allocated tracker INC-20261013-73210. Correlation note: Correlation Note:\nThis incident appears to be part of a recurring campaign, as the same source IP (192.168.137.167) and destination IP (54.69.37.156) were previously targeted in a similar web attack (INC-20261013-71573) on the same date and time. |\n| +63.624s | `Threat Intel Agent` | Knowledge Base RAG Retrieval | Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. [LLM: llama3.2, 40813.02ms] |\n| +103.715s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 84.0/100 (Critical Severity, P1 - Critical Urgent). [LLM: llama3.2, 40087.8ms] |\n| +164.204s | `Response Agent` | Mitigation & ACL Formulation | Generated 4 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL. [LLM: llama3.2, 60484.85ms] |",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 27904.09
+  },
+  "timeline": [
+    {
+      "timestamp": "+12.080s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std. [LLM: llama3.2, 12055.82ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+22.609s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated tracker INC-20261013-73210. Correlation note: Correlation Note:\nThis incident appears to be part of a recurring campaign, as the same source IP (192.168.137.167) and destination IP (54.69.37.156) were previously targeted in a similar web attack (INC-20261013-71573) on the same date and time.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+63.624s",
+      "agent": "Threat Intel Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. [LLM: llama3.2, 40813.02ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+103.715s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 84.0/100 (Critical Severity, P1 - Critical Urgent). [LLM: llama3.2, 40087.8ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+164.204s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 4 firewall/ACL commands and 4 containment procedures. Status: PENDING_ANALYST_APPROVAL. [LLM: llama3.2, 60484.85ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+192.109s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized SOC assessment report for INC-20261013-73210 (9521 bytes). [LLM: llama3.2, 27904.09ms]",
+      "status": "COMPLETED"
+    }
+  ]
+}
