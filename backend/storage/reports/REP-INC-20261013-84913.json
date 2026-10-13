@@ -1,0 +1,250 @@
+{
+  "report_id": "REP-INC-20261013-84913",
+  "incident_id": "INC-20261013-84913",
+  "detection": {
+    "attack_type": "Web Attack",
+    "confidence": 0.9998915195465088,
+    "probabilities": {
+      "Benign": 5.4351537983166054e-05,
+      "Brute Force": 3.129208562313579e-05,
+      "DDoS": 1.6713104287191527e-06,
+      "DoS": 9.36367086978862e-06,
+      "Mirai": 2.1718028619943652e-06,
+      "Recon": 3.0670908017782494e-06,
+      "Spoofing": 6.558388577104779e-06,
+      "Web Attack": 0.9998915195465088
+    },
+    "network_context": {
+      "timestamp": "2026-10-13 12:59:44",
+      "source_ip": "192.168.137.167",
+      "destination_ip": "54.69.37.156",
+      "source_port": 51331,
+      "destination_port": 443,
+      "protocol": "TCP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Std",
+        "value": 121.4044,
+        "shap_value": 1.3452,
+        "direction": "increases"
+      },
+      {
+        "feature": "Variance",
+        "value": 14739.0278,
+        "shap_value": 1.285,
+        "direction": "increases"
+      },
+      {
+        "feature": "ack_count",
+        "value": 17.0,
+        "shap_value": 1.16,
+        "direction": "increases"
+      },
+      {
+        "feature": "Rate",
+        "value": 13.5434,
+        "shap_value": 1.0677,
+        "direction": "increases"
+      },
+      {
+        "feature": "syn_count",
+        "value": 2.0,
+        "shap_value": 0.5138,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Std": 1.3452,
+      "Variance": 1.285,
+      "ack_count": 1.16,
+      "Rate": 1.0677,
+      "syn_count": 0.5138,
+      "Max": 0.474,
+      "Number": 0.4576,
+      "Time_To_Live": -0.2795,
+      "Min": 0.1066,
+      "psh_flag_number": 0.0603,
+      "Header_Length": -0.0516,
+      "IAT": -0.0371,
+      "AVG": -0.0324,
+      "syn_flag_number": 0.02,
+      "rst_flag_number": 0.0145,
+      "Tot size": 0.0127,
+      "Tot sum": -0.004,
+      "rst_count": 0.0033,
+      "fin_flag_number": -0.0021,
+      "fin_count": -0.0014,
+      "ack_flag_number": -0.0001,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 40.44,
+      "Protocol Type": 6.0,
+      "Time_To_Live": 243.44,
+      "Rate": 13.5434,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 1.0,
+      "rst_flag_number": 1.0,
+      "psh_flag_number": 1.0,
+      "ack_flag_number": 1.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 17.0,
+      "syn_count": 2.0,
+      "fin_count": 0.0,
+      "rst_count": 1.0,
+      "HTTP": 0.0,
+      "HTTPS": 1.0,
+      "DNS": 0.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 1.0,
+      "UDP": 0.0,
+      "DHCP": 0.0,
+      "ARP": 0.0,
+      "ICMP": 0.0,
+      "IGMP": 0.0,
+      "IPv": 1.0,
+      "LLC": 0.0,
+      "Tot sum": 2529.0,
+      "Min": 60.0,
+      "Max": 459.0,
+      "AVG": 140.5,
+      "Std": 121.4044,
+      "Tot size": 2529.0,
+      "IAT": 0.07818,
+      "Number": 18.0,
+      "Variance": 14739.0278,
+      "Source_IP": "192.168.137.167",
+      "Destination_IP": "54.69.37.156",
+      "Protocol_Name": "TCP",
+      "Source_Port": 51331,
+      "Destination_Port": 443
+    },
+    "analyst_explanation": "\"High-risk TCP flow detected from 192.168.137.167 to 54.69.37.156, with a confidence score of 99.99%. The flow's increased risk is attributed to elevated standard deviation (Std) and variance values, indicating anomalous packet behavior, and high acknowledgement counts, suggesting potential exploitation of a vulnerable application.\"",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 20107.71
+  },
+  "threat_intel": {},
+  "risk": {
+    "risk_score": 75.0,
+    "severity": "High",
+    "priority": "P2 - High Priority (Estimated)",
+    "impact": "Estimated baseline impact (Risk Agent was unavailable)",
+    "likelihood": "Estimated from supervised classifier",
+    "reasoning": [
+      "Fallback risk estimated from attack type 'Web Attack'."
+    ],
+    "generated_by": "rule_based",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "response": {},
+  "report": {
+    "incident_id": "INC-20261013-84913",
+    "generated_at": "2026-10-13 12:59:44",
+    "title": "Incident INC-20261013-84913 (Partial Report)",
+    "executive_summary": "Incident recorded with partial agent outputs.",
+    "attack_type": "Web Attack",
+    "severity": "High",
+    "priority": "P2 - High Priority (Estimated)",
+    "risk_score": 75.0,
+    "timeline": [
+      {
+        "timestamp": "+20.143s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std. [LLM: llama3.2, 20107.71ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+75.205s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated tracker INC-20261013-84913. Correlation note: Correlation Note:\nThis incident appears to be part of a recurring campaign, as it shares the same source IP (192.168.137.167) and destination IP (54.69.37.156) as two recent previous incidents (INC-20261013-26219 and INC-20261013-83560) on the same day, indicating potential distributed botnet probing.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+240.865s",
+        "agent": "Threat Intel Agent",
+        "action": "Knowledge Base Retrieval",
+        "details": "Failed: Agent 'Threat Intel Agent' timed out after 30.0s",
+        "status": "FAILED"
+      },
+      {
+        "timestamp": "+318.115s",
+        "agent": "Risk Assessment Agent",
+        "action": "Risk Scoring Failure",
+        "details": "Failed: Agent 'Risk Assessment Agent' timed out after 30.0s",
+        "status": "FAILED"
+      },
+      {
+        "timestamp": "+429.401s",
+        "agent": "Response Agent",
+        "action": "Response Playbook Formulation",
+        "details": "Failed: Agent 'Response Agent' timed out after 30.0s",
+        "status": "FAILED"
+      },
+      {
+        "timestamp": "+4366.285s",
+        "agent": "Incident Report Agent",
+        "action": "Report Compilation",
+        "details": "Failed: Agent 'Incident Report Agent' timed out after 30.0s",
+        "status": "FAILED"
+      }
+    ],
+    "markdown_content": "# SOC Incident Report: INC-20261013-84913\n\n**Status:** Partial Pipeline Run (Report Agent failed)\n\n- **Attack:** Web Attack (100.0%)\n- **Risk:** 75.0/100 (High)\n",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "timeline": [
+    {
+      "timestamp": "+20.143s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std. [LLM: llama3.2, 20107.71ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+75.205s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated tracker INC-20261013-84913. Correlation note: Correlation Note:\nThis incident appears to be part of a recurring campaign, as it shares the same source IP (192.168.137.167) and destination IP (54.69.37.156) as two recent previous incidents (INC-20261013-26219 and INC-20261013-83560) on the same day, indicating potential distributed botnet probing.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+240.865s",
+      "agent": "Threat Intel Agent",
+      "action": "Knowledge Base Retrieval",
+      "details": "Failed: Agent 'Threat Intel Agent' timed out after 30.0s",
+      "status": "FAILED"
+    },
+    {
+      "timestamp": "+318.115s",
+      "agent": "Risk Assessment Agent",
+      "action": "Risk Scoring Failure",
+      "details": "Failed: Agent 'Risk Assessment Agent' timed out after 30.0s",
+      "status": "FAILED"
+    },
+    {
+      "timestamp": "+429.401s",
+      "agent": "Response Agent",
+      "action": "Response Playbook Formulation",
+      "details": "Failed: Agent 'Response Agent' timed out after 30.0s",
+      "status": "FAILED"
+    },
+    {
+      "timestamp": "+4366.285s",
+      "agent": "Incident Report Agent",
+      "action": "Report Compilation",
+      "details": "Failed: Agent 'Incident Report Agent' timed out after 30.0s",
+      "status": "FAILED"
+    }
+  ]
+}

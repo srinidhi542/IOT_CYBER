@@ -1,4 +1,4 @@
-﻿"""
+"""
 budget.py - Redis-backed daily LLM token budget tracker.
 
 Redis key format: llm:usage:{user_id}:{date}  (e.g. llm:usage:alice:2026-10-11)
@@ -29,8 +29,8 @@ def _get_redis_client():
         pass
 
     # 2. Fall back to a direct connection from env/settings
-    import redis as redis_lib
     try:
+        import redis as redis_lib
         from app.core.config import settings
         _redis_client = redis_lib.Redis(
             host=settings.REDIS_HOST,
@@ -40,8 +40,8 @@ def _get_redis_client():
             socket_connect_timeout=2,
         )
         _redis_client.ping()
-    except Exception as e:
-        logger.warning(f"[Budget] Redis unavailable - budgeting disabled: {e}")
+    except (ImportError, Exception) as e:
+        logger.debug(f"[Budget] Redis unavailable - budgeting disabled: {e}")
         _redis_client = None
 
     return _redis_client

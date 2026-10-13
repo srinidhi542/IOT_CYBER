@@ -63,9 +63,20 @@ class ReportStorageService:
         json_filename = f"{report_id}.json"
         json_filepath = os.path.join(settings.STORAGE_REPORTS_DIR, json_filename)
         try:
+            from app.core.config import load_platform_settings
+            pcfg = load_platform_settings().get("llm", {})
+            provider_val = pcfg.get("provider", "ollama")
+            model_val = report_data.get("llm_model") or pcfg.get("model", "llama3.2")
+            gen_by_val = report_data.get("generated_by", "rule_based")
+            if any(x.get("generated_by") == "llm" for x in [detection_data, threat_intel_data, risk_data, response_data, report_data]):
+                gen_by_val = "llm"
+
             full_bundle = {
                 "report_id": report_id,
                 "incident_id": incident_id,
+                "generated_by": gen_by_val,
+                "llm_provider": provider_val,
+                "llm_model": model_val,
                 "detection": detection_data,
                 "threat_intel": threat_intel_data,
                 "risk": risk_data,

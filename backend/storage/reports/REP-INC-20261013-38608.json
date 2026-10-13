@@ -1,0 +1,280 @@
+{
+  "report_id": "REP-INC-20261013-38608",
+  "incident_id": "INC-20261013-38608",
+  "generated_by": "llm",
+  "llm_provider": "ollama",
+  "llm_model": "llama3.2",
+  "detection": {
+    "attack_type": "Recon",
+    "confidence": 0.9997385144233704,
+    "probabilities": {
+      "Benign": 6.81341189192608e-05,
+      "Brute Force": 7.3586811595305335e-06,
+      "DDoS": 9.080434210773092e-06,
+      "DoS": 4.321906453697011e-05,
+      "Mirai": 9.146780212176964e-05,
+      "Recon": 0.9997385144233704,
+      "Spoofing": 3.5718741855816916e-05,
+      "Web Attack": 6.523522188217612e-06
+    },
+    "network_context": {
+      "timestamp": "2026-10-13 14:47:18",
+      "source_ip": "10.11.39.0",
+      "destination_ip": "224.0.0.251",
+      "source_port": 5353,
+      "destination_port": 5353,
+      "protocol": "UDP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Tot sum",
+        "value": 237.0,
+        "shap_value": 5.1925,
+        "direction": "increases"
+      },
+      {
+        "feature": "Rate",
+        "value": 536.2189,
+        "shap_value": 0.7384,
+        "direction": "increases"
+      },
+      {
+        "feature": "AVG",
+        "value": 79.0,
+        "shap_value": -0.7147,
+        "direction": "decreases"
+      },
+      {
+        "feature": "Tot size",
+        "value": 237.0,
+        "shap_value": 0.6691,
+        "direction": "increases"
+      },
+      {
+        "feature": "Number",
+        "value": 3.0,
+        "shap_value": 0.3537,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Tot sum": 5.1925,
+      "Rate": 0.7384,
+      "AVG": -0.7147,
+      "Tot size": 0.6691,
+      "Number": 0.3537,
+      "Min": -0.2425,
+      "IAT": 0.0543,
+      "Max": -0.0389,
+      "Std": -0.0356,
+      "ack_flag_number": 0.0258,
+      "Variance": -0.0121,
+      "Header_Length": -0.01,
+      "syn_count": -0.0022,
+      "ack_count": 0.0003,
+      "syn_flag_number": -0.0001,
+      "rst_count": -0.0,
+      "fin_count": -0.0,
+      "Time_To_Live": 0.0,
+      "fin_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 28.0,
+      "Protocol Type": 17.0,
+      "Time_To_Live": 1.0,
+      "Rate": 536.2189,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ack_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 0.0,
+      "syn_count": 0.0,
+      "fin_count": 0.0,
+      "rst_count": 0.0,
+      "HTTP": 0.0,
+      "HTTPS": 0.0,
+      "DNS": 0.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 0.0,
+      "UDP": 1.0,
+      "DHCP": 0.0,
+      "ARP": 0.0,
+      "ICMP": 0.0,
+      "IGMP": 0.0,
+      "IPv": 1.0,
+      "LLC": 0.0,
+      "Tot sum": 237.0,
+      "Min": 79.0,
+      "Max": 79.0,
+      "AVG": 79.0,
+      "Std": 0.0,
+      "Tot size": 237.0,
+      "IAT": 0.002797,
+      "Number": 3.0,
+      "Variance": 0.0,
+      "Source_IP": "10.11.39.0",
+      "Destination_IP": "224.0.0.251",
+      "Protocol_Name": "UDP",
+      "Source_Port": 5353,
+      "Destination_Port": 5353
+    },
+    "analyst_explanation": "\"Reconnaissance activity detected on UDP port 5353 (Source: 10.11.39.0, Destination: 224.0.0.251). The high confidence score (99.97%) and increased SHAP attributions for 'Tot sum', 'Rate', and 'Tot size' values indicate a potential reconnaissance probe, likely utilizing the Internet Control Message Protocol (ICMP) Echo Request (Type 8) to gather information about the network.\"",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 22447.14
+  },
+  "threat_intel": {
+    "mitre_attack": [
+      {
+        "id": "T1204.005",
+        "name": "Malicious Library",
+        "tactic": "execution",
+        "description": "MITRE ATT&CK Technique T1204.005: Malicious Library\nTactic: execution\nDescription: Adversaries may rely on a user installing a malicious library to facilitate execution. Threat actors may [Upload Malware](https://attack.mitre.org/techniques/T1608/001) to package managers such as NPM and PyPi, as wel",
+        "url": "https://attack.mitre.org/techniques/T1204/005",
+        "similarity_score": null
+      },
+      {
+        "id": "T1055.014",
+        "name": "VDSO Hijacking",
+        "tactic": "stealth, privilege-escalation",
+        "description": "MITRE ATT&CK Technique T1055.014: VDSO Hijacking\nTactic: stealth, privilege-escalation\nDescription: Adversaries may inject malicious code into processes via VDSO hijacking in order to evade process-based defenses as well as possibly elevate privileges. Virtual dynamic shared object (vdso) hijacking ",
+        "url": "https://attack.mitre.org/techniques/T1055/014",
+        "similarity_score": null
+      }
+    ],
+    "cve_list": [],
+    "cisa_advisories": [],
+    "iot_threat_context": "The threat actor is utilizing various techniques to exfiltrate data, including VDSO hijacking, exfiltration over unencrypted non-C2 protocols, and scheduled transfers. The actor is also utilizing point and tag identification to gain a comprehensive understanding of the process environment. The attack is likely related to a malicious library installation, and the actor may be attempting to manipulate transmitted data to hide activity.",
+    "retrieval_confidence": 0.75,
+    "sources": [
+      "https://attack.mitre.org/techniques/T1204/005",
+      "https://attack.mitre.org/techniques/T1055/014"
+    ],
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 48484.06
+  },
+  "risk": {
+    "risk_score": 51.0,
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "impact": "Potential device compromise, unauthorized credential access, or localized disruption.",
+    "likelihood": "High Probability of Imminent Harm",
+    "reasoning": [
+      "The model confidence of 100.0% indicates a high degree of certainty in the classification, while the baseline threat severity of 0.0 suggests that the attack is not currently listed in public threat intelligence feeds, but the described techniques are still considered high-risk and potentially indicative of a malicious library installation.",
+      "The physical impact on IoT devices is significant, as the targeted port 5353 is commonly used for various IoT protocols, and the use of VDSO hijacking and scheduled transfers could potentially compromise the security of multiple devices simultaneously.",
+      "The top SHAP indicators suggest that the model is detecting an increase in SHAP values for 'Tot sum' and 'Rate', indicating that the model is identifying a potential data exfiltration mechanism, while the decrease in 'AVG' suggests that the model is also detecting a potential manipulation of transmitted data to hide activity.",
+      "The lack of correlation with CVE severity and CISA advisories suggests that this attack is not currently tracked by traditional threat intelligence sources, but the use of point and tag identification and scheduled transfers indicates a sophisticated and targeted attack.",
+      "The threat intelligence factors suggest that the attack is likely related to a malicious library installation, and the actor's use of unencrypted non-C2 protocols and scheduled transfers increases the risk of data exfiltration and compromise of the process environment."
+    ],
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 74573.11
+  },
+  "response": {},
+  "report": {
+    "incident_id": "INC-20261013-38608",
+    "generated_at": "2026-10-13 14:57:48 UTC",
+    "title": "SOC Incident Assessment: INC-20261013-38608 [Recon]",
+    "executive_summary": "Executive Summary:\n\nA high-priority reconnaissance attack (Classification Confidence: 100.0%) was detected on [Date] via a UDP connection between 10.11.39.0:5353 and 224.0.0.251:5353. The attack, scored at 51.0/100 in terms of risk, is classified as High Severity, with a priority level of P2. The threat actor is utilizing various tactics, including VDSO hijacking, exfiltration over unencrypted non-C2 protocols, and scheduled transfers, to exfiltrate data and gain a comprehensive understanding of the process environment. The attack is likely related to a malicious library installation, and the actor may be attempting to manipulate transmitted data to hide activity.\n\nThe impact of this incident is significant, with potential effects on IoT devices and infrastructure. The severity of the attack warrants immediate attention, and containment actions are necessary to prevent further compromise. The pipeline status indicates that upstream agents are DEGRADED, resulting in partial analysis, which may impact the accuracy of this report.\n\nAs the incident is still under investigation, containment actions have not been implemented yet. However, the analyst has taken initial steps to mitigate the threat. Further analysis and approval from senior management are required to finalize containment actions and ensure the incident is fully addressed.",
+    "attack_type": "Recon",
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "risk_score": 51.0,
+    "timeline": [
+      {
+        "timestamp": "+22.478s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Recon' with 100.0% confidence. Primary feature driver: Tot sum. [LLM: llama3.2, 22447.14ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+37.919s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated tracker INC-20261013-38608. Correlation note: Correlation Note:\nThis incident appears to be an isolated initial observation, as no recent incidents with the same source IP (10.11.39.0) and attack type (Recon) have been recorded in the active cache.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+86.598s",
+        "agent": "Threat Intel Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. [LLM: llama3.2, 48484.06ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+161.174s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 51.0/100 (High Severity, P2 - High Priority). [LLM: llama3.2, 74573.11ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+629.942s",
+        "agent": "Response Agent",
+        "action": "Response Playbook Formulation",
+        "details": "Failed: Agent 'Response Agent' timed out after 180.0s",
+        "status": "FAILED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENT ASSESSMENT REPORT: INC-20261013-38608\n**Generated:** 2026-10-13 14:57:48 UTC  |  **Engine:** `LLM` (Model: `llama3.2`)  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n> [!WARNING]\n> **PARTIAL PIPELINE NOTICE**: The following agents experienced errors or ran in fallback mode: response.\n\n## 1. Executive Summary\nExecutive Summary:\n\nA high-priority reconnaissance attack (Classification Confidence: 100.0%) was detected on [Date] via a UDP connection between 10.11.39.0:5353 and 224.0.0.251:5353. The attack, scored at 51.0/100 in terms of risk, is classified as High Severity, with a priority level of P2. The threat actor is utilizing various tactics, including VDSO hijacking, exfiltration over unencrypted non-C2 protocols, and scheduled transfers, to exfiltrate data and gain a comprehensive understanding of the process environment. The attack is likely related to a malicious library installation, and the actor may be attempting to manipulate transmitted data to hide activity.\n\nThe impact of this incident is significant, with potential effects on IoT devices and infrastructure. The severity of the attack warrants immediate attention, and containment actions are necessary to prevent further compromise. The pipeline status indicates that upstream agents are DEGRADED, resulting in partial analysis, which may impact the accuracy of this report.\n\nAs the incident is still under investigation, containment actions have not been implemented yet. However, the analyst has taken initial steps to mitigate the threat. Further analysis and approval from senior management are required to finalize containment actions and ensure the incident is fully addressed.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `Recon`\n- **Classification Confidence:** `99.97%`\n- **Source Endpoint:** `10.11.39.0:5353`\n- **Destination Endpoint:** `224.0.0.251:5353`\n- **Transport Protocol:** `UDP`\n- **Detection Timestamp:** `2026-10-13 14:47:18`\n\n**Analyst Technical Narrative:** \"Reconnaissance activity detected on UDP port 5353 (Source: 10.11.39.0, Destination: 224.0.0.251). The high confidence score (99.97%) and increased SHAP attributions for 'Tot sum', 'Rate', and 'Tot size' values indicate a potential reconnaissance probe, likely utilizing the Internet Control Message Protocol (ICMP) Echo Request (Type 8) to gather information about the network.\"\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 0.01% `` |\n| Brute Force | 0.00% `` |\n| DDoS | 0.00% `` |\n| DoS | 0.00% `` |\n| Mirai | 0.01% `` |\n| Recon | 99.97% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n| Spoofing | 0.00% `` |\n| Web Attack | 0.00% `` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Tot sum` | 237.000 | +5.1925 | INCREASES |\n| 2 | `Rate` | 536.219 | +0.7384 | INCREASES |\n| 3 | `AVG` | 79.000 | -0.7147 | DECREASES |\n| 4 | `Tot size` | 237.000 | +0.6691 | INCREASES |\n| 5 | `Number` | 3.000 | +0.3537 | INCREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 75%\n\n### MITRE ATT&CK Mapping\n- **[T1204.005: Malicious Library](https://attack.mitre.org/techniques/T1204/005)** (Tactic: *execution*)\n  MITRE ATT&CK Technique T1204.005: Malicious Library\nTactic: execution\nDescription: Adversaries may rely on a user installing a malicious library to facilitate execution. Threat actors may [Upload Malware](https://attack.mitre.org/techniques/T1608/001) to package managers such as NPM and PyPi, as wel\n- **[T1055.014: VDSO Hijacking](https://attack.mitre.org/techniques/T1055/014)** (Tactic: *stealth, privilege-escalation*)\n  MITRE ATT&CK Technique T1055.014: VDSO Hijacking\nTactic: stealth, privilege-escalation\nDescription: Adversaries may inject malicious code into processes via VDSO hijacking in order to evade process-based defenses as well as possibly elevate privileges. Virtual dynamic shared object (vdso) hijacking \n\n### Correlated NVD / CVE Records\n- *No matching high-risk CVE vulnerabilities found in verified database.*\n\n### Authoritative Sources\n- <https://attack.mitre.org/techniques/T1204/005>\n- <https://attack.mitre.org/techniques/T1055/014>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `51.0 / 100.0`\n- **Assigned Severity:** `HIGH`\n- **Operational Priority:** `P2 - High Priority`\n- **Potential Impact:** Potential device compromise, unauthorized credential access, or localized disruption.\n- **Threat Likelihood:** High Probability of Imminent Harm\n\n### Analytical Justification\n- The model confidence of 100.0% indicates a high degree of certainty in the classification, while the baseline threat severity of 0.0 suggests that the attack is not currently listed in public threat intelligence feeds, but the described techniques are still considered high-risk and potentially indicative of a malicious library installation.\n- The physical impact on IoT devices is significant, as the targeted port 5353 is commonly used for various IoT protocols, and the use of VDSO hijacking and scheduled transfers could potentially compromise the security of multiple devices simultaneously.\n- The top SHAP indicators suggest that the model is detecting an increase in SHAP values for 'Tot sum' and 'Rate', indicating that the model is identifying a potential data exfiltration mechanism, while the decrease in 'AVG' suggests that the model is also detecting a potential manipulation of transmitted data to hide activity.\n- The lack of correlation with CVE severity and CISA advisories suggests that this attack is not currently tracked by traditional threat intelligence sources, but the use of point and tag identification and scheduled transfers indicates a sophisticated and targeted attack.\n- The threat intelligence factors suggest that the attack is likely related to a malicious library installation, and the actor's use of unencrypted non-C2 protocols and scheduled transfers increases the risk of data exfiltration and compromise of the process environment.\n\n---\n\n## 6. Recommended Response & Containment Playbook\n> [!NOTE]\n> Response plan unavailable: response agent did not execute.\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +22.478s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'Recon' with 100.0% confidence. Primary feature driver: Tot sum. [LLM: llama3.2, 22447.14ms] |\n| +37.919s | `Coordinator Agent` | Incident State Initialized | Allocated tracker INC-20261013-38608. Correlation note: Correlation Note:\nThis incident appears to be an isolated initial observation, as no recent incidents with the same source IP (10.11.39.0) and attack type (Recon) have been recorded in the active cache. |\n| +86.598s | `Threat Intel Agent` | Knowledge Base RAG Retrieval | Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. [LLM: llama3.2, 48484.06ms] |\n| +161.174s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 51.0/100 (High Severity, P2 - High Priority). [LLM: llama3.2, 74573.11ms] |\n| +629.942s | `Response Agent` | Response Playbook Formulation | Failed: Agent 'Response Agent' timed out after 180.0s |",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 91429.21
+  },
+  "timeline": [
+    {
+      "timestamp": "+22.478s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Recon' with 100.0% confidence. Primary feature driver: Tot sum. [LLM: llama3.2, 22447.14ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+37.919s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated tracker INC-20261013-38608. Correlation note: Correlation Note:\nThis incident appears to be an isolated initial observation, as no recent incidents with the same source IP (10.11.39.0) and attack type (Recon) have been recorded in the active cache.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+86.598s",
+      "agent": "Threat Intel Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. [LLM: llama3.2, 48484.06ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+161.174s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 51.0/100 (High Severity, P2 - High Priority). [LLM: llama3.2, 74573.11ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+629.942s",
+      "agent": "Response Agent",
+      "action": "Response Playbook Formulation",
+      "details": "Failed: Agent 'Response Agent' timed out after 180.0s",
+      "status": "FAILED"
+    },
+    {
+      "timestamp": "+721.373s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized SOC assessment report for INC-20261013-38608 (7458 bytes). [LLM: llama3.2, 91429.21ms]",
+      "status": "COMPLETED"
+    }
+  ]
+}

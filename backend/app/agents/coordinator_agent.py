@@ -48,7 +48,7 @@ def run_agent_safely(
     agent_name: str,
     fn,
     *args,
-    timeout: float = 30.0,
+    timeout: float = 180.0,
     **kwargs
 ) -> AgentResult:
     """
@@ -186,7 +186,7 @@ class CoordinatorAgent:
         from app.core.config import load_platform_settings
         platform_cfg = load_platform_settings()
 
-        agent_timeout = float(platform_cfg.get("multi_agent_pipeline", {}).get("agent_timeout_seconds", 30.0))
+        agent_timeout = float(platform_cfg.get("multi_agent_pipeline", {}).get("agent_timeout_seconds", 180.0))
         exec_mode = platform_cfg.get("agent_pipeline", {}).get("execution_mode", "coordinated")
         llm_cfg = platform_cfg.get("llm", {})
         llm_enabled = bool(llm_cfg.get("enabled", True))

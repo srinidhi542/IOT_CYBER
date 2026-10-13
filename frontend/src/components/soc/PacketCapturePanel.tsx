@@ -14,7 +14,9 @@ import {
   Terminal,
   Clock,
   HardDrive,
-  RotateCw
+  RotateCw,
+  Download,
+  ArrowRight
 } from 'lucide-react';
 
 interface PacketCapturePanelProps {
@@ -23,6 +25,7 @@ interface PacketCapturePanelProps {
   onCaptureProcessed?: (result: CaptureProcessResult) => void;
   isProcessing: boolean;
   setIsProcessing: (v: boolean) => void;
+  onNavigateToIncidents?: () => void;
 }
 
 export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
@@ -30,7 +33,8 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
   onSingleIncidentGenerated,
   onCaptureProcessed,
   isProcessing,
-  setIsProcessing
+  setIsProcessing,
+  onNavigateToIncidents
 }) => {
   const [interfaces, setInterfaces] = useState<NetworkInterface[]>([]);
   const [selectedIface, setSelectedIface] = useState<string>('');
@@ -43,6 +47,8 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
   const [loadingInterfaces, setLoadingInterfaces] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [processingStatus, setProcessingStatus] = useState<string | null>(null);
+  const [processedResult, setProcessedResult] = useState<CaptureProcessResult | null>(null);
   const timerRef = useRef<any>(null);
 
   // Load interfaces and initial status
@@ -107,14 +113,7 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
   useEffect(() => {
     if (capturing) {
       timerRef.current = setInterval(() => {
-        setDurationTimer(prev => {
-          const next = prev + 1;
-          if (captureDurationLimit > 0 && next >= captureDurationLimit) {
-            handleStopAndAnalyze();
-            return captureDurationLimit;
-          }
-          return next;
-        });
+        setDurationTimer(prev => prev + 1);
       }, 1000);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -122,7 +121,13 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [capturing, captureDurationLimit]);
+  }, [capturing]);
+
+  useEffect(() => {
+    if (capturing && captureDurationLimit > 0 && durationTimer >= captureDurationLimit) {
+      handleStopAndAnalyze();
+    }
+  }, [capturing, durationTimer, captureDurationLimit]);
 
   const handleStartCapture = async () => {
     try {
@@ -147,16 +152,17 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
     try {
       setIsProcessing(true);
       setErrorMsg(null);
+      setSuccessMsg(null);
       setCapturing(false);
-      setSuccessMsg("Stopping capture and extracting bidirectional flow telemetry...");
+      setProcessingStatus("Stopping live packet capture & generating PCAP trace...");
       const stopRes = await apiService.stopCapture();
       setCaptureStatus(stopRes as any);
 
-      // Now automatically process through CICFlowMeter -> XGBoost -> Multi-Agent SOC
       const pcapFile = stopRes.output_pcap;
       if (pcapFile) {
-        setSuccessMsg(`Processing ${stopRes.packet_count || 0} packets through CICFlowMeter 39-feature pipeline...`);
+        setProcessingStatus(`Extracting 39-feature flows from ${stopRes.packet_count || 0} packets & running 6-Agent AI SOC pipeline...`);
         const procResult = await apiService.processPcap(pcapFile, 6);
+        setProcessedResult(procResult);
         if (onCaptureProcessed) {
           onCaptureProcessed(procResult);
         }
@@ -165,17 +171,18 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
         }
         if (procResult.incidents && procResult.incidents.length > 0) {
           onIncidentsGenerated(procResult.incidents);
-          setSuccessMsg(`Extracted ${procResult.flows_extracted} flows (${procResult.packets_analyzed || stopRes.packet_count || 0} packets). Classified as ${procResult.overall_prediction?.label || 'Analyzed'}.`);
+          setSuccessMsg(`Analysis complete: Extracted ${procResult.flows_extracted} flows (${procResult.packets_analyzed || stopRes.packet_count || 0} packets). Classified as ${procResult.overall_prediction?.label || 'Analyzed'}.`);
         } else if (procResult.flows_extracted === 0) {
-          setSuccessMsg(`Captured ${stopRes.packet_count || 0} packets (0 active flows on this interface). No threat activity detected (Benign / Idle).`);
+          setSuccessMsg(`Captured ${stopRes.packet_count || 0} packets (0 active flows). No malicious activity detected (Benign).`);
         } else {
-          setSuccessMsg(`Captured ${stopRes.packet_count || procResult.packets_analyzed || 0} packets (${procResult.flows_extracted} flows). Classified as ${procResult.overall_prediction?.label || 'Benign'}.`);
+          setSuccessMsg(`Analysis complete: Extracted ${procResult.flows_extracted} flows. Classified as ${procResult.overall_prediction?.label || 'Benign'}.`);
         }
       }
     } catch (err: any) {
       setErrorMsg(err.message || "Capture processing failed");
     } finally {
       setIsProcessing(false);
+      setProcessingStatus(null);
     }
   };
 
@@ -183,16 +190,20 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
     setSelectedFile(file);
+    setProcessedResult(null);
     try {
       setIsProcessing(true);
       setErrorMsg(null);
+      setSuccessMsg(null);
+      setProcessingStatus(`Uploading ${file.name}...`);
       const res = await apiService.uploadPcap(file);
       setUploadedPcapPath(res.filepath);
-      setSuccessMsg(`Uploaded ${file.name} (${(res.file_size / 1024).toFixed(1)} KB) successfully.`);
+      setSuccessMsg(`Uploaded ${file.name} (${(res.file_size / 1024).toFixed(1)} KB) successfully. Ready to process through SOC.`);
     } catch (err: any) {
       setErrorMsg(err.message || "Failed to upload PCAP file");
     } finally {
       setIsProcessing(false);
+      setProcessingStatus(null);
     }
   };
 
@@ -201,8 +212,10 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
     try {
       setIsProcessing(true);
       setErrorMsg(null);
-      setSuccessMsg(`Executing CICFlowMeter extraction on ${selectedFile?.name || 'PCAP'}...`);
+      setSuccessMsg(null);
+      setProcessingStatus(`Executing CICFlowMeter extraction & 6-Agent AI SOC Pipeline on ${selectedFile?.name || 'PCAP'}...`);
       const procResult = await apiService.processPcap(uploadedPcapPath, 6);
+      setProcessedResult(procResult);
       if (onCaptureProcessed) {
         onCaptureProcessed(procResult);
       }
@@ -211,14 +224,15 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
       }
       if (procResult.incidents && procResult.incidents.length > 0) {
         onIncidentsGenerated(procResult.incidents);
-        setSuccessMsg(`Parsed ${procResult.flows_extracted} flows (${procResult.packets_analyzed || 0} packets). Classified as ${procResult.overall_prediction?.label || 'Analyzed'}.`);
+        setSuccessMsg(`Analysis complete for ${selectedFile?.name || 'PCAP'}: Parsed ${procResult.flows_extracted} flows (${procResult.packets_analyzed || 0} packets). Classified as ${procResult.overall_prediction?.label || 'Analyzed'}.`);
       } else {
-        setSuccessMsg(`Parsed ${procResult.flows_extracted} flows. Classified as ${procResult.overall_prediction?.label || 'Benign'}.`);
+        setSuccessMsg(`Analysis complete for ${selectedFile?.name || 'PCAP'}: Parsed ${procResult.flows_extracted} flows. Classified as ${procResult.overall_prediction?.label || 'Benign'}.`);
       }
     } catch (err: any) {
       setErrorMsg(err.message || "PCAP processing failed");
     } finally {
       setIsProcessing(false);
+      setProcessingStatus(null);
     }
   };
 
@@ -449,18 +463,110 @@ export const PacketCapturePanel: React.FC<PacketCapturePanelProps> = ({
         </div>
       </div>
 
-      {/* Status & Notification Banners */}
+      {/* Status, Loading & Results Cards */}
+      {isProcessing && processingStatus && (
+        <div className="mt-4 p-4 rounded-xl bg-cyan-950/40 border border-cyan-500/50 text-cyan-300 text-xs font-mono flex items-center gap-3 animate-pulse shadow-lg">
+          <div className="w-5 h-5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin shrink-0" />
+          <div className="flex-1">
+            <span className="font-bold text-white block text-sm">{processingStatus}</span>
+            <span className="text-[11px] text-cyan-400/80">Running Detection, Threat Intel, Risk Scoring, Firewall Playbook & Reporting agents...</span>
+          </div>
+        </div>
+      )}
+
       {errorMsg && (
-        <div className="mt-4 p-3 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs font-mono flex items-center gap-2">
-          <AlertTriangle size={15} className="shrink-0 text-rose-400" />
+        <div className="mt-4 p-3.5 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs font-mono flex items-center gap-2.5">
+          <AlertTriangle size={16} className="shrink-0 text-rose-400" />
           <span>{errorMsg}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="mt-4 p-3 rounded-lg bg-emerald-950/30 border border-emerald-800/50 text-emerald-300 text-xs font-mono flex items-center gap-2">
-          <CheckCircle size={15} className="shrink-0 text-emerald-400" />
-          <span>{successMsg}</span>
+        <div className="mt-4 p-3.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs font-mono flex items-center gap-2.5">
+          <CheckCircle size={16} className="shrink-0 text-emerald-400" />
+          <span className="font-medium">{successMsg}</span>
+        </div>
+      )}
+
+      {/* Inline Analysis Results Card */}
+      {processedResult && processedResult.overall_prediction && (
+        <div className="mt-4 p-5 rounded-xl bg-slate-900/90 border border-cyan-500/50 shadow-2xl space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-slate-800">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className={`px-3 py-1 rounded-md text-xs font-mono font-bold uppercase tracking-wider ${
+                processedResult.overall_prediction.label.toLowerCase() === 'benign'
+                  ? 'bg-emerald-950/90 text-emerald-400 border border-emerald-600/60'
+                  : 'bg-rose-950/90 text-rose-300 border border-rose-600/70'
+              }`}>
+                ● {processedResult.overall_prediction.label}
+              </span>
+              <span className="text-xs font-mono text-cyan-400 font-semibold">
+                {((processedResult.overall_prediction.confidence || 0) * 100).toFixed(2)}% Confidence
+              </span>
+              <span className="text-xs font-mono text-slate-400">
+                ({processedResult.flows_extracted} flows, {processedResult.packets_analyzed || 0} packets)
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2.5 flex-wrap">
+              {processedResult.overall_incident && onNavigateToIncidents && (
+                <button
+                  type="button"
+                  onClick={onNavigateToIncidents}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-mono text-xs font-bold uppercase transition-all shadow-md shadow-rose-950/50"
+                >
+                  <ShieldAlert size={14} />
+                  <span>Open SOC Incident & Playbook</span>
+                  <ArrowRight size={13} className="ml-0.5" />
+                </button>
+              )}
+              {processedResult.overall_incident?.report && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const blob = new Blob([processedResult.overall_incident!.report!.markdown_content], { type: 'text/markdown;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `incident_report_${processedResult.overall_incident!.incident_id}.md`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-cyan-700 hover:bg-cyan-600 text-white font-mono text-xs font-semibold uppercase transition-all shadow-md shadow-cyan-950/40"
+                  title="Download full SOC Incident Report (.md)"
+                >
+                  <Download size={14} />
+                  <span>Report (.md)</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+            <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
+              <span className="text-slate-500 block text-[10px] uppercase">Incident ID</span>
+              <span className="text-cyan-300 font-bold truncate block">{processedResult.overall_incident?.incident_id || 'N/A'}</span>
+            </div>
+            <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
+              <span className="text-slate-500 block text-[10px] uppercase">Risk Score</span>
+              <span className="text-amber-400 font-bold">
+                {processedResult.overall_incident?.risk_assessment?.risk_score ?? '0.0'} / 100
+                <span className="text-[10px] text-slate-400 ml-1">({processedResult.overall_incident?.risk_assessment?.severity || 'Low'})</span>
+              </span>
+            </div>
+            <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
+              <span className="text-slate-500 block text-[10px] uppercase">Status</span>
+              <span className="text-emerald-400 font-semibold">{processedResult.overall_incident?.overall_status || 'COMPLETE'}</span>
+            </div>
+            <div className="p-2.5 rounded-lg bg-slate-950/60 border border-slate-800">
+              <span className="text-slate-500 block text-[10px] uppercase">Generated By</span>
+              <span className="text-emerald-400 font-semibold uppercase">
+                {processedResult.overall_incident?.report?.generated_by || 'LLM'} ({processedResult.overall_incident?.report?.llm_model || 'llama3.2'})
+              </span>
+            </div>
+          </div>
         </div>
       )}
     </div>

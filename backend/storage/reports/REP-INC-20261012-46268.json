@@ -1,0 +1,306 @@
+{
+  "report_id": "REP-INC-20261012-46268",
+  "incident_id": "INC-20261012-46268",
+  "detection": {
+    "attack_type": "Recon",
+    "confidence": 0.9905713796615601,
+    "probabilities": {
+      "Benign": 0.0018072481034323573,
+      "Brute Force": 0.0018587459344416857,
+      "DDoS": 0.00031949570984579623,
+      "DoS": 0.00044085615081712604,
+      "Mirai": 0.0022252066992223263,
+      "Recon": 0.9905713796615601,
+      "Spoofing": 0.002393899718299508,
+      "Web Attack": 0.0003831844951491803
+    },
+    "network_context": {
+      "timestamp": "2026-10-12 19:14:06",
+      "source_ip": "192.168.29.12",
+      "destination_ip": "192.168.29.1",
+      "source_port": 64651,
+      "destination_port": 53,
+      "protocol": "UDP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Tot sum",
+        "value": 255.0,
+        "shap_value": 4.2328,
+        "direction": "increases"
+      },
+      {
+        "feature": "Max",
+        "value": 171.0,
+        "shap_value": -2.6851,
+        "direction": "decreases"
+      },
+      {
+        "feature": "AVG",
+        "value": 127.5,
+        "shap_value": -0.6316,
+        "direction": "decreases"
+      },
+      {
+        "feature": "Rate",
+        "value": 495.9272,
+        "shap_value": 0.5876,
+        "direction": "increases"
+      },
+      {
+        "feature": "Tot size",
+        "value": 255.0,
+        "shap_value": 0.5265,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Tot sum": 4.2328,
+      "Max": -2.6851,
+      "AVG": -0.6316,
+      "Rate": 0.5876,
+      "Tot size": 0.5265,
+      "Number": 0.3529,
+      "Min": -0.2425,
+      "Std": -0.0582,
+      "IAT": 0.0349,
+      "Variance": -0.0194,
+      "syn_flag_number": -0.015,
+      "Header_Length": -0.0067,
+      "syn_count": -0.0022,
+      "ack_flag_number": 0.0008,
+      "ack_count": 0.0003,
+      "rst_count": -0.0,
+      "fin_count": -0.0,
+      "Time_To_Live": 0.0,
+      "fin_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 28.0,
+      "Protocol Type": 17.0,
+      "Time_To_Live": 96.0,
+      "Rate": 495.9272,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ack_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 0.0,
+      "syn_count": 0.0,
+      "fin_count": 0.0,
+      "rst_count": 0.0,
+      "HTTP": 0.0,
+      "HTTPS": 0.0,
+      "DNS": 1.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 0.0,
+      "UDP": 1.0,
+      "DHCP": 0.0,
+      "ARP": 0.0,
+      "ICMP": 0.0,
+      "IGMP": 0.0,
+      "IPv": 1.0,
+      "LLC": 0.0,
+      "Tot sum": 255.0,
+      "Min": 84.0,
+      "Max": 171.0,
+      "AVG": 127.5,
+      "Std": 43.5,
+      "Tot size": 255.0,
+      "IAT": 0.004033,
+      "Number": 2.0,
+      "Variance": 1892.25,
+      "Source_IP": "192.168.29.12",
+      "Destination_IP": "192.168.29.1",
+      "Protocol_Name": "UDP",
+      "Source_Port": 64651,
+      "Destination_Port": 53
+    },
+    "analyst_explanation": null,
+    "generated_by": "rule_based",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "threat_intel": {
+    "mitre_attack": [
+      {
+        "id": "T1048.003",
+        "name": "Exfiltration Over Unencrypted Non-C2 Protocol",
+        "tactic": "exfiltration",
+        "description": "MITRE ATT&CK Technique T1048.003: Exfiltration Over Unencrypted Non-C2 Protocol\nTactic: exfiltration\nDescription: Adversaries may steal data by exfiltrating it over an un-encrypted network protocol other than that of the existing command and control channel. The data may also be sent to an alternate",
+        "url": "https://attack.mitre.org/techniques/T1048/003",
+        "similarity_score": null
+      },
+      {
+        "id": "T1048",
+        "name": "Exfiltration Over Alternative Protocol",
+        "tactic": "exfiltration",
+        "description": "MITRE ATT&CK Technique T1048: Exfiltration Over Alternative Protocol\nTactic: exfiltration\nDescription: Adversaries may steal data by exfiltrating it over a different protocol than that of the existing command and control channel. The data may also be sent to an alternate network location from the ma",
+        "url": "https://attack.mitre.org/techniques/T1048",
+        "similarity_score": null
+      }
+    ],
+    "cve_list": [],
+    "cisa_advisories": [],
+    "iot_threat_context": "Associated with MITRE ATT&CK technique(s): T1048.003 (Exfiltration Over Unencrypted Non-C2 Protocol), T1048 (Exfiltration Over Alternative Protocol).",
+    "retrieval_confidence": 0.75,
+    "sources": [
+      "https://attack.mitre.org/techniques/T1048/003",
+      "https://attack.mitre.org/techniques/T1048"
+    ],
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "risk": {
+    "risk_score": 50.9,
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "impact": "Potential device compromise, unauthorized credential access, or localized disruption.",
+    "likelihood": "High Probability of Imminent Harm",
+    "reasoning": [
+      "Classified as 'Recon' with 99.1% model confidence.",
+      "Elevated SHAP attribution on 'Tot Sum' (value: 255.00, SHAP: +4.2328), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Max' (value: 171.00, SHAP: -2.6851), which strongly decreases threat probability.",
+      "Elevated SHAP attribution on 'Avg' (value: 127.50, SHAP: -0.6316), which strongly decreases threat probability.",
+      "Network 5-tuple context: Source 192.168.29.12:64651 -> Destination 192.168.29.1:53 (UDP)."
+    ],
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "response": {
+    "containment": [
+      "Rate-limit or block scanning traffic from 192.168.29.12.",
+      "Enable port-scan detection and automatic blocking on the IDS/IPS."
+    ],
+    "recovery": [
+      "Review exposed service inventory \u2013 close unnecessary ports.",
+      "Verify no unauthorized access occurred during reconnaissance window."
+    ],
+    "prevention": [
+      "Apply host-based firewall rules to restrict non-essential service exposure.",
+      "Enable network honeypots to detect and delay reconnaissance activities.",
+      "Conduct regular attack-surface reduction audits (OWASP IoT Top 10)."
+    ],
+    "firewall_commands": [
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 192.168.29.12 -m limit --limit 5/min -j ACCEPT",
+        "description": "Rate-limit traffic from suspected reconnaissance source 192.168.29.12"
+      }
+    ],
+    "approval_required": true,
+    "approval_status": "PENDING_ANALYST_APPROVAL",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated execution disabled by policy. Requires SOC Analyst sign-off.",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "report": {
+    "incident_id": "INC-20261012-46268",
+    "generated_at": "2026-10-12 19:14:06 UTC",
+    "title": "SOC Incident Assessment: INC-20261012-46268 [Recon]",
+    "executive_summary": "SECURITY INCIDENT ALERT: High-priority security incident INC-20261012-46268 detected. Network telemetry exhibits active 'Recon' threat patterns from 192.168.29.12:64651 targeting 192.168.29.1:53 (UDP) with 99.1% classification certainty. Assessed Risk Score is 50.9/100 (High Severity, P2 - High Priority). Associated with MITRE ATT&CK technique(s): T1048.003 (Exfiltration Over Unencrypted Non-C2 Protocol), T1048 (Exfiltration Over Alternative Protocol). Mitigation actions have been formulated and require SOC Analyst approval.",
+    "attack_type": "Recon",
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "risk_score": 50.9,
+    "timeline": [
+      {
+        "timestamp": "+0.029s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Recon' with 99.1% confidence. Primary feature driver: Tot sum.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.030s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated tracker INC-20261012-46268. Correlation note: First observed malicious traffic burst from this source endpoint in the current monitoring window.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.311s",
+        "agent": "Threat Intel Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed.",
+        "status": "DEGRADED"
+      },
+      {
+        "timestamp": "+0.316s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 50.9/100 (High Severity, P2 - High Priority).",
+        "status": "DEGRADED"
+      },
+      {
+        "timestamp": "+0.321s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+        "status": "DEGRADED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENT ASSESSMENT REPORT: INC-20261012-46268\n**Generated:** 2026-10-12 19:14:06 UTC  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n> [!WARNING]\n> **PARTIAL PIPELINE NOTICE**: The following agents experienced errors or ran in fallback mode: threat_intel, risk_assessment, response.\n\n## 1. Executive Summary\nSECURITY INCIDENT ALERT: High-priority security incident INC-20261012-46268 detected. Network telemetry exhibits active 'Recon' threat patterns from 192.168.29.12:64651 targeting 192.168.29.1:53 (UDP) with 99.1% classification certainty. Assessed Risk Score is 50.9/100 (High Severity, P2 - High Priority). Associated with MITRE ATT&CK technique(s): T1048.003 (Exfiltration Over Unencrypted Non-C2 Protocol), T1048 (Exfiltration Over Alternative Protocol). Mitigation actions have been formulated and require SOC Analyst approval.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `Recon`\n- **Classification Confidence:** `99.06%`\n- **Source Endpoint:** `192.168.29.12:64651`\n- **Destination Endpoint:** `192.168.29.1:53`\n- **Transport Protocol:** `UDP`\n- **Detection Timestamp:** `2026-10-12 19:14:06`\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 0.18% `` |\n| Brute Force | 0.19% `` |\n| DDoS | 0.03% `` |\n| DoS | 0.04% `` |\n| Mirai | 0.22% `` |\n| Recon | 99.06% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n| Spoofing | 0.24% `` |\n| Web Attack | 0.04% `` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Tot sum` | 255.000 | +4.2328 | INCREASES |\n| 2 | `Max` | 171.000 | -2.6851 | DECREASES |\n| 3 | `AVG` | 127.500 | -0.6316 | DECREASES |\n| 4 | `Rate` | 495.927 | +0.5876 | INCREASES |\n| 5 | `Tot size` | 255.000 | +0.5265 | INCREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 75%\n\n### MITRE ATT&CK Mapping\n- **[T1048.003: Exfiltration Over Unencrypted Non-C2 Protocol](https://attack.mitre.org/techniques/T1048/003)** (Tactic: *exfiltration*)\n  MITRE ATT&CK Technique T1048.003: Exfiltration Over Unencrypted Non-C2 Protocol\nTactic: exfiltration\nDescription: Adversaries may steal data by exfiltrating it over an un-encrypted network protocol other than that of the existing command and control channel. The data may also be sent to an alternate\n- **[T1048: Exfiltration Over Alternative Protocol](https://attack.mitre.org/techniques/T1048)** (Tactic: *exfiltration*)\n  MITRE ATT&CK Technique T1048: Exfiltration Over Alternative Protocol\nTactic: exfiltration\nDescription: Adversaries may steal data by exfiltrating it over a different protocol than that of the existing command and control channel. The data may also be sent to an alternate network location from the ma\n\n### Correlated NVD / CVE Records\n- *No matching high-risk CVE vulnerabilities found in verified database.*\n\n### Authoritative Sources\n- <https://attack.mitre.org/techniques/T1048/003>\n- <https://attack.mitre.org/techniques/T1048>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `50.9 / 100.0`\n- **Assigned Severity:** `HIGH`\n- **Operational Priority:** `P2 - High Priority`\n- **Potential Impact:** Potential device compromise, unauthorized credential access, or localized disruption.\n- **Threat Likelihood:** High Probability of Imminent Harm\n\n### Analytical Justification\n- Classified as 'Recon' with 99.1% model confidence.\n- Elevated SHAP attribution on 'Tot Sum' (value: 255.00, SHAP: +4.2328), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Max' (value: 171.00, SHAP: -2.6851), which strongly decreases threat probability.\n- Elevated SHAP attribution on 'Avg' (value: 127.50, SHAP: -0.6316), which strongly decreases threat probability.\n- Network 5-tuple context: Source 192.168.29.12:64651 -> Destination 192.168.29.1:53 (UDP).\n\n---\n\n## 6. Recommended Response & Containment Playbook\n\n### Immediate Containment Steps\n1. Rate-limit or block scanning traffic from 192.168.29.12.\n1. Enable port-scan detection and automatic blocking on the IDS/IPS.\n\n### Recovery Procedures\n1. Review exposed service inventory \u2013 close unnecessary ports.\n1. Verify no unauthorized access occurred during reconnaissance window.\n\n### Long-Term Prevention & Hardening\n- Apply host-based firewall rules to restrict non-essential service exposure.\n- Enable network honeypots to detect and delay reconnaissance activities.\n- Conduct regular attack-surface reduction audits (OWASP IoT Top 10).\n\n### Firewall & Access Control Rules\n> [!CAUTION]\n> **ANALYST APPROVAL REQUIRED**: Automated execution is strictly disabled. Verify host parameters before executing.\n\n#### IPTABLES: Rate-limit traffic from suspected reconnaissance source 192.168.29.12\n```bash\niptables -A INPUT -s 192.168.29.12 -m limit --limit 5/min -j ACCEPT\n```\n\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +0.029s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'Recon' with 99.1% confidence. Primary feature driver: Tot sum. |\n| +0.030s | `Coordinator Agent` | Incident State Initialized | Allocated tracker INC-20261012-46268. Correlation note: First observed malicious traffic burst from this source endpoint in the current monitoring window. |\n| +0.311s | `Threat Intel Agent` | Knowledge Base RAG Retrieval | Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. |\n| +0.316s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 50.9/100 (High Severity, P2 - High Priority). |\n| +0.321s | `Response Agent` | Mitigation & ACL Formulation | Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL. |",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "timeline": [
+    {
+      "timestamp": "+0.029s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Recon' with 99.1% confidence. Primary feature driver: Tot sum.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.030s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated tracker INC-20261012-46268. Correlation note: First observed malicious traffic burst from this source endpoint in the current monitoring window.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.311s",
+      "agent": "Threat Intel Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed.",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.316s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 50.9/100 (High Severity, P2 - High Priority).",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.321s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.333s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized SOC assessment report for INC-20261012-46268 (5946 bytes).",
+      "status": "DEGRADED"
+    }
+  ]
+}

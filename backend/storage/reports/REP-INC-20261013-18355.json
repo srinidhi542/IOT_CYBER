@@ -1,0 +1,309 @@
+{
+  "report_id": "REP-INC-20261013-18355",
+  "incident_id": "INC-20261013-18355",
+  "detection": {
+    "attack_type": "Spoofing",
+    "confidence": 0.061949923634529114,
+    "probabilities": {
+      "Benign": 0.9092147350311279,
+      "Brute Force": 0.00015623671060893685,
+      "DDoS": 0.0010304755996912718,
+      "DoS": 0.008655820973217487,
+      "Mirai": 0.00029460914083756506,
+      "Recon": 0.018472367897629738,
+      "Spoofing": 0.061949923634529114,
+      "Web Attack": 0.000225801530177705
+    },
+    "network_context": {
+      "timestamp": "2026-10-13 14:13:38",
+      "source_ip": "192.168.1.15",
+      "destination_ip": "104.24.12.5",
+      "source_port": 49364,
+      "destination_port": 80,
+      "protocol": "TCP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Number",
+        "value": 0.0,
+        "shap_value": -2.5756,
+        "direction": "decreases"
+      },
+      {
+        "feature": "ack_count",
+        "value": 0.0,
+        "shap_value": 0.859,
+        "direction": "increases"
+      },
+      {
+        "feature": "Tot sum",
+        "value": 0.0,
+        "shap_value": -0.7877,
+        "direction": "decreases"
+      },
+      {
+        "feature": "Header_Length",
+        "value": 0.0,
+        "shap_value": 0.7623,
+        "direction": "increases"
+      },
+      {
+        "feature": "Max",
+        "value": 0.0,
+        "shap_value": 0.7031,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Number": -2.5756,
+      "ack_count": 0.859,
+      "Tot sum": -0.7877,
+      "Header_Length": 0.7623,
+      "Max": 0.7031,
+      "syn_count": 0.4513,
+      "Rate": 0.2476,
+      "ack_flag_number": 0.2146,
+      "Tot size": -0.1476,
+      "Time_To_Live": -0.0959,
+      "Min": -0.0697,
+      "IAT": -0.0503,
+      "Std": 0.0222,
+      "AVG": -0.0142,
+      "Variance": 0.0133,
+      "syn_flag_number": 0.0022,
+      "psh_flag_number": 0.0001,
+      "rst_count": 0.0,
+      "fin_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "fin_count": 0.0
+    },
+    "raw_record": {
+      "dst_port": 23,
+      "protocol": 6,
+      "flow_duration": 123456,
+      "tot_fwd_pkts": 10,
+      "tot_bwd_pkts": 3,
+      "totlen_fwd_pkts": 1500,
+      "totlen_bwd_pkts": 300,
+      "fwd_pkt_len_max": 200,
+      "fwd_pkt_len_min": 40,
+      "fwd_pkt_len_mean": 150.0,
+      "fwd_pkt_len_std": 30.0,
+      "bwd_pkt_len_max": 100,
+      "bwd_pkt_len_min": 20,
+      "bwd_pkt_len_mean": 100.0,
+      "bwd_pkt_len_std": 10.0,
+      "flow_byts_s": 5000.0,
+      "flow_pkts_s": 100.0,
+      "flow_iat_mean": 1000.0,
+      "flow_iat_std": 200.0,
+      "flow_iat_max": 3000,
+      "flow_iat_min": 100,
+      "fwd_iat_tot": 10000,
+      "fwd_iat_mean": 1000.0,
+      "fwd_iat_std": 100.0,
+      "fwd_iat_max": 2000,
+      "fwd_iat_min": 100,
+      "bwd_iat_tot": 5000,
+      "bwd_iat_mean": 1000.0,
+      "bwd_iat_std": 100.0,
+      "bwd_iat_max": 2000,
+      "bwd_iat_min": 100,
+      "fwd_psh_flags": 1,
+      "bwd_psh_flags": 0,
+      "fwd_urg_flags": 0,
+      "bwd_urg_flags": 0,
+      "fwd_header_len": 200,
+      "bwd_header_len": 60,
+      "fwd_pkts_s": 70.0,
+      "bwd_pkts_s": 30.0,
+      "pkt_len_min": 20,
+      "pkt_len_max": 200,
+      "pkt_len_mean": 140.0,
+      "pkt_len_std": 40.0,
+      "pkt_len_var": 1600.0,
+      "fin_flag_cnt": 0,
+      "syn_flag_cnt": 1,
+      "rst_flag_cnt": 0,
+      "psh_flag_cnt": 1,
+      "ack_flag_cnt": 1,
+      "urg_flag_cnt": 0,
+      "cwe_flag_count": 0,
+      "ece_flag_cnt": 0,
+      "down_up_ratio": 3.0,
+      "pkt_size_avg": 140.0,
+      "fwd_seg_size_avg": 150.0,
+      "bwd_seg_size_avg": 100.0,
+      "fwd_byts_b_avg": 0,
+      "fwd_pkts_b_avg": 0,
+      "fwd_blk_rate_avg": 0,
+      "bwd_byts_b_avg": 0,
+      "bwd_pkts_b_avg": 0,
+      "bwd_blk_rate_avg": 0,
+      "subflow_fwd_pkts": 10,
+      "subflow_fwd_byts": 1500,
+      "subflow_bwd_pkts": 3,
+      "subflow_bwd_byts": 300,
+      "init_fwd_win_byts": 8192,
+      "init_bwd_win_byts": 1024,
+      "fwd_act_data_pkts": 8,
+      "fwd_seg_size_min": 40,
+      "active_mean": 500.0,
+      "active_std": 50.0,
+      "active_max": 800,
+      "active_min": 200,
+      "idle_mean": 2000.0,
+      "idle_std": 200.0,
+      "idle_max": 4000,
+      "idle_min": 1000
+    },
+    "analyst_explanation": "\"Flow from 192.168.1.15:49364 to 104.24.12.5:80 is classified as Spoofing due to a low confidence score (6.19%) and high SHAP attribution values for 'Header_Length' (+0.7623) and 'Max' (+0.7031), indicating potential manipulation of TCP header fields. The lack of 'ack_count' and 'Tot sum' values with positive SHAP attributions suggests a possible lack of expected TCP packet structure.\"",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 20232.62
+  },
+  "threat_intel": {},
+  "risk": {
+    "risk_score": 11.2,
+    "severity": "Low",
+    "priority": "P4 - Low / Informational",
+    "impact": "Negligible operational impact.",
+    "likelihood": "Low",
+    "reasoning": [
+      "Classified as 'Spoofing' with 6.2% model confidence.",
+      "Elevated SHAP attribution on 'Number' (value: 0.00, SHAP: -2.5756), which strongly decreases threat probability.",
+      "Elevated SHAP attribution on 'Ack Count' (value: 0.00, SHAP: +0.8590), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Tot Sum' (value: 0.00, SHAP: -0.7877), which strongly decreases threat probability.",
+      "Threat intelligence was unavailable; risk calculated without CVE/CISA modifiers.",
+      "Targeting critical IoT service port 80 (TCP).",
+      "Network 5-tuple context: Source 192.168.1.15:49364 -> Destination 104.24.12.5:80 (TCP)."
+    ],
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "response": {
+    "containment": [],
+    "recovery": [],
+    "prevention": [],
+    "firewall_commands": [
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 192.168.1.15 -m limit --limit 5/min -j ACCEPT",
+        "description": "Rate-limit traffic from suspected reconnaissance source 192.168.1.15"
+      }
+    ],
+    "approval_required": true,
+    "approval_status": "PENDING_ANALYST_APPROVAL",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated execution disabled by policy. Requires SOC Analyst sign-off.",
+    "generated_by": "llm",
+    "llm_model": "llama3.2",
+    "latency_ms": 117709.01
+  },
+  "report": {
+    "incident_id": "INC-20261013-18355",
+    "generated_at": "2026-10-13 14:13:38",
+    "title": "Incident INC-20261013-18355 (Partial Report)",
+    "executive_summary": "Incident recorded with partial agent outputs.",
+    "attack_type": "Spoofing",
+    "severity": "Low",
+    "priority": "P4 - Low / Informational",
+    "risk_score": 11.2,
+    "timeline": [
+      {
+        "timestamp": "+23.012s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Spoofing' with 6.2% confidence. Primary feature driver: Number. [LLM: llama3.2, 20232.62ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+37.384s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated tracker INC-20261013-18355. Correlation note: Correlation Note:\nThis incident appears to be part of a recurring campaign, as the same source IP (192.168.1.15) and destination IP (104.24.12.5) were targeted in a previous incident (INC-20261013-09676) on the same day, indicating possible distributed botnet probing.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+218.958s",
+        "agent": "Threat Intel Agent",
+        "action": "Knowledge Base Retrieval",
+        "details": "Failed: Agent 'Threat Intel Agent' timed out after 180.0s",
+        "status": "FAILED"
+      },
+      {
+        "timestamp": "+274.030s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 11.2/100 (Low Severity, P4 - Low / Informational).",
+        "status": "DEGRADED"
+      },
+      {
+        "timestamp": "+391.742s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 1 firewall/ACL commands and 0 containment procedures. Status: PENDING_ANALYST_APPROVAL. [LLM: llama3.2, 117709.01ms]",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+594.764s",
+        "agent": "Incident Report Agent",
+        "action": "Report Compilation",
+        "details": "Failed: Agent 'Incident Report Agent' timed out after 180.0s",
+        "status": "FAILED"
+      }
+    ],
+    "markdown_content": "# SOC Incident Report: INC-20261013-18355\n\n**Status:** Partial Pipeline Run (Report Agent failed)\n\n- **Attack:** Spoofing (6.2%)\n- **Risk:** 11.2/100 (Low)\n",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "timeline": [
+    {
+      "timestamp": "+23.012s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Spoofing' with 6.2% confidence. Primary feature driver: Number. [LLM: llama3.2, 20232.62ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+37.384s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated tracker INC-20261013-18355. Correlation note: Correlation Note:\nThis incident appears to be part of a recurring campaign, as the same source IP (192.168.1.15) and destination IP (104.24.12.5) were targeted in a previous incident (INC-20261013-09676) on the same day, indicating possible distributed botnet probing.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+218.958s",
+      "agent": "Threat Intel Agent",
+      "action": "Knowledge Base Retrieval",
+      "details": "Failed: Agent 'Threat Intel Agent' timed out after 180.0s",
+      "status": "FAILED"
+    },
+    {
+      "timestamp": "+274.030s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 11.2/100 (Low Severity, P4 - Low / Informational).",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+391.742s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 1 firewall/ACL commands and 0 containment procedures. Status: PENDING_ANALYST_APPROVAL. [LLM: llama3.2, 117709.01ms]",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+594.764s",
+      "agent": "Incident Report Agent",
+      "action": "Report Compilation",
+      "details": "Failed: Agent 'Incident Report Agent' timed out after 180.0s",
+      "status": "FAILED"
+    }
+  ]
+}

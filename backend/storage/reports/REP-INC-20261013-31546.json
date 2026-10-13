@@ -1,0 +1,317 @@
+{
+  "report_id": "REP-INC-20261013-31546",
+  "incident_id": "INC-20261013-31546",
+  "detection": {
+    "attack_type": "Recon",
+    "confidence": 0.9964823722839355,
+    "probabilities": {
+      "Benign": 3.693787584779784e-05,
+      "Brute Force": 7.37629034119891e-06,
+      "DDoS": 0.0018492538947612047,
+      "DoS": 8.223841177823488e-06,
+      "Mirai": 0.0015826205490157008,
+      "Recon": 0.9964823722839355,
+      "Spoofing": 2.6612458896124735e-05,
+      "Web Attack": 6.585286882909713e-06
+    },
+    "network_context": {
+      "timestamp": "2026-10-13 11:47:08",
+      "source_ip": "183.82.111.80",
+      "destination_ip": "10.46.38.131",
+      "source_port": 38929,
+      "destination_port": 9993,
+      "protocol": "UDP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Tot sum",
+        "value": 149.0,
+        "shap_value": 5.2019,
+        "direction": "increases"
+      },
+      {
+        "feature": "Rate",
+        "value": 5555.3695,
+        "shap_value": 0.7384,
+        "direction": "increases"
+      },
+      {
+        "feature": "AVG",
+        "value": 74.5,
+        "shap_value": -0.7347,
+        "direction": "decreases"
+      },
+      {
+        "feature": "Tot size",
+        "value": 149.0,
+        "shap_value": 0.6692,
+        "direction": "increases"
+      },
+      {
+        "feature": "Number",
+        "value": 2.0,
+        "shap_value": 0.3538,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Tot sum": 5.2019,
+      "Rate": 0.7384,
+      "AVG": -0.7347,
+      "Tot size": 0.6692,
+      "Number": 0.3538,
+      "Min": -0.2493,
+      "IAT": 0.0477,
+      "Max": -0.0388,
+      "Header_Length": -0.01,
+      "syn_count": -0.003,
+      "Variance": 0.0014,
+      "ack_flag_number": 0.0008,
+      "Std": 0.0007,
+      "ack_count": 0.0003,
+      "syn_flag_number": -0.0001,
+      "rst_count": -0.0,
+      "fin_count": -0.0,
+      "Time_To_Live": 0.0,
+      "fin_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 28.0,
+      "Protocol Type": 17.0,
+      "Time_To_Live": 121.0,
+      "Rate": 5555.3695,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ack_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 0.0,
+      "syn_count": 0.0,
+      "fin_count": 0.0,
+      "rst_count": 0.0,
+      "HTTP": 0.0,
+      "HTTPS": 0.0,
+      "DNS": 0.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 0.0,
+      "UDP": 1.0,
+      "DHCP": 0.0,
+      "ARP": 0.0,
+      "ICMP": 0.0,
+      "IGMP": 0.0,
+      "IPv": 1.0,
+      "LLC": 0.0,
+      "Tot sum": 149.0,
+      "Min": 70.0,
+      "Max": 79.0,
+      "AVG": 74.5,
+      "Std": 4.5,
+      "Tot size": 149.0,
+      "IAT": 0.00036,
+      "Number": 2.0,
+      "Variance": 20.25,
+      "Source_IP": "183.82.111.80",
+      "Destination_IP": "10.46.38.131",
+      "Protocol_Name": "UDP",
+      "Source_Port": 38929,
+      "Destination_Port": 9993
+    },
+    "analyst_explanation": null,
+    "generated_by": "rule_based",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "threat_intel": {
+    "mitre_attack": [
+      {
+        "id": "T1565.002",
+        "name": "Transmitted Data Manipulation",
+        "tactic": "impact",
+        "description": "MITRE ATT&CK Technique T1565.002: Transmitted Data Manipulation\nTactic: impact\nDescription: Adversaries may alter data en route to storage or other systems in order to manipulate external outcomes or hide activity, thus threatening the integrity of the data.(Citation: FireEye APT38 Oct 2018)(Citatio",
+        "url": "https://attack.mitre.org/techniques/T1565/002",
+        "similarity_score": null
+      },
+      {
+        "id": "T1071.001",
+        "name": "Web Protocols",
+        "tactic": "command-and-control",
+        "description": "MITRE ATT&CK Technique T1071.001: Web Protocols\nTactic: command-and-control\nDescription: Adversaries may communicate using application layer protocols associated with web traffic to avoid detection/network filtering by blending in with existing traffic. Commands to the remote system, and often the r",
+        "url": "https://attack.mitre.org/techniques/T1071/001",
+        "similarity_score": null
+      }
+    ],
+    "cve_list": [],
+    "cisa_advisories": [
+      {
+        "id": "CISA-KEV-CVE-2024-12987",
+        "title": "CISA KEV: DrayTek Vigor Routers",
+        "release_date": "2025-05-15",
+        "summary": "CISA Security Advisory CISA-KEV-CVE-2024-12987: CISA KEV: DrayTek Vigor Routers (Released: 2025-05-15)\nSummary: DrayTek Vigor2960, Vigor300B, and Vigor3900 routers contain an OS command injection vulnerability due to an unknown function of the file /cgi-bin/mainfunction.cgi/apmcfgupload of the compo",
+        "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2024-12987",
+        "similarity_score": null
+      }
+    ],
+    "iot_threat_context": "Associated with MITRE ATT&CK technique(s): T1565.002 (Transmitted Data Manipulation), T1071.001 (Web Protocols). Referenced in CISA advisories: CISA-KEV-[UNVERIFIED ID REDACTED].",
+    "retrieval_confidence": 0.85,
+    "sources": [
+      "https://attack.mitre.org/techniques/T1565/002",
+      "https://attack.mitre.org/techniques/T1071/001",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2024-12987"
+    ],
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "risk": {
+    "risk_score": 56.0,
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "impact": "Potential device compromise, unauthorized credential access, or localized disruption.",
+    "likelihood": "High Probability of Imminent Harm",
+    "reasoning": [
+      "Classified as 'Recon' with 99.6% model confidence.",
+      "Elevated SHAP attribution on 'Tot Sum' (value: 149.00, SHAP: +5.2019), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Rate' (value: 5555.37, SHAP: +0.7384), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Avg' (value: 74.50, SHAP: -0.7347), which strongly decreases threat probability.",
+      "Referenced in active CISA cyber defense advisory (CISA-KEV-CVE-2024-12987).",
+      "Network 5-tuple context: Source 183.82.111.80:38929 -> Destination 10.46.38.131:9993 (UDP)."
+    ],
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "response": {
+    "containment": [
+      "Rate-limit or block scanning traffic from 183.82.111.80.",
+      "Enable port-scan detection and automatic blocking on the IDS/IPS."
+    ],
+    "recovery": [
+      "Review exposed service inventory \u2013 close unnecessary ports.",
+      "Verify no unauthorized access occurred during reconnaissance window."
+    ],
+    "prevention": [
+      "Apply host-based firewall rules to restrict non-essential service exposure.",
+      "Enable network honeypots to detect and delay reconnaissance activities.",
+      "Conduct regular attack-surface reduction audits (OWASP IoT Top 10)."
+    ],
+    "firewall_commands": [
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 183.82.111.80 -m limit --limit 5/min -j ACCEPT",
+        "description": "Rate-limit traffic from suspected reconnaissance source 183.82.111.80"
+      }
+    ],
+    "approval_required": true,
+    "approval_status": "PENDING_ANALYST_APPROVAL",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated execution disabled by policy. Requires SOC Analyst sign-off.",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "report": {
+    "incident_id": "INC-20261013-31546",
+    "generated_at": "2026-10-13 11:47:12 UTC",
+    "title": "SOC Incident Assessment: INC-20261013-31546 [Recon]",
+    "executive_summary": "SECURITY INCIDENT ALERT: High-priority security incident INC-20261013-31546 detected. Network telemetry exhibits active 'Recon' threat patterns from 183.82.111.80:38929 targeting 10.46.38.131:9993 (UDP) with 99.6% classification certainty. Assessed Risk Score is 56.0/100 (High Severity, P2 - High Priority). Associated with MITRE ATT&CK technique(s): T1565.002 (Transmitted Data Manipulation), T1071.001 (Web Protocols). Referenced in CISA advisories: CISA-KEV-[UNVERIFIED ID REDACTED]. Mitigation actions have been formulated and require SOC Analyst approval.",
+    "attack_type": "Recon",
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "risk_score": 56.0,
+    "timeline": [
+      {
+        "timestamp": "+0.066s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Recon' with 99.6% confidence. Primary feature driver: Tot sum.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.069s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated tracker INC-20261013-31546. Correlation note: First observed malicious traffic burst from this source endpoint in the current monitoring window.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.620s",
+        "agent": "Threat Intel Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed.",
+        "status": "DEGRADED"
+      },
+      {
+        "timestamp": "+0.643s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 56.0/100 (High Severity, P2 - High Priority).",
+        "status": "DEGRADED"
+      },
+      {
+        "timestamp": "+0.653s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+        "status": "DEGRADED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENT ASSESSMENT REPORT: INC-20261013-31546\n**Generated:** 2026-10-13 11:47:12 UTC  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n> [!WARNING]\n> **PARTIAL PIPELINE NOTICE**: The following agents experienced errors or ran in fallback mode: threat_intel, risk_assessment, response.\n\n## 1. Executive Summary\nSECURITY INCIDENT ALERT: High-priority security incident INC-20261013-31546 detected. Network telemetry exhibits active 'Recon' threat patterns from 183.82.111.80:38929 targeting 10.46.38.131:9993 (UDP) with 99.6% classification certainty. Assessed Risk Score is 56.0/100 (High Severity, P2 - High Priority). Associated with MITRE ATT&CK technique(s): T1565.002 (Transmitted Data Manipulation), T1071.001 (Web Protocols). Referenced in CISA advisories: CISA-KEV-[UNVERIFIED ID REDACTED]. Mitigation actions have been formulated and require SOC Analyst approval.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `Recon`\n- **Classification Confidence:** `99.65%`\n- **Source Endpoint:** `183.82.111.80:38929`\n- **Destination Endpoint:** `10.46.38.131:9993`\n- **Transport Protocol:** `UDP`\n- **Detection Timestamp:** `2026-10-13 11:47:08`\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 0.00% `` |\n| Brute Force | 0.00% `` |\n| DDoS | 0.18% `` |\n| DoS | 0.00% `` |\n| Mirai | 0.16% `` |\n| Recon | 99.65% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n| Spoofing | 0.00% `` |\n| Web Attack | 0.00% `` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Tot sum` | 149.000 | +5.2019 | INCREASES |\n| 2 | `Rate` | 5555.369 | +0.7384 | INCREASES |\n| 3 | `AVG` | 74.500 | -0.7347 | DECREASES |\n| 4 | `Tot size` | 149.000 | +0.6692 | INCREASES |\n| 5 | `Number` | 2.000 | +0.3538 | INCREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 85%\n\n### MITRE ATT&CK Mapping\n- **[T1565.002: Transmitted Data Manipulation](https://attack.mitre.org/techniques/T1565/002)** (Tactic: *impact*)\n  MITRE ATT&CK Technique T1565.002: Transmitted Data Manipulation\nTactic: impact\nDescription: Adversaries may alter data en route to storage or other systems in order to manipulate external outcomes or hide activity, thus threatening the integrity of the data.(Citation: FireEye APT38 Oct 2018)(Citatio\n- **[T1071.001: Web Protocols](https://attack.mitre.org/techniques/T1071/001)** (Tactic: *command-and-control*)\n  MITRE ATT&CK Technique T1071.001: Web Protocols\nTactic: command-and-control\nDescription: Adversaries may communicate using application layer protocols associated with web traffic to avoid detection/network filtering by blending in with existing traffic. Commands to the remote system, and often the r\n\n### Correlated NVD / CVE Records\n- *No matching high-risk CVE vulnerabilities found in verified database.*\n\n### CISA Security Advisories\n- **[CISA-KEV-CVE-2024-12987: CISA KEV: DrayTek Vigor Routers](https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2024-12987)** (Released 2025-05-15)\n\n### Authoritative Sources\n- <https://attack.mitre.org/techniques/T1565/002>\n- <https://attack.mitre.org/techniques/T1071/001>\n- <https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2024-12987>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `56.0 / 100.0`\n- **Assigned Severity:** `HIGH`\n- **Operational Priority:** `P2 - High Priority`\n- **Potential Impact:** Potential device compromise, unauthorized credential access, or localized disruption.\n- **Threat Likelihood:** High Probability of Imminent Harm\n\n### Analytical Justification\n- Classified as 'Recon' with 99.6% model confidence.\n- Elevated SHAP attribution on 'Tot Sum' (value: 149.00, SHAP: +5.2019), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Rate' (value: 5555.37, SHAP: +0.7384), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Avg' (value: 74.50, SHAP: -0.7347), which strongly decreases threat probability.\n- Referenced in active CISA cyber defense advisory (CISA-KEV-CVE-2024-12987).\n- Network 5-tuple context: Source 183.82.111.80:38929 -> Destination 10.46.38.131:9993 (UDP).\n\n---\n\n## 6. Recommended Response & Containment Playbook\n\n### Immediate Containment Steps\n1. Rate-limit or block scanning traffic from 183.82.111.80.\n1. Enable port-scan detection and automatic blocking on the IDS/IPS.\n\n### Recovery Procedures\n1. Review exposed service inventory \u2013 close unnecessary ports.\n1. Verify no unauthorized access occurred during reconnaissance window.\n\n### Long-Term Prevention & Hardening\n- Apply host-based firewall rules to restrict non-essential service exposure.\n- Enable network honeypots to detect and delay reconnaissance activities.\n- Conduct regular attack-surface reduction audits (OWASP IoT Top 10).\n\n### Firewall & Access Control Rules\n> [!CAUTION]\n> **ANALYST APPROVAL REQUIRED**: Automated execution is strictly disabled. Verify host parameters before executing.\n\n#### IPTABLES: Rate-limit traffic from suspected reconnaissance source 183.82.111.80\n```bash\niptables -A INPUT -s 183.82.111.80 -m limit --limit 5/min -j ACCEPT\n```\n\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +0.066s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'Recon' with 99.6% confidence. Primary feature driver: Tot sum. |\n| +0.069s | `Coordinator Agent` | Incident State Initialized | Allocated tracker INC-20261013-31546. Correlation note: First observed malicious traffic burst from this source endpoint in the current monitoring window. |\n| +0.620s | `Threat Intel Agent` | Knowledge Base RAG Retrieval | Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. |\n| +0.643s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 56.0/100 (High Severity, P2 - High Priority). |\n| +0.653s | `Response Agent` | Mitigation & ACL Formulation | Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL. |",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "timeline": [
+    {
+      "timestamp": "+0.066s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Recon' with 99.6% confidence. Primary feature driver: Tot sum.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.069s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated tracker INC-20261013-31546. Correlation note: First observed malicious traffic burst from this source endpoint in the current monitoring window.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.620s",
+      "agent": "Threat Intel Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed.",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.643s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 56.0/100 (High Severity, P2 - High Priority).",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.653s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.659s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized SOC assessment report for INC-20261013-31546 (6321 bytes).",
+      "status": "DEGRADED"
+    }
+  ]
+}

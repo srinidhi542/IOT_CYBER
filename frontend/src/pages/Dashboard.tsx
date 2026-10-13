@@ -192,6 +192,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
         onCaptureProcessed={handleCaptureProcessed}
         isProcessing={isProcessingSoc}
         setIsProcessing={setIsProcessingSoc}
+        onNavigateToIncidents={onNavigateToIncidents}
       />
 
       {/* ═══════════════════════════════════════════════════
@@ -260,7 +261,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
             <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
               <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Detected Class</span>
-              <span className="text-base font-bold font-mono text-emerald-400">
+              <span className={`text-base font-bold font-mono ${
+                (latestPrediction?.label || captureResult?.overall_prediction?.label || 'Benign').toLowerCase() === 'benign'
+                  ? 'text-emerald-400'
+                  : 'text-rose-400'
+              }`}>
                 {latestPrediction?.label || captureResult?.overall_prediction?.label || 'Benign'}
               </span>
             </div>

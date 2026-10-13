@@ -1,6 +1,8 @@
 import os
 import json
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+load_dotenv()
 from typing import Dict, Any
 
 class Settings(BaseSettings):

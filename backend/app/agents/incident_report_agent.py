@@ -1,4 +1,4 @@
-﻿import time
+import time
 import logging
 from datetime import datetime
 from typing import List, Dict, Any, Optional
@@ -147,7 +147,7 @@ class IncidentReportAgent:
         latency_ms = None
         markdown_doc = ""
 
-        if llm_enabled and llm_agent_on:
+        if not exec_used_llm and llm_enabled and llm_agent_on:
             try:
                 t0 = time.time()
                 prompt = format_report_prompt(
@@ -181,9 +181,11 @@ class IncidentReportAgent:
         # 3. Deterministic Markdown Fallback
         # ------------------------------------------------------------------
         if not markdown_doc:
+            gen_by_str = "LLM" if (used_llm or exec_used_llm) else "RULE_BASED_FALLBACK"
+            model_str = (llm_model or exec_llm_model) or "N/A"
             md_lines = [
                 f"# SOC INCIDENT ASSESSMENT REPORT: {incident_id}",
-                f"**Generated:** {now_str}  |  **Classification:** RESTRICTED / SOC-OPERATIONAL",
+                f"**Generated:** {now_str}  |  **Engine:** `{gen_by_str}` (Model: `{model_str}`)  |  **Classification:** RESTRICTED / SOC-OPERATIONAL",
                 "",
             ]
 

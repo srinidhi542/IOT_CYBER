@@ -1,4 +1,4 @@
-﻿import re
+import re
 import time
 import logging
 from typing import List, Dict, Any, Optional, Tuple
@@ -40,11 +40,57 @@ def record_approved_precedent(incident: Any):
         _APPROVED_PRECEDENTS.pop(0)
 
 
+from pydantic import BaseModel, Field, field_validator
+
+
 class LLMStructuredResponse(BaseModel):
     containment: List[str] = Field(default_factory=list)
     recovery: List[str] = Field(default_factory=list)
     prevention: List[str] = Field(default_factory=list)
     firewall_commands: List[FirewallCommand] = Field(default_factory=list)
+
+    @field_validator("firewall_commands", mode="before")
+    @classmethod
+    def parse_firewall_commands(cls, v):
+        if not isinstance(v, list):
+            return []
+        parsed = []
+        for item in v:
+            if isinstance(item, FirewallCommand):
+                parsed.append(item)
+            elif isinstance(item, str):
+                s = item.strip()
+                if not s or s.endswith(":"):
+                    continue
+                fw_type = "iptables"
+                if "netsh" in s.lower() or "windows" in s.lower():
+                    fw_type = "windows_netsh"
+                elif "cisco" in s.lower() or "access-list" in s.lower():
+                    fw_type = "cisco_acl"
+                if ":" in s:
+                    parts = s.split(":", 1)
+                    if any(t in parts[0].lower() for t in ["iptables", "netsh", "cisco", "linux", "windows"]):
+                        s = parts[1].strip()
+                parsed.append(FirewallCommand(
+                    firewall_type=fw_type,
+                    command=s,
+                    description=f"Mitigation rule on {fw_type}"
+                ))
+            elif isinstance(item, dict):
+                raw_type = str(item.get("firewall_type") or item.get("type") or "iptables").lower()
+                fw_type = "iptables"
+                if "netsh" in raw_type or "windows" in raw_type:
+                    fw_type = "windows_netsh"
+                elif "cisco" in raw_type or "acl" in raw_type:
+                    fw_type = "cisco_acl"
+                cmd = item.get("command") or item.get("cmd") or item.get("rule") or str(item)
+                desc = item.get("description") or item.get("desc") or f"Mitigation rule on {fw_type}"
+                parsed.append(FirewallCommand(
+                    firewall_type=fw_type,
+                    command=str(cmd),
+                    description=str(desc)
+                ))
+        return parsed
 
 
 def validate_firewall_command(
@@ -61,6 +107,15 @@ def validate_firewall_command(
     """
     raw_cmd = cmd.command.strip()
     cmd_lower = raw_cmd.lower()
+
+    # Normalize firewall type
+    raw_type = cmd.firewall_type.lower()
+    if "netsh" in raw_type or "windows" in raw_type:
+        cmd.firewall_type = "windows_netsh"
+    elif "cisco" in raw_type or "acl" in raw_type:
+        cmd.firewall_type = "cisco_acl"
+    elif "iptables" in raw_type or "linux" in raw_type:
+        cmd.firewall_type = "iptables"
 
     valid_types = {"iptables", "windows_netsh", "cisco_acl"}
     if cmd.firewall_type not in valid_types:

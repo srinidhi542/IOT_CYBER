@@ -1,0 +1,326 @@
+{
+  "report_id": "REP-INC-20261013-19130",
+  "incident_id": "INC-20261013-19130",
+  "detection": {
+    "attack_type": "Recon",
+    "confidence": 0.9999804496765137,
+    "probabilities": {
+      "Benign": 2.9170648758736206e-06,
+      "Brute Force": 1.7277533288506675e-06,
+      "DDoS": 1.602430643288244e-06,
+      "DoS": 2.347300778637873e-06,
+      "Mirai": 2.018877239606809e-06,
+      "Recon": 0.9999804496765137,
+      "Spoofing": 7.427959644701332e-06,
+      "Web Attack": 1.4708068647451e-06
+    },
+    "network_context": {
+      "timestamp": "2026-10-13 11:48:39",
+      "source_ip": "10.46.38.131",
+      "destination_ip": "10.46.38.32",
+      "source_port": 0,
+      "destination_port": 0,
+      "protocol": "2054"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Tot sum",
+        "value": 84.0,
+        "shap_value": 5.4472,
+        "direction": "increases"
+      },
+      {
+        "feature": "Tot size",
+        "value": 84.0,
+        "shap_value": 0.6638,
+        "direction": "increases"
+      },
+      {
+        "feature": "Rate",
+        "value": 136.0153,
+        "shap_value": 0.5312,
+        "direction": "increases"
+      },
+      {
+        "feature": "Number",
+        "value": 2.0,
+        "shap_value": 0.3767,
+        "direction": "increases"
+      },
+      {
+        "feature": "Max",
+        "value": 42.0,
+        "shap_value": 0.2681,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Tot sum": 5.4472,
+      "Tot size": 0.6638,
+      "Rate": 0.5312,
+      "Number": 0.3767,
+      "Max": 0.2681,
+      "AVG": 0.1031,
+      "ack_flag_number": 0.0873,
+      "IAT": 0.0709,
+      "Min": -0.0449,
+      "Variance": -0.0298,
+      "syn_count": -0.0187,
+      "Header_Length": -0.0164,
+      "Std": 0.0084,
+      "ack_count": 0.0007,
+      "syn_flag_number": -0.0001,
+      "rst_count": -0.0,
+      "fin_count": -0.0,
+      "Time_To_Live": 0.0,
+      "fin_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 28.0,
+      "Protocol Type": 2054.0,
+      "Time_To_Live": 64.0,
+      "Rate": 136.0153,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 0.0,
+      "rst_flag_number": 0.0,
+      "psh_flag_number": 0.0,
+      "ack_flag_number": 0.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 0.0,
+      "syn_count": 0.0,
+      "fin_count": 0.0,
+      "rst_count": 0.0,
+      "HTTP": 0.0,
+      "HTTPS": 0.0,
+      "DNS": 0.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 0.0,
+      "UDP": 0.0,
+      "DHCP": 0.0,
+      "ARP": 1.0,
+      "ICMP": 0.0,
+      "IGMP": 0.0,
+      "IPv": 0.0,
+      "LLC": 0.0,
+      "Tot sum": 84.0,
+      "Min": 42.0,
+      "Max": 42.0,
+      "AVG": 42.0,
+      "Std": 0.0,
+      "Tot size": 84.0,
+      "IAT": 0.014704,
+      "Number": 2.0,
+      "Variance": 0.0,
+      "Source_IP": "10.46.38.131",
+      "Destination_IP": "10.46.38.32",
+      "Protocol_Name": "2054",
+      "Source_Port": 0,
+      "Destination_Port": 0
+    },
+    "analyst_explanation": null,
+    "generated_by": "rule_based",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "threat_intel": {
+    "mitre_attack": [
+      {
+        "id": "T0816",
+        "name": "Device Restart/Shutdown",
+        "tactic": "inhibit-response-function",
+        "description": "MITRE ATT&CK Technique T0816: Device Restart/Shutdown\nTactic: inhibit-response-function\nDescription: Adversaries may forcibly restart or shutdown a device in an ICS environment to disrupt and potentially negatively impact physical processes. Methods of device restart and shutdown exist in some devic",
+        "url": "https://attack.mitre.org/techniques/T0816",
+        "similarity_score": null
+      },
+      {
+        "id": "T1584.006",
+        "name": "Web Services",
+        "tactic": "resource-development",
+        "description": "MITRE ATT&CK Technique T1584.006: Web Services\nTactic: resource-development\nDescription: Adversaries may compromise access to third-party web services\u00a0that can be used during targeting. A variety of popular websites exist for legitimate users to register for web-based services, such as GitHub, Twitt",
+        "url": "https://attack.mitre.org/techniques/T1584/006",
+        "similarity_score": null
+      }
+    ],
+    "cve_list": [],
+    "cisa_advisories": [
+      {
+        "id": "CISA-KEV-CVE-2025-14733",
+        "title": "CISA KEV: WatchGuard Firebox",
+        "release_date": "2025-12-19",
+        "summary": "CISA Security Advisory CISA-KEV-CVE-2025-14733: CISA KEV: WatchGuard Firebox (Released: 2025-12-19)\nSummary: WatchGuard Fireware OS iked process contains an out of bounds write vulnerability in the OS iked process. This vulnerability may allow a remote unauthenticated attacker to execute arbitrary c",
+        "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2025-14733",
+        "similarity_score": null
+      },
+      {
+        "id": "CISA-KEV-CVE-2014-3931",
+        "title": "CISA KEV: Looking Glass Multi-Router Looking Glass (MRLG)",
+        "release_date": "2025-07-07",
+        "summary": "CISA Security Advisory CISA-KEV-CVE-2014-3931: CISA KEV: Looking Glass Multi-Router Looking Glass (MRLG) (Released: 2025-07-07)\nSummary: Multi-Router Looking Glass (MRLG) contains a buffer overflow vulnerability that could allow remote attackers to cause an arbitrary memory write and memory corrupti",
+        "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2014-3931",
+        "similarity_score": null
+      }
+    ],
+    "iot_threat_context": "Associated with MITRE ATT&CK technique(s): T0816 (Device Restart/Shutdown), T1584.006 (Web Services). Referenced in CISA advisories: CISA-KEV-[UNVERIFIED ID REDACTED], CISA-KEV-[UNVERIFIED ID REDACTED].",
+    "retrieval_confidence": 0.95,
+    "sources": [
+      "https://attack.mitre.org/techniques/T0816",
+      "https://attack.mitre.org/techniques/T1584/006",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2025-14733",
+      "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2014-3931"
+    ],
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "risk": {
+    "risk_score": 56.0,
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "impact": "Potential device compromise, unauthorized credential access, or localized disruption.",
+    "likelihood": "High Probability of Imminent Harm",
+    "reasoning": [
+      "Classified as 'Recon' with 100.0% model confidence.",
+      "Elevated SHAP attribution on 'Tot Sum' (value: 84.00, SHAP: +5.4472), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Tot Size' (value: 84.00, SHAP: +0.6638), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Rate' (value: 136.02, SHAP: +0.5312), which strongly increases threat probability.",
+      "Referenced in active CISA cyber defense advisory (CISA-KEV-CVE-2025-14733).",
+      "Network 5-tuple context: Source 10.46.38.131:0 -> Destination 10.46.38.32:0 (2054)."
+    ],
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "response": {
+    "containment": [
+      "Rate-limit or block scanning traffic from 10.46.38.131.",
+      "Enable port-scan detection and automatic blocking on the IDS/IPS."
+    ],
+    "recovery": [
+      "Review exposed service inventory \u2013 close unnecessary ports.",
+      "Verify no unauthorized access occurred during reconnaissance window."
+    ],
+    "prevention": [
+      "Apply host-based firewall rules to restrict non-essential service exposure.",
+      "Enable network honeypots to detect and delay reconnaissance activities.",
+      "Conduct regular attack-surface reduction audits (OWASP IoT Top 10)."
+    ],
+    "firewall_commands": [
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 10.46.38.131 -m limit --limit 5/min -j ACCEPT",
+        "description": "Rate-limit traffic from suspected reconnaissance source 10.46.38.131"
+      }
+    ],
+    "approval_required": true,
+    "approval_status": "PENDING_ANALYST_APPROVAL",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated execution disabled by policy. Requires SOC Analyst sign-off.",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "report": {
+    "incident_id": "INC-20261013-19130",
+    "generated_at": "2026-10-13 11:48:39 UTC",
+    "title": "SOC Incident Assessment: INC-20261013-19130 [Recon]",
+    "executive_summary": "SECURITY INCIDENT ALERT: High-priority security incident INC-20261013-19130 detected. Network telemetry exhibits active 'Recon' threat patterns from 10.46.38.131:0 targeting 10.46.38.32:0 (2054) with 100.0% classification certainty. Assessed Risk Score is 56.0/100 (High Severity, P2 - High Priority). Associated with MITRE ATT&CK technique(s): T0816 (Device Restart/Shutdown), T1584.006 (Web Services). Referenced in CISA advisories: CISA-KEV-[UNVERIFIED ID REDACTED], CISA-KEV-[UNVERIFIED ID REDACTED]. Mitigation actions have been formulated and require SOC Analyst approval.",
+    "attack_type": "Recon",
+    "severity": "High",
+    "priority": "P2 - High Priority",
+    "risk_score": 56.0,
+    "timeline": [
+      {
+        "timestamp": "+0.040s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Recon' with 100.0% confidence. Primary feature driver: Tot sum.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.040s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated tracker INC-20261013-19130. Correlation note: First observed malicious traffic burst from this source endpoint in the current monitoring window.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.313s",
+        "agent": "Threat Intel Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed.",
+        "status": "DEGRADED"
+      },
+      {
+        "timestamp": "+0.321s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 56.0/100 (High Severity, P2 - High Priority).",
+        "status": "DEGRADED"
+      },
+      {
+        "timestamp": "+0.328s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+        "status": "DEGRADED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENT ASSESSMENT REPORT: INC-20261013-19130\n**Generated:** 2026-10-13 11:48:39 UTC  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n> [!WARNING]\n> **PARTIAL PIPELINE NOTICE**: The following agents experienced errors or ran in fallback mode: threat_intel, risk_assessment, response.\n\n## 1. Executive Summary\nSECURITY INCIDENT ALERT: High-priority security incident INC-20261013-19130 detected. Network telemetry exhibits active 'Recon' threat patterns from 10.46.38.131:0 targeting 10.46.38.32:0 (2054) with 100.0% classification certainty. Assessed Risk Score is 56.0/100 (High Severity, P2 - High Priority). Associated with MITRE ATT&CK technique(s): T0816 (Device Restart/Shutdown), T1584.006 (Web Services). Referenced in CISA advisories: CISA-KEV-[UNVERIFIED ID REDACTED], CISA-KEV-[UNVERIFIED ID REDACTED]. Mitigation actions have been formulated and require SOC Analyst approval.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `Recon`\n- **Classification Confidence:** `100.00%`\n- **Source Endpoint:** `10.46.38.131:0`\n- **Destination Endpoint:** `10.46.38.32:0`\n- **Transport Protocol:** `2054`\n- **Detection Timestamp:** `2026-10-13 11:48:39`\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 0.00% `` |\n| Brute Force | 0.00% `` |\n| DDoS | 0.00% `` |\n| DoS | 0.00% `` |\n| Mirai | 0.00% `` |\n| Recon | 100.00% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n| Spoofing | 0.00% `` |\n| Web Attack | 0.00% `` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Tot sum` | 84.000 | +5.4472 | INCREASES |\n| 2 | `Tot size` | 84.000 | +0.6638 | INCREASES |\n| 3 | `Rate` | 136.015 | +0.5312 | INCREASES |\n| 4 | `Number` | 2.000 | +0.3767 | INCREASES |\n| 5 | `Max` | 42.000 | +0.2681 | INCREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 95%\n\n### MITRE ATT&CK Mapping\n- **[T0816: Device Restart/Shutdown](https://attack.mitre.org/techniques/T0816)** (Tactic: *inhibit-response-function*)\n  MITRE ATT&CK Technique T0816: Device Restart/Shutdown\nTactic: inhibit-response-function\nDescription: Adversaries may forcibly restart or shutdown a device in an ICS environment to disrupt and potentially negatively impact physical processes. Methods of device restart and shutdown exist in some devic\n- **[T1584.006: Web Services](https://attack.mitre.org/techniques/T1584/006)** (Tactic: *resource-development*)\n  MITRE ATT&CK Technique T1584.006: Web Services\nTactic: resource-development\nDescription: Adversaries may compromise access to third-party web services\u00a0that can be used during targeting. A variety of popular websites exist for legitimate users to register for web-based services, such as GitHub, Twitt\n\n### Correlated NVD / CVE Records\n- *No matching high-risk CVE vulnerabilities found in verified database.*\n\n### CISA Security Advisories\n- **[CISA-KEV-CVE-2025-14733: CISA KEV: WatchGuard Firebox](https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2025-14733)** (Released 2025-12-19)\n- **[CISA-KEV-CVE-2014-3931: CISA KEV: Looking Glass Multi-Router Looking Glass (MRLG)](https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2014-3931)** (Released 2025-07-07)\n\n### Authoritative Sources\n- <https://attack.mitre.org/techniques/T0816>\n- <https://attack.mitre.org/techniques/T1584/006>\n- <https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2025-14733>\n- <https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search=CVE-2014-3931>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `56.0 / 100.0`\n- **Assigned Severity:** `HIGH`\n- **Operational Priority:** `P2 - High Priority`\n- **Potential Impact:** Potential device compromise, unauthorized credential access, or localized disruption.\n- **Threat Likelihood:** High Probability of Imminent Harm\n\n### Analytical Justification\n- Classified as 'Recon' with 100.0% model confidence.\n- Elevated SHAP attribution on 'Tot Sum' (value: 84.00, SHAP: +5.4472), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Tot Size' (value: 84.00, SHAP: +0.6638), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Rate' (value: 136.02, SHAP: +0.5312), which strongly increases threat probability.\n- Referenced in active CISA cyber defense advisory (CISA-KEV-CVE-2025-14733).\n- Network 5-tuple context: Source 10.46.38.131:0 -> Destination 10.46.38.32:0 (2054).\n\n---\n\n## 6. Recommended Response & Containment Playbook\n\n### Immediate Containment Steps\n1. Rate-limit or block scanning traffic from 10.46.38.131.\n1. Enable port-scan detection and automatic blocking on the IDS/IPS.\n\n### Recovery Procedures\n1. Review exposed service inventory \u2013 close unnecessary ports.\n1. Verify no unauthorized access occurred during reconnaissance window.\n\n### Long-Term Prevention & Hardening\n- Apply host-based firewall rules to restrict non-essential service exposure.\n- Enable network honeypots to detect and delay reconnaissance activities.\n- Conduct regular attack-surface reduction audits (OWASP IoT Top 10).\n\n### Firewall & Access Control Rules\n> [!CAUTION]\n> **ANALYST APPROVAL REQUIRED**: Automated execution is strictly disabled. Verify host parameters before executing.\n\n#### IPTABLES: Rate-limit traffic from suspected reconnaissance source 10.46.38.131\n```bash\niptables -A INPUT -s 10.46.38.131 -m limit --limit 5/min -j ACCEPT\n```\n\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +0.040s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'Recon' with 100.0% confidence. Primary feature driver: Tot sum. |\n| +0.040s | `Coordinator Agent` | Incident State Initialized | Allocated tracker INC-20261013-19130. Correlation note: First observed malicious traffic burst from this source endpoint in the current monitoring window. |\n| +0.313s | `Threat Intel Agent` | Knowledge Base RAG Retrieval | Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. |\n| +0.321s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 56.0/100 (High Severity, P2 - High Priority). |\n| +0.328s | `Response Agent` | Mitigation & ACL Formulation | Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL. |",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "timeline": [
+    {
+      "timestamp": "+0.040s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Recon' with 100.0% confidence. Primary feature driver: Tot sum.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.040s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated tracker INC-20261013-19130. Correlation note: First observed malicious traffic burst from this source endpoint in the current monitoring window.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.313s",
+      "agent": "Threat Intel Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed.",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.321s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 56.0/100 (High Severity, P2 - High Priority).",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.328s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.337s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized SOC assessment report for INC-20261013-19130 (6602 bytes).",
+      "status": "DEGRADED"
+    }
+  ]
+}

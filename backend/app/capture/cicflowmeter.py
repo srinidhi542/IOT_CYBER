@@ -93,11 +93,24 @@ class Flow:
 
         # Flow transmission rate (packets / second).
         # For single-packet flows (dur==0) use 0.0 — not 1/0.0001=10000.
-        # Inflating Rate to 10000 for single-pkt flows causes Recon misclassification
-        # because the model's training Recon samples have very high rates.
-        # CICIoT2023 schema: Rate = total_packets / flow_duration; 0 if no duration.
+        # Inflating Rate causes Recon misclassification because the CICIoT2023 training
+        # Recon samples have very high rates.
+        #
+        # MICRO-BURST SMOOTHING (Fix for live LAN false-positive Recon verdicts):
+        # Short benign flows (ARP, DNS, mDNS, multicast) send 2-5 packets within
+        # tens of microseconds: Rate = 2 / 0.00004 = 46,000 pkts/sec.
+        # The XGBoost model reads this as Recon (99% confidence).
+        # Real Recon traffic also has high rates, but over a SUSTAINED window (seconds).
+        # Solution: for micro-burst flows (≤5 pkts arriving in <1.0s) compute Rate
+        # over a normalised 1.0-second window so that they look like what they are —
+        # low-volume bursts — not scanner sweeps.
         if actual_dur > 0:
-            rate = float(pkt_count / actual_dur)
+            if pkt_count <= 5 and actual_dur < 1.0:
+                # Normalise to 1-second effective window to suppress burst inflation
+                effective_dur = 1.0
+                rate = float(pkt_count / effective_dur)
+            else:
+                rate = float(pkt_count / actual_dur)
         else:
             rate = 0.0
 
@@ -331,6 +344,17 @@ def extract_flows_from_pcap(pcap_path: str, max_packets: int = 10000) -> pd.Data
 
     records = [flow.to_features() for flow in flows.values()]
     df = pd.DataFrame(records)
+
+    # Drop phantom flows where both endpoints are 0.0.0.0 — these are non-IP
+    # frames (raw 802.11 management frames, broken IGMP, etc.) that produced no
+    # usable IP header. They can have large packet counts and bias aggregation.
+    if 'Source_IP' in df.columns and 'Destination_IP' in df.columns:
+        phantom_mask = (df['Source_IP'] == '0.0.0.0') & (df['Destination_IP'] == '0.0.0.0')
+        phantom_count = phantom_mask.sum()
+        if phantom_count > 0:
+            logger.info(f"Dropped {phantom_count} phantom 0.0.0.0 flows (non-IP frames)")
+            df = df[~phantom_mask].reset_index(drop=True)
+
     df.attrs['total_packets'] = packet_count
     logger.info(f"CICFlowMeter parsed {packet_count} packets into {len(df)} flows from {pcap_path}")
     return df
@@ -429,18 +453,49 @@ def aggregate_flow_features(df: pd.DataFrame) -> Tuple[Dict[str, float], Dict[st
         f"{len(attack_flows)} attack | {len(benign_flows)} benign"
     )
 
-    # 3. Model-driven representative selection:
-    # If attack flows detected → pick the one with highest confidence.
-    # If all flows are benign → pick the flow with most packets (most traffic activity).
-    if attack_flows:
+    # 3. Quorum-based representative selection.
+    #
+    # PROBLEM (before this fix):
+    #   Even 1 misclassified 2-packet mDNS broadcast (false-positive Recon due to
+    #   micro-burst rate inflation) was enough to make the whole session an attack,
+    #   even when 140+ other flows were perfectly Benign.
+    #
+    # FIX: Require the attack signal to be statistically meaningful:
+    #   - attack_ratio  >= 10% of all flows, AND
+    #   - attack_pkts   >= 15 total packets across attack flows
+    #   OR (special case): very small captures (<=3 flows) where even 1 flow matters.
+    attack_ratio = len(attack_flows) / total_flows if total_flows > 0 else 0.0
+    attack_pkts = sum(int(df.loc[idx, 'Number']) for idx, _ in attack_flows) if attack_flows else 0
+
+    session_is_attack = bool(attack_flows) and (
+        total_flows <= 3
+        or (attack_ratio >= 0.10 and attack_pkts >= 15)
+    )
+
+    if session_is_attack:
         chosen_idx, chosen_pred = max(attack_flows, key=lambda x: x[1]["confidence"])
         logger.info(
             f"Representative: attack flow {chosen_idx} -> "
-            f"{chosen_pred['label']} ({chosen_pred['confidence']*100:.1f}%)"
+            f"{chosen_pred['label']} ({chosen_pred['confidence']*100:.1f}%) "
+            f"[quorum: {attack_ratio*100:.1f}% of flows, {attack_pkts} attack pkts]"
         )
     else:
-        chosen_idx = df['Number'].idxmax() if 'Number' in df.columns else df.index[0]
-        logger.info(f"Representative: benign flow {chosen_idx} (highest packet count)")
+        if attack_flows:
+            logger.info(
+                f"Attack flows below quorum ({attack_ratio*100:.1f}% of flows, "
+                f"{attack_pkts} attack pkts) -> treating session as Benign"
+            )
+        # Pick representative from flows that were actually classified as benign.
+        # Using df['Number'].idxmax() on ALL flows can accidentally select a high-packet
+        # attack flow as representative, producing a false attack verdict for the session.
+        if benign_flows and 'Number' in df.columns:
+            benign_indices = [idx for idx, _ in benign_flows]
+            chosen_idx = df.loc[benign_indices, 'Number'].idxmax()
+        elif benign_flows:
+            chosen_idx = benign_flows[0][0]
+        else:
+            chosen_idx = df.index[0]
+        logger.info(f"Representative: benign flow {chosen_idx} (highest packet count among benign flows)")
 
     # 4. Use the genuine feature set of the chosen flow as the representative record
     representative_row = df.loc[chosen_idx].to_dict()

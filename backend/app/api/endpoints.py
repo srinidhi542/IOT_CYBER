@@ -39,6 +39,24 @@ def health_check():
     return {"status": "healthy", "service": settings.PROJECT_NAME}
 
 
+import time as _time
+
+@router.get("/llm/health", response_model=Dict[str, Any])
+def llm_health():
+    """Makes a tiny generation request and reports LLM provider health."""
+    from app.llm.client import get_llm_client
+    client = get_llm_client(force_refresh=True)
+    if not client.is_available():
+        return {"provider": client.provider, "model": client.model, "status": "unavailable", "latency_ms": None}
+    try:
+        t0 = _time.time()
+        _ = client.generate("System", "ping", agent_name="health")
+        latency_ms = round((_time.time() - t0) * 1000, 2)
+        return {"provider": client.provider, "model": client.model, "status": "ok", "latency_ms": latency_ms}
+    except Exception as e:
+        return {"provider": client.provider, "model": client.model, "status": f"error: {str(e)}", "latency_ms": None}
+
+
 @router.get("/system/status", response_model=schemas.SystemStatusResponse)
 def get_system_status(db: Session = Depends(get_db)):
     # Check ML engine capability

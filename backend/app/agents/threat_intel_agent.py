@@ -99,36 +99,12 @@ class ThreatIntelAgent:
         llm_enabled = bool(llm_cfg.get("enabled", True))
         llm_client = get_llm_client()
 
-        if llm_enabled and llm_cfg.get("agent_toggles", {}).get("threat_intel", True) and llm_client.is_available():
-            try:
-                prompt = format_query_expansion_prompt(
-                    attack_type=attack,
-                    top_features=top_feats,
-                    network_context=net_ctx.model_dump()
-                )
-                raw_exp = llm_client.generate(QUERY_EXPANSION_SYSTEM_PROMPT, prompt, agent_name="Threat Intel Agent")
-                # Parse JSON queries
-                cleaned = raw_exp.strip()
-                if cleaned.startswith("```"):
-                    import re
-                    cleaned = re.sub(r"^```(?:json)?\s*", "", cleaned, flags=re.IGNORECASE)
-                    cleaned = re.sub(r"\s*```$", "", cleaned)
-                data = json.loads(cleaned)
-                for q in data.get("queries", []):
-                    if isinstance(q, str) and q.strip():
-                        expanded_queries.append(q.strip())
-            except Exception as qe:
-                logger.debug(f"Query expansion fallback to rule queries: {qe}")
-                # Rule-based expanded queries
-                expanded_queries.extend([
-                    f"{attack} IoT vulnerability {net_ctx.protocol}",
-                    f"{attack} botnet command injection router"
-                ])
-        else:
-            expanded_queries.extend([
-                f"{attack} IoT vulnerability {net_ctx.protocol}",
-                f"{attack} botnet router"
-            ])
+        # Fast keyword & semantic query variations
+        expanded_queries.extend([
+            f"{attack} IoT vulnerability {net_ctx.protocol}",
+            f"{attack} port {net_ctx.destination_port}",
+            f"{attack} botnet command injection router"
+        ])
 
         # -------------------------------------------------------------
         # 3. Hybrid RAG Retrieval (Dense + BM25 + Exact ID + RRF)

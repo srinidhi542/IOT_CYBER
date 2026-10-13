@@ -7,14 +7,18 @@ import logging
 from typing import Type, TypeVar, Optional, Dict, Any, Tuple
 from pydantic import BaseModel
 import httpx
+import threading
 
 logger = logging.getLogger(__name__)
+
+# Mutex for Ollama to serialize GPU/CPU inference requests and prevent timeouts
+_ollama_lock = threading.Lock()
 
 T = TypeVar("T", bound=BaseModel)
 
 # Default size limits
 MAX_PROMPT_CHARS = 16000
-DEFAULT_TIMEOUT_SEC = 25.0
+DEFAULT_TIMEOUT_SEC = 120.0
 MAX_CACHE_SIZE = 500
 
 
@@ -91,7 +95,7 @@ class LLMClient:
 
     def _default_model_for_provider(self, provider: str) -> str:
         mapping = {
-            "gemini": "gemini-1.5-flash",
+            "gemini": "gemini-2.5-flash",
             "openai": "gpt-4o-mini",
             "ollama": "llama3.2",
             "anthropic": "claude-3-5-haiku-20241022"
@@ -162,9 +166,9 @@ class LLMClient:
             logger.info(f"[{agent_name}] LLM Cache hit for {self.provider}/{self.model}")
             return cached_text
 
-        # 2. Execute with exponential backoff (up to 2 retries)
+        # 2. Execute with exponential backoff (0 retries for Ollama to avoid cascading timeout delays)
         last_exception = None
-        max_retries = 2
+        max_retries = 0 if self.provider == "ollama" else 1
         for attempt in range(max_retries + 1):
             t0 = time.time()
             try:
@@ -222,32 +226,83 @@ class LLMClient:
     ) -> T:
         """
         Generates structured output validated against a Pydantic BaseModel schema.
-        Automatically retries with targeted error feedback up to 2 times on validation failure.
+        Uses clean instance templates and automatically unwraps nested property wrappers.
         """
-        schema_json = json.dumps(schema.model_json_schema(), indent=2)
+        # Generate clean example template
+        example_fields = {}
+        if hasattr(schema, "model_fields"):
+            for fname, ffield in schema.model_fields.items():
+                ann = str(ffield.annotation).lower()
+                if fname == "firewall_commands":
+                    example_fields[fname] = [
+                        {
+                            "firewall_type": "iptables",
+                            "command": "iptables -A INPUT -s <source_ip> -j DROP",
+                            "description": "Block source IP"
+                        }
+                    ]
+                elif "list" in ann:
+                    example_fields[fname] = ["example_item"]
+                elif "int" in ann or "float" in ann:
+                    example_fields[fname] = 0
+                elif "bool" in ann:
+                    example_fields[fname] = True
+                elif "dict" in ann:
+                    example_fields[fname] = {}
+                else:
+                    example_fields[fname] = f"<{fname}>"
+        example_json = json.dumps(example_fields, indent=2)
+
         system_with_schema = (
             f"{system}\n\n"
-            f"You MUST output valid, parsable JSON matching this Pydantic JSON Schema strictly:\n"
-            f"```json\n{schema_json}\n```\n"
-            f"Do not include any prose commentary or markdown outside the valid JSON object."
+            f"You MUST output valid, parsable JSON with this exact key structure:\n"
+            f"```json\n{example_json}\n```\n"
+            f"Do not nest these keys inside 'properties', 'schema', or 'type'. "
+            f"Return only the valid JSON object."
         )
+
+        def _try_validate(data: Any) -> T:
+            if not isinstance(data, dict):
+                return schema.model_validate(data)
+            # Direct validation
+            try:
+                return schema.model_validate(data)
+            except Exception:
+                pass
+
+            # Unwrap common wrappers (e.g. {"properties": {...}}, {"data": {...}})
+            target_keys = set(schema.model_fields.keys()) if hasattr(schema, "model_fields") else set()
+            for wrap in ["properties", "data", "result", "response", "values"]:
+                if wrap in data and isinstance(data[wrap], dict):
+                    inner = data[wrap]
+                    flattened = {}
+                    for k, v in inner.items():
+                        if isinstance(v, dict):
+                            flattened[k] = v.get("value") or v.get("default") or v.get("description") or v
+                        else:
+                            flattened[k] = v
+                    try:
+                        return schema.model_validate(flattened)
+                    except Exception:
+                        pass
+            return schema.model_validate(data)
 
         current_prompt = prompt
         parse_attempts = 2
         for attempt in range(parse_attempts + 1):
-            raw_text = self.generate(system=system_with_schema, prompt=current_prompt, agent_name=agent_name, **opts)
+            raw_text = self.generate(system=system_with_schema, prompt=current_prompt, agent_name=agent_name, format="json", **opts)
             cleaned = _clean_json_markdown(raw_text)
             try:
                 parsed_dict = json.loads(cleaned)
-                return schema.model_validate(parsed_dict)
+                return _try_validate(parsed_dict)
             except Exception as parse_err:
                 logger.warning(f"[{agent_name}] JSON schema validation failed on attempt {attempt + 1}: {parse_err}")
                 if attempt < parse_attempts:
                     current_prompt = (
                         f"{prompt}\n\n"
                         f"CRITICAL ERROR IN PREVIOUS ATTEMPT: {parse_err}\n"
-                        f"Previous invalid output was:\n{cleaned[:500]}\n"
-                        f"Please correct the JSON formatting and fields to strictly match the required schema."
+                        f"Previous output was:\n{cleaned[:500]}\n"
+                        f"Please return valid JSON with keys: {list(example_fields.keys())}."
                     )
                 else:
                     raise ValueError(f"Failed to produce valid schema '{schema.__name__}' from LLM: {parse_err}") from parse_err
@@ -261,7 +316,8 @@ class LLMClient:
         elif self.provider == "openai":
             return self._call_openai(system, prompt, **opts)
         elif self.provider == "ollama":
-            return self._call_ollama(system, prompt, **opts)
+            with _ollama_lock:
+                return self._call_ollama(system, prompt, **opts)
         elif self.provider == "anthropic":
             return self._call_anthropic(system, prompt, **opts)
         else:
@@ -274,14 +330,18 @@ class LLMClient:
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent?key={api_key}"
         headers = {"Content-Type": "application/json"}
+        gen_cfg = {
+            "temperature": opts.get("temperature", self.temperature),
+            "maxOutputTokens": opts.get("num_predict") or opts.get("max_tokens", 2048)
+        }
+        if opts.get("format") == "json":
+            gen_cfg["responseMimeType"] = "application/json"
+
         payload = {
             "contents": [
                 {"role": "user", "parts": [{"text": f"System Instructions:\n{system}\n\nUser Task:\n{prompt}"}]}
             ],
-            "generationConfig": {
-                "temperature": opts.get("temperature", self.temperature),
-                "maxOutputTokens": opts.get("max_tokens", 2048)
-            }
+            "generationConfig": gen_cfg
         }
 
         with httpx.Client(timeout=self.timeout) as client:
@@ -311,8 +371,11 @@ class LLMClient:
                 {"role": "system", "content": system},
                 {"role": "user", "content": prompt}
             ],
-            "temperature": opts.get("temperature", self.temperature)
+            "temperature": opts.get("temperature", self.temperature),
+            "max_tokens": opts.get("num_predict") or opts.get("max_tokens", 2048)
         }
+        if opts.get("format") == "json":
+            payload["response_format"] = {"type": "json_object"}
 
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(url, headers=headers, json=payload)
@@ -325,6 +388,13 @@ class LLMClient:
         base_url = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434").rstrip("/")
         url = f"{base_url}/api/chat"
         headers = {"Content-Type": "application/json"}
+        options = {
+            "temperature": opts.get("temperature", self.temperature)
+        }
+        token_limit = opts.get("num_predict") or opts.get("max_tokens")
+        if token_limit:
+            options["num_predict"] = int(token_limit)
+
         payload = {
             "model": self.model,
             "messages": [
@@ -332,10 +402,10 @@ class LLMClient:
                 {"role": "user", "content": prompt}
             ],
             "stream": False,
-            "options": {
-                "temperature": opts.get("temperature", self.temperature)
-            }
+            "options": options
         }
+        if opts.get("format") == "json":
+            payload["format"] = "json"
 
         with httpx.Client(timeout=self.timeout) as client:
             resp = client.post(url, headers=headers, json=payload)

@@ -18,7 +18,7 @@
   "multi_agent_pipeline": {
     "execution_mode": "coordinated",
     "analyst_approval_required": true,
-    "agent_timeout_seconds": 30
+    "agent_timeout_seconds": 180
   },
   "threat_intelligence": {
     "enable_mitre": true,
@@ -28,9 +28,10 @@
   },
   "llm": {
     "enabled": true,
-    "provider": "gemini",
-    "model": "gemini-1.5-flash",
+    "provider": "ollama",
+    "model": "llama3.2",
     "temperature": 0.2,
+    "max_output_tokens": 2048,
     "agent_toggles": {
       "detection": true,
       "coordinator": true,

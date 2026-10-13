@@ -1,0 +1,306 @@
+{
+  "report_id": "REP-INC-20261013-83560",
+  "incident_id": "INC-20261013-83560",
+  "detection": {
+    "attack_type": "Web Attack",
+    "confidence": 0.9998915195465088,
+    "probabilities": {
+      "Benign": 5.4351537983166054e-05,
+      "Brute Force": 3.129208562313579e-05,
+      "DDoS": 1.6713104287191527e-06,
+      "DoS": 9.36367086978862e-06,
+      "Mirai": 2.1718028619943652e-06,
+      "Recon": 3.0670908017782494e-06,
+      "Spoofing": 6.558388577104779e-06,
+      "Web Attack": 0.9998915195465088
+    },
+    "network_context": {
+      "timestamp": "2026-10-13 12:48:03",
+      "source_ip": "192.168.137.167",
+      "destination_ip": "54.69.37.156",
+      "source_port": 51331,
+      "destination_port": 443,
+      "protocol": "TCP"
+    },
+    "top_contributing_features": [
+      {
+        "feature": "Std",
+        "value": 121.4044,
+        "shap_value": 1.3452,
+        "direction": "increases"
+      },
+      {
+        "feature": "Variance",
+        "value": 14739.0278,
+        "shap_value": 1.285,
+        "direction": "increases"
+      },
+      {
+        "feature": "ack_count",
+        "value": 17.0,
+        "shap_value": 1.16,
+        "direction": "increases"
+      },
+      {
+        "feature": "Rate",
+        "value": 13.5434,
+        "shap_value": 1.0677,
+        "direction": "increases"
+      },
+      {
+        "feature": "syn_count",
+        "value": 2.0,
+        "shap_value": 0.5138,
+        "direction": "increases"
+      }
+    ],
+    "shap_values": {
+      "Std": 1.3452,
+      "Variance": 1.285,
+      "ack_count": 1.16,
+      "Rate": 1.0677,
+      "syn_count": 0.5138,
+      "Max": 0.474,
+      "Number": 0.4576,
+      "Time_To_Live": -0.2795,
+      "Min": 0.1066,
+      "psh_flag_number": 0.0603,
+      "Header_Length": -0.0516,
+      "IAT": -0.0371,
+      "AVG": -0.0324,
+      "syn_flag_number": 0.02,
+      "rst_flag_number": 0.0145,
+      "Tot size": 0.0127,
+      "Tot sum": -0.004,
+      "rst_count": 0.0033,
+      "fin_flag_number": -0.0021,
+      "fin_count": -0.0014,
+      "ack_flag_number": -0.0001,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0
+    },
+    "raw_record": {
+      "Header_Length": 40.44,
+      "Protocol Type": 6.0,
+      "Time_To_Live": 243.44,
+      "Rate": 13.5434,
+      "fin_flag_number": 0.0,
+      "syn_flag_number": 1.0,
+      "rst_flag_number": 1.0,
+      "psh_flag_number": 1.0,
+      "ack_flag_number": 1.0,
+      "ece_flag_number": 0.0,
+      "cwr_flag_number": 0.0,
+      "ack_count": 17.0,
+      "syn_count": 2.0,
+      "fin_count": 0.0,
+      "rst_count": 1.0,
+      "HTTP": 0.0,
+      "HTTPS": 1.0,
+      "DNS": 0.0,
+      "Telnet": 0.0,
+      "SMTP": 0.0,
+      "SSH": 0.0,
+      "IRC": 0.0,
+      "TCP": 1.0,
+      "UDP": 0.0,
+      "DHCP": 0.0,
+      "ARP": 0.0,
+      "ICMP": 0.0,
+      "IGMP": 0.0,
+      "IPv": 1.0,
+      "LLC": 0.0,
+      "Tot sum": 2529.0,
+      "Min": 60.0,
+      "Max": 459.0,
+      "AVG": 140.5,
+      "Std": 121.4044,
+      "Tot size": 2529.0,
+      "IAT": 0.07818,
+      "Number": 18.0,
+      "Variance": 14739.0278,
+      "Source_IP": "192.168.137.167",
+      "Destination_IP": "54.69.37.156",
+      "Protocol_Name": "TCP",
+      "Source_Port": 51331,
+      "Destination_Port": 443
+    },
+    "analyst_explanation": null,
+    "generated_by": "rule_based",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "threat_intel": {
+    "mitre_attack": [
+      {
+        "id": "T1583.005",
+        "name": "Botnet",
+        "tactic": "resource-development",
+        "description": "MITRE ATT&CK Technique T1583.005: Botnet\nTactic: resource-development\nDescription: Adversaries may buy, lease, or rent a network of compromised systems\u00a0that can be used during targeting. A botnet is a network of compromised systems that can be instructed to perform coordinated tasks.(Citation: Norto",
+        "url": "https://attack.mitre.org/techniques/T1583/005",
+        "similarity_score": null
+      },
+      {
+        "id": "T1596.003",
+        "name": "Digital Certificates",
+        "tactic": "reconnaissance",
+        "description": "MITRE ATT&CK Technique T1596.003: Digital Certificates\nTactic: reconnaissance\nDescription: Adversaries may search public digital certificate data for information about victims that can be used during targeting. Digital certificates are issued by a certificate authority (CA) in order to cryptographic",
+        "url": "https://attack.mitre.org/techniques/T1596/003",
+        "similarity_score": null
+      }
+    ],
+    "cve_list": [],
+    "cisa_advisories": [],
+    "iot_threat_context": "Associated with MITRE ATT&CK technique(s): T1583.005 (Botnet), T1596.003 (Digital Certificates).",
+    "retrieval_confidence": 0.75,
+    "sources": [
+      "https://attack.mitre.org/techniques/T1583/005",
+      "https://attack.mitre.org/techniques/T1596/003"
+    ],
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "risk": {
+    "risk_score": 84.0,
+    "severity": "Critical",
+    "priority": "P1 - Critical Urgent",
+    "impact": "Catastrophic or severe degradation of IoT gateway and dependent network infrastructure.",
+    "likelihood": "Active Exploitation in Progress",
+    "reasoning": [
+      "Classified as 'Web Attack' with 100.0% model confidence.",
+      "Elevated SHAP attribution on 'Std' (value: 121.40, SHAP: +1.3452), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Variance' (value: 14739.03, SHAP: +1.2850), which strongly increases threat probability.",
+      "Elevated SHAP attribution on 'Ack Count' (value: 17.00, SHAP: +1.1600), which strongly increases threat probability.",
+      "Targeting critical IoT service port 443 (TCP).",
+      "Network 5-tuple context: Source 192.168.137.167:51331 -> Destination 54.69.37.156:443 (TCP)."
+    ],
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "response": {
+    "containment": [
+      "Quarantine traffic from 192.168.137.167 pending investigation.",
+      "Escalate incident to Tier-2 SOC analyst for manual review."
+    ],
+    "recovery": [
+      "Perform forensic memory and log capture on affected IoT device.",
+      "Restore device from known-good firmware backup if compromise confirmed."
+    ],
+    "prevention": [
+      "Review and harden IoT device network access policies.",
+      "Apply NIST SP 800-213 security controls for IoT deployment."
+    ],
+    "firewall_commands": [
+      {
+        "firewall_type": "iptables",
+        "command": "iptables -A INPUT -s 192.168.137.167 -j DROP",
+        "description": "Block unclassified threat source 192.168.137.167"
+      }
+    ],
+    "approval_required": true,
+    "approval_status": "PENDING_ANALYST_APPROVAL",
+    "reviewed_by": null,
+    "review_timestamp": null,
+    "review_notes": "Automated execution disabled by policy. Requires SOC Analyst sign-off.",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "report": {
+    "incident_id": "INC-20261013-83560",
+    "generated_at": "2026-10-13 12:48:03 UTC",
+    "title": "SOC Incident Assessment: INC-20261013-83560 [Web Attack]",
+    "executive_summary": "SECURITY INCIDENT ALERT: High-priority security incident INC-20261013-83560 detected. Network telemetry exhibits active 'Web Attack' threat patterns from 192.168.137.167:51331 targeting 54.69.37.156:443 (TCP) with 100.0% classification certainty. Assessed Risk Score is 84.0/100 (Critical Severity, P1 - Critical Urgent). Associated with MITRE ATT&CK technique(s): T1583.005 (Botnet), T1596.003 (Digital Certificates). Mitigation actions have been formulated and require SOC Analyst approval.",
+    "attack_type": "Web Attack",
+    "severity": "Critical",
+    "priority": "P1 - Critical Urgent",
+    "risk_score": 84.0,
+    "timeline": [
+      {
+        "timestamp": "+0.049s",
+        "agent": "Detection Agent",
+        "action": "Supervised Inference & SHAP Attribution",
+        "details": "Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.049s",
+        "agent": "Coordinator Agent",
+        "action": "Incident State Initialized",
+        "details": "Allocated tracker INC-20261013-83560. Correlation note: Observed 2 prior correlated incident(s) from host 192.168.137.167 in current active session.",
+        "status": "COMPLETED"
+      },
+      {
+        "timestamp": "+0.252s",
+        "agent": "Threat Intel Agent",
+        "action": "Knowledge Base RAG Retrieval",
+        "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed.",
+        "status": "DEGRADED"
+      },
+      {
+        "timestamp": "+0.257s",
+        "agent": "Risk Assessment Agent",
+        "action": "Multi-Factor Risk Scoring",
+        "details": "Assessed Risk Score: 84.0/100 (Critical Severity, P1 - Critical Urgent).",
+        "status": "DEGRADED"
+      },
+      {
+        "timestamp": "+0.260s",
+        "agent": "Response Agent",
+        "action": "Mitigation & ACL Formulation",
+        "details": "Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+        "status": "DEGRADED"
+      }
+    ],
+    "markdown_content": "# SOC INCIDENT ASSESSMENT REPORT: INC-20261013-83560\n**Generated:** 2026-10-13 12:48:03 UTC  |  **Classification:** RESTRICTED / SOC-OPERATIONAL\n\n> [!WARNING]\n> **PARTIAL PIPELINE NOTICE**: The following agents experienced errors or ran in fallback mode: threat_intel, risk_assessment, response.\n\n## 1. Executive Summary\nSECURITY INCIDENT ALERT: High-priority security incident INC-20261013-83560 detected. Network telemetry exhibits active 'Web Attack' threat patterns from 192.168.137.167:51331 targeting 54.69.37.156:443 (TCP) with 100.0% classification certainty. Assessed Risk Score is 84.0/100 (Critical Severity, P1 - Critical Urgent). Associated with MITRE ATT&CK technique(s): T1583.005 (Botnet), T1596.003 (Digital Certificates). Mitigation actions have been formulated and require SOC Analyst approval.\n\n---\n\n## 2. Threat Classification & Network Telemetry\n- **Attack Family:** `Web Attack`\n- **Classification Confidence:** `99.99%`\n- **Source Endpoint:** `192.168.137.167:51331`\n- **Destination Endpoint:** `54.69.37.156:443`\n- **Transport Protocol:** `TCP`\n- **Detection Timestamp:** `2026-10-13 12:48:03`\n\n### Class Probability Breakdown\n| Class Label | Probability |\n| :--- | :--- |\n| Benign | 0.01% `` |\n| Brute Force | 0.00% `` |\n| DDoS | 0.00% `` |\n| DoS | 0.00% `` |\n| Mirai | 0.00% `` |\n| Recon | 0.00% `` |\n| Spoofing | 0.00% `` |\n| Web Attack | 99.99% `\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588` |\n\n---\n\n## 3. Machine Learning Explainability (SHAP Attribution)\nThe following top network flow features drove the XGBoost classification model:\n\n| Rank | Feature Indicator | Measured Value | SHAP Attribution | Directional Impact |\n| :---: | :--- | :---: | :---: | :--- |\n| 1 | `Std` | 121.404 | +1.3452 | INCREASES |\n| 2 | `Variance` | 14739.028 | +1.2850 | INCREASES |\n| 3 | `ack_count` | 17.000 | +1.1600 | INCREASES |\n| 4 | `Rate` | 13.543 | +1.0677 | INCREASES |\n| 5 | `syn_count` | 2.000 | +0.5138 | INCREASES |\n\n---\n\n## 4. Verified Threat Intelligence & RAG Findings\n**Retrieval Confidence:** 75%\n\n### MITRE ATT&CK Mapping\n- **[T1583.005: Botnet](https://attack.mitre.org/techniques/T1583/005)** (Tactic: *resource-development*)\n  MITRE ATT&CK Technique T1583.005: Botnet\nTactic: resource-development\nDescription: Adversaries may buy, lease, or rent a network of compromised systems\u00a0that can be used during targeting. A botnet is a network of compromised systems that can be instructed to perform coordinated tasks.(Citation: Norto\n- **[T1596.003: Digital Certificates](https://attack.mitre.org/techniques/T1596/003)** (Tactic: *reconnaissance*)\n  MITRE ATT&CK Technique T1596.003: Digital Certificates\nTactic: reconnaissance\nDescription: Adversaries may search public digital certificate data for information about victims that can be used during targeting. Digital certificates are issued by a certificate authority (CA) in order to cryptographic\n\n### Correlated NVD / CVE Records\n- *No matching high-risk CVE vulnerabilities found in verified database.*\n\n### Authoritative Sources\n- <https://attack.mitre.org/techniques/T1583/005>\n- <https://attack.mitre.org/techniques/T1596/003>\n\n---\n\n## 5. Risk Assessment Profile\n- **Assessed Risk Score:** `84.0 / 100.0`\n- **Assigned Severity:** `CRITICAL`\n- **Operational Priority:** `P1 - Critical Urgent`\n- **Potential Impact:** Catastrophic or severe degradation of IoT gateway and dependent network infrastructure.\n- **Threat Likelihood:** Active Exploitation in Progress\n\n### Analytical Justification\n- Classified as 'Web Attack' with 100.0% model confidence.\n- Elevated SHAP attribution on 'Std' (value: 121.40, SHAP: +1.3452), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Variance' (value: 14739.03, SHAP: +1.2850), which strongly increases threat probability.\n- Elevated SHAP attribution on 'Ack Count' (value: 17.00, SHAP: +1.1600), which strongly increases threat probability.\n- Targeting critical IoT service port 443 (TCP).\n- Network 5-tuple context: Source 192.168.137.167:51331 -> Destination 54.69.37.156:443 (TCP).\n\n---\n\n## 6. Recommended Response & Containment Playbook\n\n### Immediate Containment Steps\n1. Quarantine traffic from 192.168.137.167 pending investigation.\n1. Escalate incident to Tier-2 SOC analyst for manual review.\n\n### Recovery Procedures\n1. Perform forensic memory and log capture on affected IoT device.\n1. Restore device from known-good firmware backup if compromise confirmed.\n\n### Long-Term Prevention & Hardening\n- Review and harden IoT device network access policies.\n- Apply NIST SP 800-213 security controls for IoT deployment.\n\n### Firewall & Access Control Rules\n> [!CAUTION]\n> **ANALYST APPROVAL REQUIRED**: Automated execution is strictly disabled. Verify host parameters before executing.\n\n#### IPTABLES: Block unclassified threat source 192.168.137.167\n```bash\niptables -A INPUT -s 192.168.137.167 -j DROP\n```\n\n---\n\n## 7. Chronological Incident Timeline\n| Timestamp | Agent | Action / Decision | Telemetry Details |\n| :--- | :--- | :--- | :--- |\n| +0.049s | `Detection Agent` | Supervised Inference & SHAP Attribution | Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std. |\n| +0.049s | `Coordinator Agent` | Incident State Initialized | Allocated tracker INC-20261013-83560. Correlation note: Observed 2 prior correlated incident(s) from host 192.168.137.167 in current active session. |\n| +0.252s | `Threat Intel Agent` | Knowledge Base RAG Retrieval | Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed. |\n| +0.257s | `Risk Assessment Agent` | Multi-Factor Risk Scoring | Assessed Risk Score: 84.0/100 (Critical Severity, P1 - Critical Urgent). |\n| +0.260s | `Response Agent` | Mitigation & ACL Formulation | Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL. |",
+    "generated_by": "rule_based_fallback",
+    "llm_model": null,
+    "latency_ms": null
+  },
+  "timeline": [
+    {
+      "timestamp": "+0.049s",
+      "agent": "Detection Agent",
+      "action": "Supervised Inference & SHAP Attribution",
+      "details": "Classified flow as 'Web Attack' with 100.0% confidence. Primary feature driver: Std.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.049s",
+      "agent": "Coordinator Agent",
+      "action": "Incident State Initialized",
+      "details": "Allocated tracker INC-20261013-83560. Correlation note: Observed 2 prior correlated incident(s) from host 192.168.137.167 in current active session.",
+      "status": "COMPLETED"
+    },
+    {
+      "timestamp": "+0.252s",
+      "agent": "Threat Intel Agent",
+      "action": "Knowledge Base RAG Retrieval",
+      "details": "Retrieved 2 MITRE ATT&CK technique(s) and 0 verified CVE record(s). Zero-hallucination checks passed.",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.257s",
+      "agent": "Risk Assessment Agent",
+      "action": "Multi-Factor Risk Scoring",
+      "details": "Assessed Risk Score: 84.0/100 (Critical Severity, P1 - Critical Urgent).",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.260s",
+      "agent": "Response Agent",
+      "action": "Mitigation & ACL Formulation",
+      "details": "Generated 1 firewall/ACL commands and 2 containment procedures. Status: PENDING_ANALYST_APPROVAL.",
+      "status": "DEGRADED"
+    },
+    {
+      "timestamp": "+0.264s",
+      "agent": "Incident Report Agent",
+      "action": "Structured Report Compilation",
+      "details": "Finalized SOC assessment report for INC-20261013-83560 (5819 bytes).",
+      "status": "DEGRADED"
+    }
+  ]
+}
