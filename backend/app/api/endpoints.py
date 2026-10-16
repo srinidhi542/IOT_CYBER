@@ -802,6 +802,61 @@ def get_anomaly_model(id: int, db: Session = Depends(get_db)):
     return db_model
 
 
+@router.get("/anomaly/status", response_model=Dict[str, Any])
+def get_anomaly_engine_status(db: Session = Depends(get_db)):
+    """
+    Returns the real-time operational status, active model metadata,
+    and score calibration for the Isolation Forest anomaly detection engine.
+    """
+    from app.ml.anomaly.isolation_forest import get_flow_anomaly_model
+    artifact = get_flow_anomaly_model()
+
+    db_anomaly_models = db.query(models.MLModel).filter(
+        models.MLModel.model_type == "anomaly"
+    ).order_by(models.MLModel.id.desc()).all()
+
+    active_db_model = db_anomaly_models[0] if db_anomaly_models else None
+
+    if artifact:
+        metrics = artifact.get("metrics", {})
+        calib = metrics.get("score_calibration", {})
+        return {
+            "status": "Operational",
+            "model_id": active_db_model.id if active_db_model else None,
+            "model_name": active_db_model.name if active_db_model else "Isolation Forest (Calibrated)",
+            "algorithm": "Isolation Forest",
+            "contamination": float(artifact.get("contamination", 0.05)),
+            "features_count": len(artifact.get("features", [])),
+            "features": artifact.get("features", []),
+            "ref_min": artifact.get("score_ref_min") or calib.get("ref_min"),
+            "ref_max": artifact.get("score_ref_max") or calib.get("ref_max"),
+            "metrics": metrics,
+            "anomaly_models_count": len(db_anomaly_models),
+            "ready": True
+        }
+    elif active_db_model:
+        return {
+            "status": "Ready",
+            "model_id": active_db_model.id,
+            "model_name": active_db_model.name,
+            "algorithm": active_db_model.algorithm,
+            "contamination": active_db_model.contamination or 0.05,
+            "features_count": len(json.loads(active_db_model.features)) if active_db_model.features else 0,
+            "metrics": json.loads(active_db_model.metrics_json) if active_db_model.metrics_json else {},
+            "anomaly_models_count": len(db_anomaly_models),
+            "ready": True
+        }
+    else:
+        return {
+            "status": "Not Trained",
+            "algorithm": "Isolation Forest",
+            "contamination": 0.05,
+            "features_count": 0,
+            "anomaly_models_count": 0,
+            "ready": False
+        }
+
+
 # ----------------- 7. ANALYTICS (DASHBOARD) -----------------
 @router.get("/analytics", response_model=Dict[str, Any])
 def get_dashboard_analytics(db: Session = Depends(get_db)):

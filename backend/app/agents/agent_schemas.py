@@ -34,6 +34,8 @@ class DetectionOutput(BaseModel):
     shap_values: Dict[str, float] = Field(default_factory=dict)
     raw_record: Dict[str, Any] = Field(default_factory=dict)
     analyst_explanation: Optional[str] = None
+    anomaly_score: Optional[float] = None
+    anomaly_status: Optional[str] = None
     generated_by: Optional[str] = "rule_based"  # "llm" or "rule_based_fallback"
     llm_model: Optional[str] = None
     latency_ms: Optional[float] = None
@@ -85,6 +87,8 @@ class RiskAssessmentOutput(BaseModel):
     priority: str      # "P1 - Critical Urgent", "P2 - High", "P3 - Medium", "P4 - Low"
     impact: str
     likelihood: str
+    anomaly_score: Optional[float] = None
+    anomaly_status: Optional[str] = None
     reasoning: List[str] = Field(default_factory=list)
     generated_by: Optional[str] = "rule_based"  # "llm" or "rule_based_fallback"
     llm_model: Optional[str] = None

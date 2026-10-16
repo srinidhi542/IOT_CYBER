@@ -154,7 +154,9 @@ def process_pcap(payload: ProcessPcapRequest):
         overall_pred = {
             "label": overall_explainability["label"],
             "confidence": overall_explainability["confidence"],
-            "probabilities": overall_explainability["probabilities"]
+            "probabilities": overall_explainability["probabilities"],
+            "anomaly_score": overall_explainability.get("anomaly_score", 0.0),
+            "anomaly_status": overall_explainability.get("anomaly_status", "Normal")
         }
 
         # 4. Run overall captured profile through the complete Coordinator Multi-Agent Pipeline
@@ -166,6 +168,11 @@ def process_pcap(payload: ProcessPcapRequest):
             "flows_extracted": len(df),
             "capture_stats": net_ctx,
             "overall_prediction": overall_pred,
+            "overall_anomaly": {
+                "status": overall_explainability.get("anomaly_status", "Normal"),
+                "score": overall_explainability.get("anomaly_score", 0.0),
+                "model": overall_explainability.get("anomaly_model", "Isolation Forest (Calibrated)")
+            },
             "overall_explainability": overall_explainability,
             "overall_incident": overall_incident.dict(),
             "incidents": [overall_incident.dict()]

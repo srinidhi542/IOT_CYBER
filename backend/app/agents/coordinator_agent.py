@@ -250,6 +250,8 @@ class CoordinatorAgent:
                 top_contributing_features=shap_items,
                 shap_values=shap_result.get("shap_values", {}),
                 raw_record=record,
+                anomaly_score=shap_result.get("anomaly_score", 0.0),
+                anomaly_status=shap_result.get("anomaly_status", "Normal"),
                 generated_by="rule_based"
             )
 
@@ -309,10 +311,11 @@ class CoordinatorAgent:
         detection_output: DetectionOutput = det_res.value
         top_shap_desc = detection_output.top_contributing_features[0].feature if detection_output.top_contributing_features else "flow metrics"
         llm_info = f" [LLM: {detection_output.llm_model}, {detection_output.latency_ms}ms]" if detection_output.generated_by == "llm" else ""
+        anomaly_info = f" Anomaly: {detection_output.anomaly_status or 'Normal'} ({detection_output.anomaly_score or 0.0:.1f}/100)." if detection_output.anomaly_score is not None else ""
         mark_event(
             "Detection Agent",
             "Supervised Inference & SHAP Attribution",
-            f"Classified flow as '{detection_output.attack_type}' with {detection_output.confidence * 100:.1f}% confidence. Primary feature driver: {top_shap_desc}.{llm_info}",
+            f"Classified flow as '{detection_output.attack_type}' with {detection_output.confidence * 100:.1f}% confidence.{anomaly_info} Primary feature driver: {top_shap_desc}.{llm_info}",
             status=det_res.status
         )
 

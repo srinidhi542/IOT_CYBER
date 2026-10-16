@@ -1,4 +1,4 @@
-﻿import time
+import time
 import logging
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
@@ -64,15 +64,28 @@ class RiskAssessmentAgent:
         conf = max(0.0, min(1.0, detection.confidence))
         is_benign = attack in ["benign", "normal"]
 
-        if is_benign:
+        anomaly_score = float(detection.anomaly_score) if detection.anomaly_score is not None else 0.0
+        anomaly_status = detection.anomaly_status or ("Anomalous" if anomaly_score >= 50.0 else "Normal")
+
+        # ------------------------------------------------------------------
+        # Zero-Day / Unknown Anomaly Gate (from Threat Intelligence Engine)
+        # If Isolation Forest detects a severe statistical anomaly (> 82.0),
+        # but the supervised model predicts Benign with non-absolute confidence (< 0.90):
+        # ------------------------------------------------------------------
+        is_zero_day_anomaly = is_benign and (anomaly_score > 82.0) and (conf < 0.90)
+
+        if is_benign and not is_zero_day_anomaly:
             return RiskAssessmentOutput(
                 risk_score=0.0,
                 severity="Low",
                 priority="P4 - Low / Informational",
                 impact="Minimal - Routine Authorized IoT Operations",
                 likelihood="Negligible",
+                anomaly_score=anomaly_score,
+                anomaly_status=anomaly_status,
                 reasoning=[
                     "Network traffic behavior matches known benign telemetry baseline.",
+                    f"Isolation Forest verified normal flow telemetry (Anomaly Score: {anomaly_score:.1f}/100, Status: {anomaly_status}).",
                     "No anomalous feature spikes or unauthorized access vectors detected.",
                     f"Model confidence in benign classification is {conf * 100:.1f}%.",
                 ],
@@ -134,6 +147,24 @@ class RiskAssessmentAgent:
         else:
             intel_reasons.append("Threat intelligence was unavailable; risk calculated without CVE/CISA modifiers.")
 
+        # Isolation Forest Anomaly modifier
+        anomaly_reasons: List[str] = []
+        if is_zero_day_anomaly:
+            calculated_risk = max(55.0, round(anomaly_score * 0.7, 1))
+            anomaly_reasons.append(
+                f"CRITICAL ZERO-DAY ANOMALY: Isolation Forest detected severe statistical divergence ({anomaly_score:.1f}/100) on previously unflagged telemetry."
+            )
+        elif anomaly_score > 50.0:
+            anomaly_boost = min(8.0, round(((anomaly_score - 50.0) / 50.0) * 8.0, 1))
+            calculated_risk += anomaly_boost
+            anomaly_reasons.append(
+                f"Isolation Forest flagged anomalous flow distribution ({anomaly_score:.1f}/100, Status: {anomaly_status})."
+            )
+        else:
+            anomaly_reasons.append(
+                f"Isolation Forest verified normal baseline bounds (Anomaly Score: {anomaly_score:.1f}/100, Status: {anomaly_status})."
+            )
+
         dport = detection.network_context.destination_port or 0
         if dport in [22, 23, 80, 443, 1883, 8080]:
             calculated_risk += 3.0
@@ -169,6 +200,7 @@ class RiskAssessmentAgent:
         # ------------------------------------------------------------------
         rule_reasoning: List[str] = [
             f"Classified as '{detection.attack_type}' with {conf * 100:.1f}% model confidence.",
+            *anomaly_reasons,
             *shap_reasons,
             *intel_reasons,
             (
@@ -233,6 +265,8 @@ class RiskAssessmentAgent:
             priority=priority,
             impact=impact,
             likelihood=likelihood,
+            anomaly_score=anomaly_score,
+            anomaly_status=anomaly_status,
             reasoning=final_reasoning,
             generated_by="llm" if used_llm else "rule_based_fallback",
             llm_model=llm_model,

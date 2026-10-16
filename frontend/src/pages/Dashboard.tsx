@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Dataset, MLModel, DashboardAnalytics, PredictionExplanation, IncidentState, CaptureProcessResult } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Dataset, MLModel, DashboardAnalytics, PredictionExplanation, IncidentState, CaptureProcessResult, AnomalyEngineStatus } from '../types';
 import { apiService } from '../services/api';
-import { Database, Cpu, Play, CheckCircle, AlertCircle, Sparkles, Shield, ShieldAlert, TrendingUp, TrendingDown, ArrowRight, Activity, Network, Download, RotateCcw } from 'lucide-react';
+import { Database, Cpu, Play, CheckCircle, AlertCircle, Sparkles, Shield, ShieldAlert, TrendingUp, TrendingDown, ArrowRight, Activity, Network, Download, RotateCcw, Zap, RefreshCw, Sliders, AlertTriangle } from 'lucide-react';
 import { PacketCapturePanel } from '../components/soc/PacketCapturePanel';
 
 interface DashboardProps {
@@ -112,6 +112,48 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [predicting, setPredicting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isProcessingSoc, setIsProcessingSoc] = useState<boolean>(false);
+  const [anomalyStatus, setAnomalyStatus] = useState<AnomalyEngineStatus | null>(null);
+  const [loadingAnomalyStatus, setLoadingAnomalyStatus] = useState<boolean>(false);
+  const [trainingAnomaly, setTrainingAnomaly] = useState<boolean>(false);
+  const [contamination, setContamination] = useState<number>(0.05);
+  const [anomalyActionMsg, setAnomalyActionMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const fetchAnomalyStatus = async () => {
+    try {
+      setLoadingAnomalyStatus(true);
+      const res = await apiService.getAnomalyStatus();
+      setAnomalyStatus(res);
+    } catch (err: any) {
+      console.error('Failed to load anomaly engine status:', err);
+    } finally {
+      setLoadingAnomalyStatus(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnomalyStatus();
+  }, []);
+
+  const handleTrainAnomaly = async () => {
+    const datasetId = selectedDataset?.id || 1;
+    try {
+      setTrainingAnomaly(true);
+      setAnomalyActionMsg(null);
+      await apiService.trainAnomalyModel(datasetId, contamination);
+      setAnomalyActionMsg({
+        type: 'success',
+        text: `Isolation Forest retrained successfully with contamination=${contamination}`
+      });
+      await fetchAnomalyStatus();
+    } catch (err: any) {
+      setAnomalyActionMsg({
+        type: 'error',
+        text: err.message || 'Failed to retrain Isolation Forest model'
+      });
+    } finally {
+      setTrainingAnomaly(false);
+    }
+  };
 
   const handlePredict = async () => {
     try {
@@ -149,7 +191,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
         confidence: 1.0,
         probabilities: { 'Benign': 1.0 },
         top_contributing_features: [],
-        shap_values: {}
+        shap_values: {},
+        anomaly_score: 0.0,
+        anomaly_status: 'Normal'
       });
       setActiveIncident(null);
     }
@@ -172,6 +216,20 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const maxShap = latestPrediction?.top_contributing_features
     ? Math.max(...latestPrediction.top_contributing_features.map(f => Math.abs(f.shap_value)), 0.001)
     : 1;
+
+  const activeAnomalyScore: number | null = 
+    latestPrediction?.anomaly_score ?? 
+    captureResult?.overall_anomaly?.anomaly_score ?? 
+    captureResult?.overall_prediction?.anomaly_score ?? 
+    (activeIncident?.detection?.anomaly_score ?? null);
+
+  const activeAnomalyStatus: string | null = 
+    latestPrediction?.anomaly_status ?? 
+    captureResult?.overall_anomaly?.anomaly_status ?? 
+    captureResult?.overall_prediction?.anomaly_status ?? 
+    (activeIncident?.detection?.anomaly_status ?? null);
+
+  const activeRiskScore: number | null = activeIncident?.risk_assessment?.risk_score ?? null;
 
   return (
     <div className="space-y-8">
@@ -258,7 +316,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
             <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
               <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Detected Class</span>
               <span className={`text-base font-bold font-mono ${
@@ -278,6 +336,45 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </div>
 
             <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+              <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Anomaly Status</span>
+              <span className={`inline-flex items-center gap-1.5 text-base font-bold font-mono ${
+                (activeAnomalyStatus || 'Normal').toLowerCase() === 'normal'
+                  ? 'text-emerald-400'
+                  : 'text-amber-400'
+              }`}>
+                <span className={`w-2 h-2 rounded-full ${
+                  (activeAnomalyStatus || 'Normal').toLowerCase() === 'normal'
+                    ? 'bg-emerald-400'
+                    : 'bg-amber-400 animate-ping'
+                }`} />
+                {activeAnomalyStatus || 'Normal'}
+              </span>
+            </div>
+
+            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+              <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Anomaly Score</span>
+              <div className="flex items-baseline gap-1">
+                <span className={`text-base font-bold font-mono ${
+                  (activeAnomalyScore ?? 0) >= 70
+                    ? 'text-rose-400'
+                    : (activeAnomalyScore ?? 0) >= 45
+                    ? 'text-amber-400'
+                    : 'text-emerald-400'
+                }`}>
+                  {(activeAnomalyScore ?? 0).toFixed(1)}
+                </span>
+                <span className="text-[10px] font-mono text-slate-500">/ 100</span>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+              <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Risk Score</span>
+              <span className="text-base font-bold font-mono text-rose-400">
+                {activeRiskScore !== null ? `${activeRiskScore.toFixed(1)} / 100` : 'N/A'}
+              </span>
+            </div>
+
+            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
               <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Extracted Flows</span>
               <span className="text-base font-bold font-mono text-white">
                 {captureResult?.flows_extracted || captureResult?.capture_stats?.total_flows || '1'}
@@ -291,7 +388,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
               </span>
             </div>
 
-            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800 col-span-2">
+            <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
               <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Endpoints (Src → Dst)</span>
               <span className="text-xs font-mono text-slate-300 truncate block">
                 {captureResult?.capture_stats?.Source_IP || '192.168.1.100'}:{captureResult?.capture_stats?.Source_Port || 'Dynamic'} → {captureResult?.capture_stats?.Destination_IP || '10.0.0.1'}:{captureResult?.capture_stats?.Destination_Port || '80'}
@@ -300,6 +397,206 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       )}
+
+      {/* ═══════════════════════════════════════════════════
+          STAGE 1: ISOLATION FOREST ANOMALY DETECTION ENGINE
+      ═══════════════════════════════════════════════════ */}
+      <div className="dark-panel p-6 border-l-4 border-l-amber-500 bg-slate-950/70 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-amber-950/60 border border-amber-600/50 text-amber-400">
+              <Zap size={22} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-mono uppercase tracking-wider text-white font-bold">
+                  Stage 1 Anomaly Detection Engine (Isolation Forest)
+                </h3>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${
+                  anomalyStatus?.ready
+                    ? 'bg-emerald-950/80 text-emerald-400 border-emerald-600/40'
+                    : 'bg-amber-950/80 text-amber-400 border-amber-600/40'
+                }`}>
+                  {anomalyStatus?.ready ? '● CALIBRATED & ARMED' : '● INITIALIZING'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-1">
+                Unsupervised anomaly scoring on pure flow dynamics (23 features). Identifies unseen anomalies & zero-day deviations.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={fetchAnomalyStatus}
+              disabled={loadingAnomalyStatus}
+              className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white transition-all"
+              title="Refresh engine status from backend"
+            >
+              <RefreshCw size={14} className={loadingAnomalyStatus ? 'animate-spin' : ''} />
+            </button>
+          </div>
+        </div>
+
+        {/* Anomaly Gauge & Status Display */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Visual Indicator & Gauge Meter */}
+          <div className="lg:col-span-7 p-5 rounded-xl bg-slate-900/70 border border-slate-800/90 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono uppercase text-slate-400 font-semibold tracking-wider">
+                Current Flow Evaluation
+              </span>
+              <span className={`px-3 py-1 rounded-md text-xs font-mono font-bold uppercase tracking-wider border ${
+                (activeAnomalyStatus || 'Normal').toLowerCase() === 'anomalous'
+                  ? 'bg-rose-950/90 text-rose-300 border-rose-600/60 animate-pulse'
+                  : 'bg-emerald-950/90 text-emerald-400 border-emerald-600/50'
+              }`}>
+                {(activeAnomalyStatus || 'Normal').toUpperCase()}
+              </span>
+            </div>
+
+            {/* Score Big Display */}
+            <div className="flex items-baseline gap-3">
+              <span className={`text-4xl font-extrabold font-mono ${
+                (activeAnomalyScore ?? 0) >= 70
+                  ? 'text-rose-400'
+                  : (activeAnomalyScore ?? 0) >= 45
+                  ? 'text-amber-400'
+                  : 'text-emerald-400'
+              }`}>
+                {(activeAnomalyScore ?? 0).toFixed(1)}
+              </span>
+              <span className="text-sm font-mono text-slate-500">/ 100 Anomaly Score</span>
+              <span className="text-xs font-mono text-slate-400 ml-auto">
+                Cutoff: <b className="text-slate-200">50.0</b> | Zero-Day Gate: <b className="text-amber-300">82.0</b>
+              </span>
+            </div>
+
+            {/* Custom Visual Meter Gauge */}
+            <div className="space-y-1.5 pt-1">
+              <div className="relative h-4 rounded-full bg-slate-950 border border-slate-800 overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-600 rounded-full transition-all duration-700 ease-out"
+                  style={{ width: `${Math.min(100, Math.max(3, activeAnomalyScore ?? 0))}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                <span className="text-emerald-400">0.0 (Normal Inlier)</span>
+                <span className="text-amber-400">50.0 (Threshold)</span>
+                <span className="text-rose-400">100.0 (Extreme Outlier)</span>
+              </div>
+            </div>
+
+            <div className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 text-xs font-mono text-slate-300 leading-relaxed">
+              {(activeAnomalyScore ?? 0) >= 82.0 ? (
+                <span className="text-rose-300 flex items-start gap-2">
+                  <AlertTriangle size={15} className="text-rose-400 shrink-0 mt-0.5" />
+                  <span>
+                    <b>Critical Dispersion Outlier:</b> Score exceeds zero-day threshold (82.0). If Stage 2 classifier labels this flow as Benign, the SOC pipeline automatically elevates it to <b>Unknown / Suspicious</b> for human analyst review.
+                  </span>
+                </span>
+              ) : (activeAnomalyScore ?? 0) >= 50.0 ? (
+                <span className="text-amber-300 flex items-start gap-2">
+                  <AlertCircle size={15} className="text-amber-400 shrink-0 mt-0.5" />
+                  <span>
+                    <b>Elevated Flow Variance:</b> Telemetry exhibits non-standard packet inter-arrival times or header fluctuations diverging from nominal training traffic.
+                  </span>
+                </span>
+              ) : (
+                <span className="text-emerald-300 flex items-start gap-2">
+                  <CheckCircle size={15} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <span>
+                    <b>Baseline Conformity:</b> Telemetry operates strictly within nominal flow clusters. Normal traffic profile confirmed by 100-tree ensemble.
+                  </span>
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Model Status & Training Controls */}
+          <div className="lg:col-span-5 p-5 rounded-xl bg-slate-900/70 border border-slate-800/90 flex flex-col justify-between space-y-4">
+            <div className="space-y-2.5 text-xs font-mono">
+              <div className="flex items-center gap-2 pb-2 border-b border-slate-800">
+                <Sliders size={15} className="text-cyan-400" />
+                <span className="text-slate-200 font-bold uppercase tracking-wider">
+                  Model Status & Hyperparameters
+                </span>
+              </div>
+
+              <div className="flex justify-between py-1 border-b border-slate-800/50">
+                <span className="text-slate-500">Active Artifact:</span>
+                <span className="text-cyan-300 font-semibold truncate max-w-[190px]">
+                  {anomalyStatus?.model_name || 'ciciot2023_isolation_forest.joblib'}
+                </span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-800/50">
+                <span className="text-slate-500">Algorithm:</span>
+                <span className="text-white">Isolation Forest (100 Trees)</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-800/50">
+                <span className="text-slate-500">Features Evaluated:</span>
+                <span className="text-white">23 Pure Flow Dynamics</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-800/50">
+                <span className="text-slate-500">Calibration Bounds:</span>
+                <span className="text-slate-300">
+                  [{anomalyStatus?.ref_min ?? -0.2435}, {anomalyStatus?.ref_max ?? 0.1341}]
+                </span>
+              </div>
+            </div>
+
+            {/* Training Controls */}
+            <div className="pt-2 border-t border-slate-800 space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <label className="text-[11px] font-mono text-slate-400 uppercase">
+                  Contamination:
+                </label>
+                <select
+                  value={contamination}
+                  onChange={(e) => setContamination(parseFloat(e.target.value))}
+                  disabled={trainingAnomaly}
+                  className="px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 text-xs font-mono focus:border-cyan-500 outline-none"
+                >
+                  <option value={0.01}>0.01 (1% - Conservative)</option>
+                  <option value={0.03}>0.03 (3% - Low Outliers)</option>
+                  <option value={0.05}>0.05 (5% - Recommended)</option>
+                  <option value={0.10}>0.10 (10% - Sensitive)</option>
+                  <option value={0.15}>0.15 (15% - Aggressive)</option>
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleTrainAnomaly}
+                disabled={trainingAnomaly}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:bg-slate-800 text-white font-mono text-xs font-bold uppercase tracking-wider transition-all shadow-md shadow-amber-950/40"
+              >
+                {trainingAnomaly ? (
+                  <>
+                    <RefreshCw size={13} className="animate-spin" />
+                    <span>Retraining Isolation Forest...</span>
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw size={13} />
+                    <span>Retrain Anomaly Detector</span>
+                  </>
+                )}
+              </button>
+
+              {anomalyActionMsg && (
+                <div className={`p-2 rounded text-[11px] font-mono ${
+                  anomalyActionMsg.type === 'success'
+                    ? 'bg-emerald-950/80 border border-emerald-700/60 text-emerald-300'
+                    : 'bg-rose-950/80 border border-rose-700/60 text-rose-300'
+                }`}>
+                  {anomalyActionMsg.text}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* ═══════════════════════════════════════════════════
           3. LINK TO DEDICATED AI EXPLAINABILITY VIEW

@@ -100,7 +100,11 @@ def preprocess_dataset(
     removed_duplicates = original_row_count - len(df_cleaned)
     
     if target_column not in df_cleaned.columns:
-        raise ValueError(f"Target column '{target_column}' not found in dataset.")
+        matched = [c for c in df_cleaned.columns if c.lower() == str(target_column).lower()]
+        if matched:
+            target_column = matched[0]
+        else:
+            raise ValueError(f"Target column '{target_column}' not found in dataset.")
         
     # Separate features and target
     y = df_cleaned[target_column]

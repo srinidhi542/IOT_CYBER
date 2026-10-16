@@ -108,10 +108,16 @@ def predict_tuned(record: Dict[str, Any]) -> Dict[str, Any]:
     # Build probabilities dict
     class_probs = {str(le.classes_[i]): float(probs[i]) for i in range(len(le.classes_))}
     
+    # Run Isolation Forest unsupervised anomaly evaluation
+    from app.ml.anomaly.isolation_forest import predict_flow_anomaly
+    anomaly_res = predict_flow_anomaly(record)
+
     return {
         "label": pred_class,
         "confidence": confidence,
-        "probabilities": class_probs
+        "probabilities": class_probs,
+        "anomaly_score": anomaly_res.get("anomaly_score", 0.0),
+        "anomaly_status": anomaly_res.get("anomaly_status", "Normal")
     }
 
 def explain_prediction(record: Dict[str, Any], top_k: Optional[int] = None) -> Dict[str, Any]:
@@ -216,10 +222,18 @@ def explain_prediction(record: Dict[str, Any], top_k: Optional[int] = None) -> D
         
     all_shap_dict = {item["feature"]: round(item["shap_value"], 4) for item in contributions}
     
+    # Run Isolation Forest unsupervised anomaly evaluation
+    from app.ml.anomaly.isolation_forest import predict_flow_anomaly
+    anomaly_res = predict_flow_anomaly(record)
+
     return {
         "label": pred_class,
         "confidence": confidence,
         "probabilities": class_probs,
         "top_contributing_features": top_features,
-        "shap_values": all_shap_dict
+        "shap_values": all_shap_dict,
+        "anomaly_score": anomaly_res.get("anomaly_score", 0.0),
+        "anomaly_status": anomaly_res.get("anomaly_status", "Normal"),
+        "anomaly_model": anomaly_res.get("model_name", "Isolation Forest (Calibrated)"),
+        "anomaly_raw_score": anomaly_res.get("raw_score", 0.0)
     }

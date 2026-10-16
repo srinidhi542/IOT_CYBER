@@ -158,7 +158,7 @@ export const AIExplainability: React.FC<AIExplainabilityProps> = ({
       </div>
 
       {/* Prediction Summary Header */}
-      <div className="dark-panel p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="dark-panel p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         <div>
           <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Detected Attack Family</span>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded bg-emerald-950/80 border border-emerald-700/50 text-emerald-400 font-bold font-mono text-sm tracking-wide">
@@ -175,6 +175,33 @@ export const AIExplainability: React.FC<AIExplainabilityProps> = ({
         </div>
 
         <div>
+          <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Anomaly Status (iForest)</span>
+          <p className={`text-base font-bold font-mono mt-1 ${
+            (latestPrediction.anomaly_status || 'Normal').toLowerCase() === 'anomalous'
+              ? 'text-rose-400'
+              : 'text-emerald-400'
+          }`}>
+            ● {latestPrediction.anomaly_status || 'Normal'}
+          </p>
+        </div>
+
+        <div>
+          <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Anomaly Score</span>
+          <div className="flex items-baseline gap-1 mt-1">
+            <span className={`text-xl font-bold font-mono ${
+              (latestPrediction.anomaly_score ?? 0) >= 70
+                ? 'text-rose-400'
+                : (latestPrediction.anomaly_score ?? 0) >= 45
+                ? 'text-amber-400'
+                : 'text-emerald-400'
+            }`}>
+              {(latestPrediction.anomaly_score ?? 0).toFixed(1)}
+            </span>
+            <span className="text-xs font-mono text-slate-500">/ 100</span>
+          </div>
+        </div>
+
+        <div>
           <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Explainer Engine</span>
           <p className="text-sm font-semibold font-mono text-slate-300 mt-1">
             SHAP TreeExplainer
@@ -182,9 +209,9 @@ export const AIExplainability: React.FC<AIExplainabilityProps> = ({
         </div>
 
         <div>
-          <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Evaluated Features</span>
-          <p className="text-sm font-semibold font-mono text-slate-300 mt-1">
-            39 Network Telemetry Features
+          <span className="text-[10px] font-mono text-slate-500 uppercase block mb-1">Stage 1 Filter</span>
+          <p className="text-sm font-semibold font-mono text-cyan-300 mt-1">
+            Isolation Forest
           </p>
         </div>
       </div>

@@ -16,7 +16,8 @@ import {
   PlatformSettings,
   PlatformSettingsResponse,
   PersistentReport,
-  StorageStatus
+  StorageStatus,
+  AnomalyEngineStatus
 } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -101,6 +102,11 @@ export const apiService = {
       body: JSON.stringify({ dataset_id: datasetId, contamination }),
     });
     return handleResponse<MLModel>(res);
+  },
+
+  async getAnomalyStatus(): Promise<AnomalyEngineStatus> {
+    const res = await fetch(`${API_BASE_URL}/anomaly/status`);
+    return handleResponse<AnomalyEngineStatus>(res);
   },
 
   async getModels(): Promise<MLModel[]> {

@@ -152,3 +152,110 @@ def train_anomaly_detector(
         }
 
     return model, scaler, metrics
+
+
+_FLOW_ANOMALY_CACHE: Dict[str, Any] = {}
+
+def get_flow_anomaly_model() -> Optional[Dict[str, Any]]:
+    """
+    Retrieves or loads the calibrated flow Isolation Forest model artifact.
+    Falls back gracefully if the artifact is not found.
+    """
+    if 'flow_anomaly' not in _FLOW_ANOMALY_CACHE:
+        import os
+        import joblib
+        from app.core.config import settings
+
+        # Priority 1: Calibrated CICIoT2023 flow anomaly model
+        preferred_path = os.path.join(settings.MODEL_DIR, "ciciot2023_isolation_forest.joblib")
+        if os.path.exists(preferred_path):
+            try:
+                _FLOW_ANOMALY_CACHE['flow_anomaly'] = joblib.load(preferred_path)
+                logger.info(f"Loaded primary flow anomaly model from {preferred_path}")
+                return _FLOW_ANOMALY_CACHE['flow_anomaly']
+            except Exception as e:
+                logger.warning(f"Error loading primary flow anomaly model: {e}")
+
+        # Priority 2: Look for any anomaly model in model directory
+        if os.path.exists(settings.MODEL_DIR):
+            for fname in os.listdir(settings.MODEL_DIR):
+                if fname.startswith("anomaly_") and fname.endswith(".joblib"):
+                    p = os.path.join(settings.MODEL_DIR, fname)
+                    try:
+                        _FLOW_ANOMALY_CACHE['flow_anomaly'] = joblib.load(p)
+                        logger.info(f"Loaded fallback anomaly model from {p}")
+                        return _FLOW_ANOMALY_CACHE['flow_anomaly']
+                    except Exception as e:
+                        logger.warning(f"Could not load fallback anomaly model {p}: {e}")
+
+        logger.warning("No Isolation Forest flow anomaly model found on disk.")
+        return None
+
+    return _FLOW_ANOMALY_CACHE.get('flow_anomaly')
+
+
+def predict_flow_anomaly(record: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Evaluates an individual network flow record through the calibrated Isolation Forest.
+    Returns:
+      - anomaly_status: 'Normal' or 'Anomalous'
+      - anomaly_score: float in [0.0, 100.0]
+      - raw_score: float from decision_function()
+      - is_outlier: bool (True if Isolation Forest flags outlier or score >= 50.0)
+      - model_name: string identifier of the model
+    """
+    artifact = get_flow_anomaly_model()
+    if artifact is None:
+        return {
+            "anomaly_status": "Normal",
+            "anomaly_score": 0.0,
+            "raw_score": 0.0,
+            "is_outlier": False,
+            "model_name": "Isolation Forest (Default Baseline)"
+        }
+
+    try:
+        model = artifact['model']
+        scaler = artifact['scaler']
+        features = artifact['features']
+        ref_min = artifact.get('score_ref_min')
+        ref_max = artifact.get('score_ref_max')
+
+        # Extract features in expected order, defaulting missing to 0.0
+        row = []
+        for f in features:
+            v = record.get(f, 0.0)
+            try:
+                row.append(float(v) if v is not None else 0.0)
+            except (ValueError, TypeError):
+                row.append(0.0)
+
+        df_row = pd.DataFrame([row], columns=features)
+        scaled = scaler.transform(df_row)
+
+        pred = int(model.predict(scaled)[0])
+        raw_score = float(model.decision_function(scaled)[0])
+        norm_score = float(normalize_anomaly_scores([raw_score], ref_min=ref_min, ref_max=ref_max)[0])
+        norm_score = round(max(0.0, min(100.0, norm_score)), 1)
+
+        # An outlier is flagged if Isolation Forest decision is -1 OR calibrated score >= 50.0
+        is_outlier = bool(pred == -1 or norm_score >= 50.0)
+        status = "Anomalous" if is_outlier else "Normal"
+
+        return {
+            "anomaly_status": status,
+            "anomaly_score": norm_score,
+            "raw_score": round(raw_score, 4),
+            "is_outlier": is_outlier,
+            "model_name": "Isolation Forest (Calibrated)"
+        }
+    except Exception as e:
+        logger.error(f"Flow anomaly prediction failed: {e}")
+        return {
+            "anomaly_status": "Normal",
+            "anomaly_score": 0.0,
+            "raw_score": 0.0,
+            "is_outlier": False,
+            "model_name": "Isolation Forest (Error Fallback)"
+        }
+

@@ -113,7 +113,7 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
                 </span>
               </div>
               <p className="text-xs font-mono text-slate-400 mt-1">
-                Detected at {incident.created_at} UTC | Engine: Tuned XGBoost + SHAP TreeExplainer
+                Detected at {incident.created_at} UTC | Engine: Isolation Forest (Stage 1) + Tuned XGBoost (Stage 2) + SHAP TreeExplainer
               </p>
             </div>
           </div>
@@ -159,7 +159,7 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
         </div>
 
         {/* 5-Tuple Network Context Bar */}
-        <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs font-mono">
+        <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3 text-xs font-mono">
           <div className="p-2 rounded bg-slate-900/60 border border-slate-800">
             <span className="text-[10px] text-slate-500 block">ATTACK CLASSIFICATION</span>
             <span className="text-cyan-400 font-bold">{incident.detection.attack_type}</span>
@@ -167,6 +167,26 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
           <div className="p-2 rounded bg-slate-900/60 border border-slate-800">
             <span className="text-[10px] text-slate-500 block">MODEL CONFIDENCE</span>
             <span className="text-emerald-400 font-bold">{(incident.detection.confidence * 100).toFixed(2)}%</span>
+          </div>
+          <div className="p-2 rounded bg-slate-900/60 border border-slate-800">
+            <span className="text-[10px] text-slate-500 block">ANOMALY STATUS</span>
+            <span className={`font-bold ${
+              (incident.detection?.anomaly_status || incident.risk_assessment?.anomaly_status || 'Normal').toLowerCase() === 'anomalous'
+                ? 'text-rose-400'
+                : 'text-emerald-400'
+            }`}>
+              {incident.detection?.anomaly_status || incident.risk_assessment?.anomaly_status || 'Normal'}
+            </span>
+          </div>
+          <div className="p-2 rounded bg-slate-900/60 border border-slate-800">
+            <span className="text-[10px] text-slate-500 block">ANOMALY SCORE</span>
+            <span className="text-amber-400 font-bold">
+              {(incident.detection?.anomaly_score ?? incident.risk_assessment?.anomaly_score ?? 0).toFixed(1)} / 100
+            </span>
+          </div>
+          <div className="p-2 rounded bg-slate-900/60 border border-slate-800">
+            <span className="text-[10px] text-slate-500 block">RISK SCORE</span>
+            <span className="text-rose-400 font-bold">{incident.risk_assessment?.risk_score || 0}/100</span>
           </div>
           <div className="p-2 rounded bg-slate-900/60 border border-slate-800">
             <span className="text-[10px] text-slate-500 block">SOURCE ENDPOINT</span>
@@ -180,16 +200,50 @@ export const IncidentDetailView: React.FC<IncidentDetailViewProps> = ({
             <span className="text-[10px] text-slate-500 block">PROTOCOL</span>
             <span className="text-purple-400 font-bold">{net.protocol || "TCP"}</span>
           </div>
-          <div className="p-2 rounded bg-slate-900/60 border border-slate-800">
-            <span className="text-[10px] text-slate-500 block">RISK SCORE</span>
-            <span className="text-rose-400 font-bold">{incident.risk_assessment?.risk_score || 0}/100</span>
-          </div>
         </div>
       </div>
 
       {/* TAB 1: OVERVIEW */}
       {activeTab === 'overview' && (
         <div className="space-y-6">
+          {/* Isolation Forest Anomaly Analysis Card */}
+          <div className="dark-panel p-5 border border-slate-800 bg-slate-950/70">
+            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-slate-800">
+              <Zap className="text-amber-400" size={17} />
+              <h4 className="font-mono text-xs uppercase tracking-wider text-slate-200 font-bold">
+                Stage 1 Isolation Forest Anomaly Assessment
+              </h4>
+              <span className={`ml-auto text-[10px] font-mono px-2 py-0.5 rounded border uppercase font-bold ${
+                (incident.detection?.anomaly_status || incident.risk_assessment?.anomaly_status || 'Normal').toLowerCase() === 'anomalous'
+                  ? 'bg-rose-950/80 text-rose-300 border-rose-700/60'
+                  : 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
+              }`}>
+                {incident.detection?.anomaly_status || incident.risk_assessment?.anomaly_status || 'Normal'} ({(incident.detection?.anomaly_score ?? incident.risk_assessment?.anomaly_score ?? 0).toFixed(1)}/100)
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-mono">
+              <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                <span className="text-[10px] text-slate-500 block mb-1">STAGE 1 OUTLIER FILTER</span>
+                <span className="text-slate-300">
+                  {(incident.detection?.anomaly_score ?? 0) >= 50 ? 'Flagged as statistical outlier' : 'Within normal baseline boundaries'}
+                </span>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                <span className="text-[10px] text-slate-500 block mb-1">ZERO-DAY UNKNOWN GATE</span>
+                <span className={(incident.detection?.anomaly_score ?? 0) >= 82 ? 'text-rose-400 font-bold' : 'text-slate-300'}>
+                  {(incident.detection?.anomaly_score ?? 0) >= 82 ? 'TRIGGERED (Score >= 82.0)' : 'Not Triggered (< 82.0)'}
+                </span>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                <span className="text-[10px] text-slate-500 block mb-1">RISK ENGINE IMPACT</span>
+                <span className="text-amber-400 font-semibold">
+                  {(incident.detection?.anomaly_score ?? 0) > 60 ? `+${Math.min(8.0, ((incident.detection?.anomaly_score ?? 0) - 60) * 0.2).toFixed(1)} pts anomaly risk boost` : 'Nominal risk weighting'}
+                </span>
+              </div>
+            </div>
+          </div>
+
           {/* Verified Threat Intelligence (RAG) */}
           <div className="dark-panel p-6 border border-slate-800 bg-slate-950/70">
             <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-800">

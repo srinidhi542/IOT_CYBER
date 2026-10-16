@@ -163,6 +163,10 @@ export interface PredictionExplanation {
   probabilities: Record<string, number>;
   top_contributing_features: ShapContribution[];
   shap_values: Record<string, number>;
+  anomaly_score?: number | null;
+  anomaly_status?: 'Anomalous' | 'Normal' | null;
+  anomaly_model?: string | null;
+  anomaly_raw_score?: number | null;
 }
 
 // ═══════════════════════════════════════════════════
@@ -249,6 +253,8 @@ export interface RiskAssessmentData {
   impact: string;
   likelihood: string;
   reasoning: string[];
+  anomaly_score?: number | null;
+  anomaly_status?: 'Anomalous' | 'Normal' | null;
   generated_by?: string;
   llm_model?: string;
   latency_ms?: number;
@@ -319,6 +325,8 @@ export interface IncidentState {
     shap_values: Record<string, number>;
     raw_record: Record<string, any>;
     analyst_explanation?: string;
+    anomaly_score?: number | null;
+    anomaly_status?: 'Anomalous' | 'Normal' | null;
     generated_by?: string;
     llm_model?: string;
     latency_ms?: number;
@@ -331,6 +339,20 @@ export interface IncidentState {
   agent_status?: Record<string, string>;
   errors?: AgentError[];
   correlation_note?: string;
+}
+
+export interface AnomalyEngineStatus {
+  status: string;
+  active_model_id: number | null;
+  model_name: string | null;
+  algorithm: string | null;
+  contamination: number | null;
+  training_date: string | null;
+  is_trained: boolean;
+  ready: boolean;
+  ref_min: number | null;
+  ref_max: number | null;
+  n_features: number | null;
 }
 
 export interface CaptureProcessResult {
@@ -353,7 +375,16 @@ export interface CaptureProcessResult {
     label: string;
     confidence: number;
     probabilities: Record<string, number>;
+    anomaly_score?: number | null;
+    anomaly_status?: 'Anomalous' | 'Normal' | null;
   };
+  overall_anomaly?: {
+    anomaly_score: number;
+    anomaly_status: 'Anomalous' | 'Normal';
+    raw_score?: number;
+    is_outlier?: boolean;
+    model?: string;
+  } | null;
   overall_explainability?: PredictionExplanation;
   overall_incident?: IncidentState;
   incidents: IncidentState[];
